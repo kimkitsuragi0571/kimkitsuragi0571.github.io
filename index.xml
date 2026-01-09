@@ -7,7 +7,23 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Sun, 28 Dec 2025 11:35:08 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 09 Jan 2026 17:05:28 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>NextTest</title>
+        <link>https://kimkitsuragi0571.github.io/p/nexttest/</link>
+        <pubDate>Fri, 09 Jan 2026 17:05:28 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/p/nexttest/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Newpage</title>
+        <link>https://kimkitsuragi0571.github.io/p/newpage/</link>
+        <pubDate>Fri, 09 Jan 2026 15:14:25 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/p/newpage/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>MyFirstBlog</title>
         <link>https://kimkitsuragi0571.github.io/p/myfirstblog/</link>
         <pubDate>Sun, 28 Dec 2025 11:35:08 +0800</pubDate>
