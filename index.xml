@@ -31,6 +31,9 @@ git push&lt;/p&gt;
 &lt;h5 id=&#34;重装系统的时候&#34;&gt;重装系统的时候:
 &lt;/h5&gt;&lt;p&gt;Hugo无任何配置文件/注册表依赖，把博客根文件夹压缩备份后，重装系统解压即可直接使用。
 对存放路径无任何要求，只需要在解压后的博客主目录打开终端即可。&lt;/p&gt;
+&lt;h5 id=&#34;catgories中文件的slug&#34;&gt;catgories中文件的slug:
+&lt;/h5&gt;&lt;p&gt;如slug: &amp;ldquo;test&amp;rdquo;,则这篇文章的最终访问地址 = &lt;a class=&#34;link&#34; href=&#34;https://kimkitsuragi0571.github.io/p/test/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://kimkitsuragi0571.github.io/p/test/&lt;/a&gt;&lt;/p&gt;
 </description>
         </item>
         <item>
