@@ -2,10 +2,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>默认分类 on Harrier Du Bois</title>
-        <link>https://kimkitsuragi0571.github.io/categories/test/</link>
+        <link>https://kimkitsuragi-0571.github.io/categories/test/</link>
         <description>Recent content in 默认分类 on Harrier Du Bois</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <copyright>KimKitsuragi</copyright><atom:link href="https://kimkitsuragi0571.github.io/categories/test/index.xml" rel="self" type="application/rss+xml" />
+        <copyright>KimKitsuragi</copyright><atom:link href="https://kimkitsuragi-0571.github.io/categories/test/index.xml" rel="self" type="application/rss+xml" />
     </channel>
 </rss>
