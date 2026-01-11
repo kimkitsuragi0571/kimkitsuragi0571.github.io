@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kimkitsuragi0571.github.io/</loc>
-    <lastmod>2026-01-09T17:05:28+08:00</lastmod>
+    <lastmod>2026-01-11T11:20:41+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,11 +15,11 @@
                 href="https://kimkitsuragi0571.github.io/"
                 />
   </url><url>
-    <loc>https://kimkitsuragi0571.github.io/p/nexttest/</loc>
-    <lastmod>2026-01-09T17:05:28+08:00</lastmod>
+    <loc>https://kimkitsuragi0571.github.io/p/hugo%E9%83%A8%E7%BD%B2%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/</loc>
+    <lastmod>2026-01-11T11:20:41+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/post/</loc>
-    <lastmod>2026-01-09T17:05:28+08:00</lastmod>
+    <lastmod>2026-01-11T11:20:41+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -30,6 +30,9 @@
                 hreflang="zh-cn"
                 href="https://kimkitsuragi0571.github.io/post/"
                 />
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/p/nexttest/</loc>
+    <lastmod>2026-01-09T17:05:28+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/p/newpage/</loc>
     <lastmod>2026-01-09T15:14:25+08:00</lastmod>
@@ -149,8 +152,6 @@
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/p/emoji-support/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kimkitsuragi0571.github.io/p/</loc>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/categories/%D8%AA%D8%AC%D8%B1%D8%A8%D8%A9/</loc>
   </url><url>

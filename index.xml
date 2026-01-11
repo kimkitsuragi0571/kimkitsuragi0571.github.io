@@ -7,7 +7,15 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Fri, 09 Jan 2026 17:05:28 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 11 Jan 2026 11:20:41 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Hugo部署使用方法</title>
+        <link>https://kimkitsuragi0571.github.io/p/hugo%E9%83%A8%E7%BD%B2%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/</link>
+        <pubDate>Sun, 11 Jan 2026 11:20:41 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/p/hugo%E9%83%A8%E7%BD%B2%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>NextTest</title>
         <link>https://kimkitsuragi0571.github.io/p/nexttest/</link>
         <pubDate>Fri, 09 Jan 2026 17:05:28 +0800</pubDate>
@@ -463,14 +471,6 @@ $$</description>
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;</description>
-        </item>
-        <item>
-        <title></title>
-        <link>https://kimkitsuragi0571.github.io/p/</link>
-        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-        
-        <guid>https://kimkitsuragi0571.github.io/p/</guid>
-        <description></description>
         </item>
         <item>
         <title>链接</title>
