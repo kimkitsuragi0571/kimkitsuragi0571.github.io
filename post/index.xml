@@ -34,6 +34,9 @@ git push&lt;/p&gt;
 &lt;h5 id=&#34;catgories中文件的slug&#34;&gt;catgories中文件的slug:
 &lt;/h5&gt;&lt;p&gt;如slug: &amp;ldquo;test&amp;rdquo;,则这篇文章的最终访问地址 = &lt;a class=&#34;link&#34; href=&#34;https://kimkitsuragi0571.github.io/p/test/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;https://kimkitsuragi0571.github.io/p/test/&lt;/a&gt;&lt;/p&gt;
+&lt;h5 id=&#34;在文章中创建分类时为分类配置图片&#34;&gt;在文章中创建分类时,为分类配置图片
+&lt;/h5&gt;&lt;p&gt;图片放在你博客根目录的 static文件夹里，新建一个 categories子文件夹，把你的分类封面图放进去即可&lt;/p&gt;
+&lt;p&gt;文章里写的是 &lt;code&gt;categories = [&amp;quot;博客相关&amp;quot;]&lt;/code&gt; → 图片名就叫 &lt;code&gt;博客相关.jpg&lt;/code&gt;（或 png）&lt;/p&gt;
 </description>
         </item>
         
