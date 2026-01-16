@@ -491,14 +491,38 @@
         document.head.appendChild(customFont);
     }());
 </script>
-<style>body {
-    background: url("https://kimkitsuragi-0571.github.io/background/bg.jpeg") no-repeat center top !important;
-    background-size: cover !important;
-    background-attachment: fixed !important;
+
+<style>
+   
+  @media (min-width: 769px) {
+    body {
+      background: url("/background/bg.jpeg") no-repeat center center fixed !important;
+      background-size: cover !important;
+      background-attachment: fixed !important;
+    }
+  }
+  
+   
+  @media (max-width: 768px) {
+    body {
+      background: url("/background/bg.jpeg") no-repeat center top !important;
+      background-size: cover !important;
+      background-attachment: scroll !important;
+    }
+  }
+  
+   
+  #page-wrapper,
+  .main-content,
+  .container {
+    background: none !important;
     background-color: transparent !important;
   }
-  #page-wrapper {
-    background: none !important;
+  
+   
+  .mask,
+  .overlay {
+    background-color: transparent !important;
   }
 </style>
 
