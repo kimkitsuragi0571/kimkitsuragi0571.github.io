@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/categories/test/'>
 
-<link rel="stylesheet" href="/scss/style.min.086a044993ba1d4c486bb268ef1b0a07602c459be1e26dba8c86deedcad7e3da.css"><meta property='og:title' content="Category: 默认分类 - IBN5100">
+<link rel="stylesheet" href="/scss/style.min.c5fed9acfb2fc841fc916dd710875861f83100251b3fb16504881eff6d7113ec.css"><meta property='og:title' content="Category: 默认分类 - IBN5100">
 <meta property='og:description' content="只是为了保存这个markdown文件hhh">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/categories/test/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -386,47 +386,79 @@
         2026 KimKitsuragi
     </section>
     
-    <section class="powerby">
-        
-            To record my personal experience of learning code <br/>
-        
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
-        <p>发布了 5 篇文章 | 共 788 字</p>使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.33.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
-    </section>
-</footer>
+   
+<section class="count_info" style="color: #00ffd9 !important;">
+    <div>
+        本站稳定运行：
+        <span id="ds" class="running-days number-highlight"></span>
+        天
+        <span id="hs" class="running-days number-highlight"></span>
+        小时
+        <span id="ms" class="running-days number-highlight"></span>
+        分钟
+    </div>
+    <div>
+        
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+        共发表文章数：
+        <span class="number-highlight">1</span>
+        篇 · 总计
+        <span class="number-highlight">0.79</span>
+        k 字
+    </div>
+    <div>
+        <span id="busuanzi_container_site_pv">
+            本站总访问量：
+            <span id="busuanzi_value_site_pv" class="number-highlight"></span>
+            次
+        </span>
+    </div>
+</section>
+
+
+<script>
+(function() {
+    
+    const startDate = '2026-01-01';
+    const s1 = new Date(startDate.replace(/-/g, "/"));
+    const s2 = new Date();
+    const diff = s2.getTime() - s1.getTime();
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const ds = document.getElementById('ds');
+    const hs = document.getElementById('hs');
+    const ms = document.getElementById('ms');
+
+    if (ds) ds.textContent = days;
+    if (hs) hs.textContent = hours;
+    if (ms) ms.textContent = minutes;
+
+    const pv = document.getElementById('busuanzi_value_site_pv');
+    if (pv) {
+        pv.classList.add('number-highlight');
+        pv.style.color = '#00ffd9';
+        pv.style.fontWeight = 'bold';
+    }
+})();
+</script>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
             </main>
         </div>
@@ -434,7 +466,7 @@
                 src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.80c78f0f5dd61e676ac924d91b1a0e5dc680b9d446a0087a4ec0b85da1c53a6e.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.dcfe2741e50c072b0417741064a00a4f8fabadfc20ae376ed2cabde4607937e9.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
@@ -446,351 +478,129 @@
         document.head.appendChild(customFont);
     }());
 </script>
-
 <style>
-   
-  @media (min-width: 769px) {
-    body {
-      background: url("/background/bg.jpeg") no-repeat center center fixed !important;
-      background-size: cover !important;
-      background-attachment: fixed !important;
+     
+    #TableOfContents > ul ul,
+    #TableOfContents > ul ol,
+    #TableOfContents > ol ul,
+    #TableOfContents > ol ol {
+        display: none;
     }
-  }
-  
-   
-  @media (max-width: 768px) {
-    body {
-      background: url("/background/bg.jpeg") no-repeat center top !important;
-      background-size: cover !important;
-      background-attachment: scroll !important;
+    #TableOfContents .open {
+        display: block !important;
     }
-  }
-  
-   
-  #page-wrapper,
-  .main-content,
-  .container {
-    background: none !important;
-    background-color: transparent !important;
-  }
-  
-   
-  .mask,
-  .overlay {
-    background-color: transparent !important;
-  }
-
-   
-  #TableOfContents > ul, #TableOfContents > ol {
-      ul, ol {
-          display: none;
-      }
-      .open {
-          display: block;
-      }
-  }
-
-   
-   
-  .main-container {
-    min-height: 100vh;
-    align-items: flex-start;
-    padding: 0 15px;
-    gap: var(--section-separation);
-    padding-top: var(--main-top-padding);
-  }
-  @media (min-width: 768px) {
-    .main-container {
-      padding: 0 37px;
-    }
-  }
-
-   
-   
-  .container {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .container .left-sidebar {
-    order: -3;
-    max-width: var(--left-sidebar-max-width);
-  }
-  .container .right-sidebar {
-    order: -1;
-    max-width: var(--right-sidebar-max-width);
-  }
-  @media (min-width: 1024px) {
-    .container .right-sidebar {
-      display: flex;
-    }
-  }
-  .container.extended {
-    @media (min-width: 768px) {
-      max-width: 1024px;
-      --left-sidebar-max-width: 25%;
-      --right-sidebar-max-width: 22% !important;
-    }
-    @media (min-width: 1024px) {
-      max-width: 1280px;
-      --left-sidebar-max-width: 20%;
-      --right-sidebar-max-width: 30%;
-    }
-    @media (min-width: 1280px) {
-      max-width: 1453px;  
-      --left-sidebar-max-width: 15%;
-      --right-sidebar-max-width: 25%;
-    }
-  }
-  .container.compact {
-    @media (min-width: 768px) {
-      --left-sidebar-max-width: 25%;
-      max-width: 768px;
-    }
-    @media (min-width: 1024px) {
-      max-width: 1024px;
-      --left-sidebar-max-width: 20%;
-    }
-    @media (min-width: 1280px) {
-      max-width: 1280px;
-    }
-  }
-
-   
-   
-  .article-list--compact article .article-image img {
-    width: var(--image-size);
-    height: var(--image-size);
-    object-fit: cover;
-    border-radius: 17%;
-  }
-
-   
-   
-  .menu {
-    padding-left: 0;
-    list-style: none;
-    flex-direction: column;
-    overflow-x: hidden;
-    flex-grow: 1;
-    font-size: 1.6rem;
-    background-color: var(--card-background);
-    box-shadow: none;
-    display: none;
-    margin: 0;  
-    border-radius: 10px;  
-    padding: 30px 30px;
-  }
-  @media (min-width: 1280px) {
-    .menu {
-      padding: 15px 0;
-    }
-  }
-  .menu, .menu-bottom-section {
-    gap: 30px;
-  }
-  @media (min-width: 1280px) {
-    .menu, .menu-bottom-section {
-      gap: 25px;
-    }
-  }
-  .menu.show {
-    display: flex;
-  }
-  @media (min-width: 768px) {
-    .menu {
-      align-items: flex-end;
-      display: flex;
-      background-color: transparent;
-      padding: 0;
-      box-shadow: none;
-      margin: 0;
-    }
-  }
-  .menu li {
-    position: relative;
-    vertical-align: middle;
-	padding: 0;
-  }
-  @media (min-width: 768px) {
-    .menu li {
-      width: 100%;
-    }
-  }
-  .menu li svg {
-    stroke-width: 1.33;
-    width: 20px;
-    height: 20px;
-  }
-  .menu li a {
-    height: 100%;
-    display: inline-flex;
-    align-items: center;
-    color: var(--body-text-color);
-    gap: var(--menu-icon-separation);
-  }
-  .menu li span {
-    flex: 1;
-  }
-  .menu li.current a {
-    color: var(--accent-color);
-    font-weight: bold;
-  }
-
-   
-  .menu::-webkit-scrollbar {
-    display: none;  
-  }
-
-  .sidebar header .site-name {
-    margin: 8px;
-    font-size: 2rem;  
-  }
-
-   
-   
-  .article-content blockquote {
-    border-left: 6px solid #358b9a1f !important;
-    background: #3a97431f;
-  }
-
-   
-   
-  .highlight {
-    max-width: 102% !important;
-    background-color: var(--pre-background-color);
-    padding: var(--card-padding);
-    position: relative;
-    border-radius: 20px;
-    margin-left: -7px !important;
-    margin-right: -12px;
-    box-shadow: var(--shadow-l1) !important;
-  }
-  .highlight:hover .copyCodeButton {
-    opacity: 1;
-  }
-   
-  [dir="rtl"] .highlight {
-    direction: ltr;
-  }
-  .highlight pre {
-    margin: initial;
-    padding: 0;
-    margin: 0;
-    width: auto;
-  }
-
-   
-   
-  [data-scheme="light"] .article-content .highlight {
-    background-color: #fff9f3;
-  }
-  [data-scheme="light"] .chroma {
-    color: #ff6f00;
-    background-color: #fff9f3cc;
-  }
-
-   
-   
-  .article-page .main-article .article-content img {
-    max-width: 96% !important;
-    height: auto !important;
-    border-radius: 8px;
-  }
-
-   
-   
-  ::selection {
-    color: #fff;
-    background: #001572;
-  }
-
-   
-  a {
-    text-decoration: none;
-    color: var(--accent-color);
-  }
-  a:hover {
-    color: var(--accent-color-darker);
-  }
-  a .link {
-    font-weight: 800;  
-    padding: 0 2px;  
-    text-decoration: none;  
-    cursor: pointer;  
-    color: #000000;  
-  }
-  a .link:hover {
-    text-decoration: underline;
-  }
-   
-  @media (prefers-color-scheme: dark) {
-    a .link {
-      color: #FFFFFF;  
-    }
-  }
-
-   
-   
-  .article-list article .article-image img {
-    width: 100%;
-    height: 150px;  
-    object-fit: cover;
-  }
-  @media (min-width: 768px) {
-    .article-list article .article-image img {
-      height: 200px;
-    }
-  }
-  @media (min-width: 1280px) {
-    .article-list article .article-image img {
-      height: 305px;
-    }
-  }
-
-   
-   
-  a {
-    word-break: break-all;
-  }
-  code {
-    word-break: break-all;
-  }
 </style>
 
 <script>
     function initTocHide() {
         
         let toc = document.querySelector(".widget--toc");
-        if (!toc) {
-            return;
-        }
+        if (!toc) return;
         
+        
+        let timer = null;
         window.addEventListener('scroll', function() {
-            
-            let openUl = document.querySelectorAll(".open");
-            if (openUl.length > 0) {
-              openUl.forEach((ul) => {
-                ul.classList.remove("open")
-              })
-            }
-            
-            let currentLi = document.querySelector(".active-class");
-            if (!currentLi) {
-                return
-            }
-            
-            if (currentLi.children.length > 1) {
-                currentLi.children[1].classList.add("open")
-            }
-            
-            let ul = currentLi.parentElement;
-            do {
-                ul.classList.add("open");
-                ul = ul.parentElement.parentElement
-           } while (ul !== undefined && (ul.localName === 'ul' || ul.localName === 'ol'))
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                
+                document.querySelectorAll(".open").forEach(el => el.classList.remove("open"));
+                
+                
+                const currentLi = document.querySelector(".active-class");
+                if (!currentLi) return;
+
+                
+                if (currentLi.children.length > 1) {
+                    currentLi.children[1].classList.add("open");
+                }
+
+                
+                let parentUl = currentLi.parentElement;
+                while (parentUl && (parentUl.tagName === 'UL' || parentUl.tagName === 'OL')) {
+                    parentUl.classList.add("open");
+                    const grandParent = parentUl.parentElement;
+                    parentUl = grandParent ? grandParent.parentElement : null;
+                }
+            }, 80);
         });
     }
-    initTocHide()
+    
+    initTocHide();
+</script>
+
+
+
+<style>
+    .highlight {
+        max-height: 400px;
+        overflow: hidden;
+        position: relative;  
+    }
+
+    .code-show {
+        max-height: none !important;
+    }
+
+    .code-more-box {
+        width: 100%;
+        padding-top: 78px;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(#fff));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .code-more-btn {
+        display: block;
+        margin: auto;
+        width: 44px;
+        height: 22px;
+        background: #f0f0f5;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-top: 6px;
+        cursor: pointer;
+    }
+
+    .code-more-img {
+        cursor: pointer !important;
+        display: block;
+        margin: auto;
+        width: 22px;
+        height: 16px;
+    }
+</style>
+
+<script>
+  function initCodeMoreBox() {
+    document.querySelectorAll(".highlight").forEach(codeBlock => {
+      if (codeBlock.querySelector('.code-more-box')) return;
+      if (codeBlock.scrollHeight <= codeBlock.clientHeight) return;
+
+      const codeMoreBox = document.createElement('div');
+      codeMoreBox.classList.add('code-more-box');
+
+      const codeMoreBtn = document.createElement('span');
+      codeMoreBtn.classList.add('code-more-btn');
+      codeMoreBtn.addEventListener('click', () => {
+        codeBlock.classList.add('code-show');
+        codeMoreBox.style.display = 'none';
+      });
+
+      const img = document.createElement('img');
+      img.classList.add('code-more-img');
+      
+      img.src = "/icons/codeMore.png";
+
+      codeMoreBtn.appendChild(img);
+      codeMoreBox.appendChild(codeMoreBtn);
+      codeBlock.appendChild(codeMoreBox);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCodeMoreBox);
 </script>
 
 
@@ -853,5 +663,174 @@ document.addEventListener('DOMContentLoaded', initFlyingFish);
  
 document.addEventListener('pjax:complete', initFlyingFish);
 </script>
+
+
+
+
+<div id="toast-stack"></div>
+
+<script>
+ 
+(() => {
+  const toastStack = document.getElementById('toast-stack');
+  let toastCount = 0;
+  const MAX_TOAST = 5;
+  const DURATION  = 2500;
+
+   
+  let lastText = '';
+  let lastTime = 0;
+
+  window.pushToast = function (msg = '✅ 复制成功 ') {
+    const now = Date.now();
+    if (msg === lastText && now - lastTime < 500) return; 
+    lastText = msg;
+    lastTime = now;
+
+     
+    if (toastCount >= MAX_TOAST) toastStack.firstElementChild?.closeToast();
+
+    const item = document.createElement('div');
+    item.className = 'snack-left-top';
+    item.textContent = msg;
+
+    let closeTimer = null;
+    function closeToast() {
+      if (item.isClosing) return;
+      item.isClosing = true;
+      item.classList.remove('show');
+      item.addEventListener('transitionend', () => {
+        item.remove();
+        toastCount--;
+      }, { once: true });
+      clearTimeout(closeTimer);
+    }
+    item.closeToast = closeToast;
+
+    toastStack.appendChild(item);
+    toastCount++;
+    void item.offsetWidth;
+    item.classList.add('show');
+    closeTimer = setTimeout(closeToast, DURATION);
+  };
+
+   
+  document.addEventListener('copy', e => {
+    const text = window.getSelection().toString().trim();
+    if (!text) return;
+    e.preventDefault();
+    navigator.clipboard.writeText(text)
+      .then(() => pushToast())
+      .catch(console.warn);
+  });
+
+   
+  const container = document.querySelector('.article-content');
+  if (container) {
+    container.addEventListener('click', e => {
+      if (!e.target.matches('.copyCodeButton')) return;
+      const wrap = e.target.closest('pre, .highlight');
+      const codeTd = wrap?.querySelector('td:nth-child(2)') || wrap;
+      const txt = codeTd ? codeTd.textContent.trim() : '';
+      navigator.clipboard.writeText(txt)
+        .then(() => pushToast())
+        .catch(err => alert('复制失败：' + err));
+    });
+  }
+})();
+</script>
+
+<style>
+ 
+.copyCodeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #3d3c3c;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.copyCodeButton:hover {
+  background: var(--hover-text-color);
+  color: #fff;
+}
+
+ 
+.snack-left-top {
+  position: fixed;
+  left: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  transform: translateX(calc(-100% - 20px));
+  width: 300px;
+  height: 60px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 15px;
+  background: var(--hover-text-color);
+  color: #fff;
+  box-shadow: 4px 4px 14px rgba(0, 0, 0, .35);
+  z-index: 9999;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+}
+ 
+.snack-left-top.show {
+  transform: translateX(0);
+}
+ 
+#toast-stack {
+  position: fixed;
+  left: 0;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  z-index: 9999;
+  pointer-events: none;
+}
+
+ 
+#toast-stack .snack-left-top {
+  position: relative;    
+  margin-bottom: 12px;   
+  pointer-events: auto;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1),
+              opacity   .35s cubic-bezier(.4, 0, .2, 1);
+  opacity: 0;
+  transform: translateX(calc(-100% - 20px));
+}
+
+#toast-stack .snack-left-top.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>
+
+
+<style>
+  @font-face {
+    font-family: 'YuanWei';
+    src: url('https://kimkitsuragi-0571.github.io/font/AaYuanWeiTuSi-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --base-font-family: 'YuanWei', sans-serif;
+    --code-font-family: 'YuanWei', monospace;
+  }
+</style>
+
     </body>
 </html>

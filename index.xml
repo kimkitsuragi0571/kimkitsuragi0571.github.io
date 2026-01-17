@@ -32,8 +32,17 @@ git push&lt;/p&gt;
 &lt;/h5&gt;&lt;p&gt;Hugo无任何配置文件/注册表依赖，把博客根文件夹压缩备份后，重装系统解压即可直接使用。
 对存放路径无任何要求，只需要在解压后的博客主目录打开终端即可。&lt;/p&gt;
 &lt;h5 id=&#34;catgories中文件的slug&#34;&gt;catgories中文件的slug:
-&lt;/h5&gt;&lt;p&gt;如slug: &amp;ldquo;test&amp;rdquo;,则这篇文章的最终访问地址 = &lt;a class=&#34;link&#34; href=&#34;https://kimkitsuragi0571.github.io/p/test/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;https://kimkitsuragi0571.github.io/p/test/&lt;/a&gt;&lt;/p&gt;
+&lt;/h5&gt;&lt;p&gt;如slug: &amp;ldquo;test&amp;rdquo;,则这篇文章的最终访问地址 = &lt;a class=&#34;link&#34; href=&#34;https://kimkitsuragi0571.github.io/p/test/&#34;   target=&#34;_blank&#34; rel=&#34;noopener&#34; &gt;
+    &lt;span style=&#34;display: inline-flex; align-items: center; gap: 0.5em;&#34;&gt;
+        https://kimkitsuragi0571.github.io/p/test/
+        
+            &lt;svg width=&#34;.7em&#34; height=&#34;.7em&#34; viewBox=&#34;0 0 21 21&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34;&gt;
+                &lt;path d=&#34;m13 3l3.293 3.293l-7 7l1.414 1.414l7-7L21 11V3z&#34; fill=&#34;currentColor&#34; /&gt;
+                &lt;path d=&#34;M19 19H5V5h7l-2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5l-2-2v7z&#34; fill=&#34;currentColor&#34; /&gt;
+            &lt;/svg&gt;
+        
+    &lt;/span&gt;
+&lt;/a&gt;&lt;/p&gt;
 &lt;h5 id=&#34;在文章中创建分类时为分类配置图片&#34;&gt;在文章中创建分类时,为分类配置图片
 &lt;/h5&gt;&lt;p&gt;图片放在你博客根目录的 static文件夹里，新建一个 categories子文件夹，把你的分类封面图放进去即可&lt;/p&gt;
 &lt;p&gt;文章里写的是 &lt;code&gt;categories = [&amp;quot;博客相关&amp;quot;]&lt;/code&gt; → 图片名就叫 &lt;code&gt;博客相关.jpg&lt;/code&gt;（或 png）&lt;/p&gt;
