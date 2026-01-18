@@ -486,54 +486,94 @@
         document.head.appendChild(customFont);
     }());
 </script>
+
+
+
+
+
 <style>
-     
-    #TableOfContents > ul ul,
-    #TableOfContents > ul ol,
-    #TableOfContents > ol ul,
-    #TableOfContents > ol ol {
-        display: none;
-    }
-    #TableOfContents .open {
-        display: block !important;
-    }
+  @font-face {
+    font-family: 'MengWaXiYuan';
+    src: url('https://kimkitsuragi-0571.github.io/font/JianShouMengWaChaoCuYuanTi-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+   
+  :root {
+    --font-primary: 'MengWaXiYuan', sans-serif;
+  }
+  
+   
+  body,
+  html {
+    font-family: var(--font-primary) !important;
+  }
+  
+   
+  .article-content,
+  .single__contents,
+  .widget--toc {
+    font-family: var(--font-primary) !important;
+  }
+  
+   
+  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
+    font-family: inherit !important;
+  }
+  
+   
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary) !important;
+  }
 </style>
 
+
+
+<style>
+  #TableOfContents > ul ul,
+  #TableOfContents > ul ol,
+  #TableOfContents > ol ul,
+  #TableOfContents > ol ol {
+    display: none;
+  }
+  
+  #TableOfContents .open {
+    display: block !important;
+  }
+</style>
+
+
 <script>
-    function initTocHide() {
-        
-        let toc = document.querySelector(".widget--toc");
-        if (!toc) return;
-        
-        
-        let timer = null;
-        window.addEventListener('scroll', function() {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                
-                document.querySelectorAll(".open").forEach(el => el.classList.remove("open"));
-                
-                
-                const currentLi = document.querySelector(".active-class");
-                if (!currentLi) return;
-
-                
-                if (currentLi.children.length > 1) {
-                    currentLi.children[1].classList.add("open");
-                }
-
-                
-                let parentUl = currentLi.parentElement;
-                while (parentUl && (parentUl.tagName === 'UL' || parentUl.tagName === 'OL')) {
-                    parentUl.classList.add("open");
-                    const grandParent = parentUl.parentElement;
-                    parentUl = grandParent ? grandParent.parentElement : null;
-                }
-            }, 80);
-        });
-    }
+  function initTocHide() {
+    let toc = document.querySelector(".widget--toc");
+    if (!toc) return;
     
-    initTocHide();
+    let timer = null;
+    window.addEventListener('scroll', function() {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        document.querySelectorAll(".open").forEach(el => el.classList.remove("open"));
+        
+        const currentLi = document.querySelector(".active-class");
+        if (!currentLi) return;
+
+        if (currentLi.children.length > 1) {
+          currentLi.children[1].classList.add("open");
+        }
+
+        let parentUl = currentLi.parentElement;
+        while (parentUl && (parentUl.tagName === 'UL' || parentUl.tagName === 'OL')) {
+          parentUl.classList.add("open");
+          const grandParent = parentUl.parentElement;
+          parentUl = grandParent ? grandParent.parentElement : null;
+        }
+      }, 80);
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', initTocHide);
 </script>
 
 
@@ -611,7 +651,6 @@
   document.addEventListener('DOMContentLoaded', initCodeMoreBox);
 </script>
 
-
 <div id="jsi-flying-fish-container"></div>
 
 
@@ -671,8 +710,6 @@ document.addEventListener('DOMContentLoaded', initFlyingFish);
  
 document.addEventListener('pjax:complete', initFlyingFish);
 </script>
-
-
 
 
 <div id="toast-stack"></div>
@@ -822,22 +859,6 @@ document.addEventListener('pjax:complete', initFlyingFish);
   opacity: 1;
   transform: translateX(0);
 }
-</style>
-
-
-<style>
-  @font-face {
-    font-family: 'YuanWei';
-    src: url('https://kimkitsuragi-0571.github.io/font/AaYuanWeiTuSi-2.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  :root {
-    --base-font-family: 'YuanWei', sans-serif;
-    --code-font-family: 'YuanWei', monospace;
-  }
 </style>
 
     </body>
