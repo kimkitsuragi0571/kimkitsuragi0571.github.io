@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/categories/test/'>
 
-<link rel="stylesheet" href="/scss/style.min.476bbd89d84853809d3bf7da1fd2fa23a8d45b73c6c4027312ff9affde644b91.css"><meta property='og:title' content="Category: 默认分类 - IBN5100">
+<link rel="stylesheet" href="/scss/style.min.dc512a0aa2b3dd682cb37d8b5aaed5cff0b609d21d09e2f40b640f95d4f88846.css"><meta property='og:title' content="Category: 默认分类 - IBN5100">
 <meta property='og:description' content="只是为了保存这个markdown文件hhh">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/categories/test/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -610,7 +610,6 @@
 </script>
 
 
- 
 
 
 <style>
@@ -621,33 +620,18 @@
     font-style: normal;
     font-display: swap;
   }
-
-   
   :root {
     --font-primary: 'MengWaXiYuan', sans-serif;
   }
-  
-   
-  body,
-  html {
-    font-family: var(--font-primary) !important;
-  }
-  
-   
+  html, body,
   .article-content,
   .single__contents,
-  .widget--toc {
-    font-family: var(--font-primary) !important;
-  }
-  
-   
-  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
-    font-family: inherit !important;
-  }
-  
-   
+  .widget--toc,
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-primary) !important;
+  }
+  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
+    font-family: inherit !important;
   }
 </style>
 
@@ -660,42 +644,163 @@
   #TableOfContents > ol ol {
     display: none;
   }
-  
   #TableOfContents .open {
     display: block !important;
   }
 </style>
 
 
-<script>
-  function initTocHide() {
-    let toc = document.querySelector(".widget--toc");
-    if (!toc) return;
-    
-    let timer = null;
-    window.addEventListener('scroll', function() {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        document.querySelectorAll(".open").forEach(el => el.classList.remove("open"));
-        
-        const currentLi = document.querySelector(".active-class");
-        if (!currentLi) return;
-
-        if (currentLi.children.length > 1) {
-          currentLi.children[1].classList.add("open");
-        }
-
-        let parentUl = currentLi.parentElement;
-        while (parentUl && (parentUl.tagName === 'UL' || parentUl.tagName === 'OL')) {
-          parentUl.classList.add("open");
-          const grandParent = parentUl.parentElement;
-          parentUl = grandParent ? grandParent.parentElement : null;
-        }
-      }, 80);
-    });
+<style>
+  #backTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 20px;  
+    z-index: 99;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-image: url('https://kimkitsuragi-0571.github.io/icons/backTop.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    outline: none;
   }
-  
-  document.addEventListener('DOMContentLoaded', initTocHide);
+</style>
+
+
+<style>
+  .highlight {
+    max-height: 400px;
+    overflow: hidden;
+    position: relative;
+  }
+  .code-show {
+    max-height: none !important;
+  }
+  .code-more-box {
+    width: 100%;
+    padding-top: 78px;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .code-more-btn {
+    display: block;
+    margin: auto;
+    width: 44px;
+    height: 22px;
+    background: #f0f0f5;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding-top: 6px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .code-more-img {
+    display: block;
+    margin: auto;
+    width: 22px;
+    height: 16px;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    function initTocHide() {
+      const toc = document.querySelector(".widget--toc");
+      if (!toc) return;
+
+      let timer = null;
+      window.addEventListener('scroll', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          
+          document.querySelectorAll('.open').forEach(el => el.classList.remove('open'));
+
+          
+          const activeLink = document.querySelector(
+            ".toc-link.active, .toc-link.active-class, .active, .active-class"
+          );
+          if (!activeLink) return;
+
+          
+          const nextSibling = activeLink.nextElementSibling;
+          if (nextSibling && (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL')) {
+            nextSibling.classList.add('open');
+          }
+
+          
+          let parent = activeLink.parentElement;
+          while (parent && parent.parentElement) {
+            if (parent.tagName === 'UL' || parent.tagName === 'OL') {
+              parent.classList.add('open');
+            }
+            parent = parent.parentElement;
+          }
+        }, 80);
+      });
+    }
+
+    
+    function initScrollTop() {
+      const rightSidebar = document.querySelector(".right-sidebar");
+      if (!rightSidebar) return;
+
+      const btn = document.createElement("div");
+      btn.id = "backTopBtn";
+      btn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+      rightSidebar.appendChild(btn);
+
+      window.addEventListener('scroll', () => {
+        btn.style.display = window.scrollY > 20 ? "block" : "none";
+      });
+    }
+
+    
+    function initCodeMoreBox() {
+      const codeBlocks = document.querySelectorAll(".highlight");
+      if (!codeBlocks.length) return;
+
+      
+      const iconSrc = 
+        "/icons/codeMore.png";
+      
+
+      codeBlocks.forEach(block => {
+        if (block.scrollHeight <= block.clientHeight) return;
+
+        const moreBox = document.createElement('div');
+        moreBox.className = 'code-more-box';
+
+        const moreBtn = document.createElement('span');
+        moreBtn.className = 'code-more-btn';
+        moreBtn.addEventListener('click', () => {
+          block.classList.add('code-show');
+          moreBox.style.display = 'none';
+          window.dispatchEvent(new Event('resize')); 
+        });
+
+        const img = document.createElement('img');
+        img.className = 'code-more-img';
+        img.src = iconSrc;
+        moreBtn.appendChild(img);
+        moreBox.appendChild(moreBtn);
+        block.appendChild(moreBox);
+      });
+    }
+
+    
+    initTocHide();
+    initScrollTop();
+    initCodeMoreBox();
+  });
 </script>
 
 
@@ -984,7 +1089,6 @@ document.addEventListener('pjax:complete', initFlyingFish);
 </style>
 
 
-
 <style>
    
   .fixed-ghost-box {
@@ -1166,7 +1270,6 @@ document.addEventListener('pjax:complete', initFlyingFish);
     <div id="shadow"></div>
   </div>
 </div>
-
 
 
 <style>
