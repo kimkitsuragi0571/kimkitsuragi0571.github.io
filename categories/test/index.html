@@ -6,11 +6,11 @@
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/categories/test/'>
 
-<link rel="stylesheet" href="/scss/style.min.dc512a0aa2b3dd682cb37d8b5aaed5cff0b609d21d09e2f40b640f95d4f88846.css"><meta property='og:title' content="Category: 默认分类 - IBN5100">
+<link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Category: 默认分类 - IBN5100">
 <meta property='og:description' content="只是为了保存这个markdown文件hhh">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/categories/test/'>
 <meta property='og:site_name' content='IBN5100'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2026-02-25T11:20:41&#43;08:00 '/><meta property='og:image' content='https://kimkitsuragi-0571.github.io/categories/test/mountain.jpg' />
+<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2026-05-03T10:30:00&#43;08:00 '/><meta property='og:image' content='https://kimkitsuragi-0571.github.io/categories/test/mountain.jpg' />
 <meta name="twitter:title" content="Category: 默认分类 - IBN5100">
 <meta name="twitter:description" content="只是为了保存这个markdown文件hhh"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://kimkitsuragi-0571.github.io/categories/test/mountain.jpg' /><link rel="alternate" type="application/rss&#43;xml" href="https://kimkitsuragi-0571.github.io/categories/test/index.xml"><!DOCTYPE html>
@@ -432,7 +432,7 @@
                     <a href="/archives/#2026">
                         
                             <span class="year">2026</span>
-                            <span class="count">4</span>
+                            <span class="count">2</span>
                         
                     </a> 
                 </div>
@@ -459,7 +459,11 @@
 
     <div class="tagCloud-tags">
         
-            <a href="/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/" class="font_size_4">
+            <a href="/categories/unity/" class="font_size_1">
+                Unity
+            </a>
+        
+            <a href="/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/" class="font_size_1">
                 博客相关
             </a>
         
@@ -513,7 +517,7 @@
 
 
    
-<section class="count_info" style="color: #00ffd9 !important;">
+<section class="count_info">
     <div>
         本站稳定运行：
         <span id="ds" class="running-days number-highlight"></span>
@@ -538,14 +542,10 @@
         
             
         
-            
-        
-            
-        
         共发表文章数：
-        <span class="number-highlight">4</span>
+        <span class="number-highlight">2</span>
         篇 · 总计
-        <span class="number-highlight">0.80</span>
+        <span class="number-highlight">1.94</span>
         k 字
     </div>
     <div>
@@ -581,8 +581,13 @@
     const pv = document.getElementById('busuanzi_value_site_pv');
     if (pv) {
         pv.classList.add('number-highlight');
-        pv.style.color = '#00ffd9';
-        pv.style.fontWeight = 'bold';
+        
+        pv.addEventListener('DOMNodeInserted', function() {
+            const value = parseInt(this.textContent);
+            if (value > 1000) {
+                this.textContent = '1';
+            }
+        });
     }
 })();
 </script>
