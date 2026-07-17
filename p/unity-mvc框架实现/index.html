@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="单例模式（Singleton Pattern）是游戏开发中最常用的设计模式之一，确保一个类只有一个实例，并提供全局访问点。本文总结了在 Unity 开发中常见的几种单例模式实现方式。\n">
-<title>Unity单例模式实现总结</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="MVC（Model-View-Controller）是一种经典的设计模式，通过将数据、界面、逻辑分离，使代码结构更清晰、更易维护。本文展示在 Unity 中实现 MVC 框架的完整流程。\n">
+<title>Unity MVC框架实现</title>
 
-<link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/'>
+<link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Unity单例模式实现总结">
-<meta property='og:description' content="单例模式（Singleton Pattern）是游戏开发中最常用的设计模式之一，确保一个类只有一个实例，并提供全局访问点。本文总结了在 Unity 开发中常见的几种单例模式实现方式。\n">
-<meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/'>
+<link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Unity MVC框架实现">
+<meta property='og:description' content="MVC（Model-View-Controller）是一种经典的设计模式，通过将数据、界面、逻辑分离，使代码结构更清晰、更易维护。本文展示在 Unity 中实现 MVC 框架的完整流程。\n">
+<meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/'>
 <meta property='og:site_name' content='IBN5100'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='设计模式' /><meta property='article:tag' content='单例模式' /><meta property='article:published_time' content='2026-07-16T19:30:00&#43;08:00'/><meta property='article:modified_time' content='2026-07-16T19:30:00&#43;08:00'/>
-<meta name="twitter:title" content="Unity单例模式实现总结">
-<meta name="twitter:description" content="单例模式（Singleton Pattern）是游戏开发中最常用的设计模式之一，确保一个类只有一个实例，并提供全局访问点。本文总结了在 Unity 开发中常见的几种单例模式实现方式。\n"><!DOCTYPE html>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='设计模式' /><meta property='article:tag' content='MVC' /><meta property='article:published_time' content='2026-07-17T18:20:00&#43;08:00'/><meta property='article:modified_time' content='2026-07-17T18:20:00&#43;08:00'/>
+<meta name="twitter:title" content="Unity MVC框架实现">
+<meta name="twitter:description" content="MVC（Model-View-Controller）是一种经典的设计模式，通过将数据、界面、逻辑分离，使代码结构更清晰、更易维护。本文展示在 Unity 中实现 MVC 框架的完整流程。\n"><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -411,25 +411,21 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#一普通-c-单例模式">一、普通 C# 单例模式</a>
+    <li><a href="#一model层playermodel">一、Model层：PlayerModel</a></li>
+    <li><a href="#二mainpanel主面板的-view-与-controller">二、MainPanel：主面板的 View 与 Controller</a>
       <ol>
-        <li><a href="#1-懒汉式单例">1. 懒汉式单例</a></li>
-        <li><a href="#2-饿汉式单例">2. 饿汉式单例</a></li>
-        <li><a href="#3-线程安全单例双重锁定">3. 线程安全单例（双重锁定）</a></li>
-        <li><a href="#4-静态内部类单例">4. 静态内部类单例</a></li>
-        <li><a href="#5-lazy-超级懒汉单例">5. Lazy 超级懒汉单例</a></li>
-        <li><a href="#6-泛型单例基类普通-c-版">6. 泛型单例基类（普通 C# 版）</a></li>
+        <li><a href="#1-mainview">1. MainView</a></li>
+        <li><a href="#2-maincontroller">2. MainController</a></li>
       </ol>
     </li>
-    <li><a href="#二unity-monobehaviour-单例模式">二、Unity MonoBehaviour 单例模式</a>
+    <li><a href="#三rolepanel角色面板的-view-与-controller">三、RolePanel：角色面板的 View 与 Controller</a>
       <ol>
-        <li><a href="#1-基础-monobehaviour-单例">1. 基础 MonoBehaviour 单例</a></li>
-        <li><a href="#2-monobehaviour-泛型单例基类">2. MonoBehaviour 泛型单例基类</a></li>
-        <li><a href="#3-自动创建的-monobehaviour-单例基类">3. 自动创建的 MonoBehaviour 单例基类</a></li>
+        <li><a href="#1-roleview">1. RoleView</a></li>
+        <li><a href="#2-rolecontroller">2. RoleController</a></li>
       </ol>
     </li>
-    <li><a href="#三各实现方式对比">三、各实现方式对比</a></li>
-    <li><a href="#四使用建议">四、使用建议</a></li>
+    <li><a href="#四测试入口mvctest">四、测试入口：MVCTest</a></li>
+    <li><a href="#五mvc-数据流向总结">五、MVC 数据流向总结</a></li>
   </ol>
 </nav>
         </div>
@@ -457,7 +453,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/unity%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/">Unity单例模式实现总结</a>
+            <a href="/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/">Unity MVC框架实现</a>
         </h2>
     
         
@@ -479,7 +475,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-07-16T19:30:00&#43;08:00'>2026-07-16</time>
+                <time class="article-time--published" datetime='2026-07-17T18:20:00&#43;08:00'>2026-07-17</time>
             </div>
         
 
@@ -509,617 +505,23 @@
     <section class="article-content">
     
     
-    <p>单例模式（Singleton Pattern）是游戏开发中最常用的设计模式之一，确保一个类只有一个实例，并提供全局访问点。本文总结了在 Unity 开发中常见的几种单例模式实现方式。</p>
-<h2 id="一普通-c-单例模式">一、普通 C# 单例模式
-</h2><h3 id="1-懒汉式单例">1. 懒汉式单例
-</h3><p>懒汉式，即延迟加载，在第一次使用时才创建实例。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">AudioManager_1</span> 
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kd">private</span> <span class="kd">static</span> <span class="n">AudioManager_1</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="kd">static</span> <span class="n">AudioManager_1</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">get</span>
-</span></span><span class="line"><span class="cl">      <span class="p">{</span>
-</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">          <span class="p">{</span>
-</span></span><span class="line"><span class="cl">              <span class="n">_instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">AudioManager_1</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">          <span class="p">}</span>
-</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">      <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">  <span class="kd">private</span> <span class="n">AudioManager_1</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;AudioManager-懒汉单例&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>第一次访问时才创建实例，节省资源</li>
-<li>构造函数私有，防止外部实例化</li>
-<li>线程不安全，多线程环境下可能创建多个实例</li>
-</ul>
-<hr>
-<h3 id="2-饿汉式单例">2. 饿汉式单例
-</h3><p>饿汉式，即提前加载，在类加载时就创建实例。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">DataManager_2</span> 
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="k">readonly</span>  <span class="n">DataManager_2</span> <span class="n">_instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">DataManager_2</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">DataManager_2</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">get</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">DataManager_2</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;DataManager-饿汉单例&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>类加载时立即创建实例，线程安全</li>
-<li>使用 <code>readonly</code> 关键字确保只能在静态构造时赋值</li>
-<li>无论是否使用都会占用资源</li>
-</ul>
-<hr>
-<h3 id="3-线程安全单例双重锁定">3. 线程安全单例（双重锁定）
-</h3><p>通过双重检查锁定（Double-Check Locking）实现线程安全的懒汉式单例。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">MonsterManager_3</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="kd">static</span> <span class="n">MonsterManager_3</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">readonly</span> <span class="kd">static</span> <span class="n">Object</span> <span class="n">loc</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Object</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="n">MonsterManager_3</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="k">get</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">           <span class="p">{</span>
-</span></span><span class="line"><span class="cl">               <span class="k">lock</span> <span class="p">(</span><span class="n">loc</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">               <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                   <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">                   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                       <span class="n">_instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MonsterManager_3</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">                   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">               <span class="p">}</span>
-</span></span><span class="line"><span class="cl">           <span class="p">}</span>
-</span></span><span class="line"><span class="cl">           <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="n">MonsterManager_3</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;MonsterManager-线程安全&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>双重判断 + lock 锁，保证线程安全</li>
-<li>第一层判断避免每次都加锁，提升性能</li>
-<li>第二层判断确保只创建一个实例</li>
-<li>适用于多线程环境</li>
-</ul>
-<hr>
-<h3 id="4-静态内部类单例">4. 静态内部类单例
-</h3><p>利用 C# 静态内部类的特性实现延迟初始化。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">WeaponManager_4</span> 
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">   <span class="c1">//静态内部类中写instance,并且只有第一次被访问时实例化仅一次</span>
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="kd">static</span> <span class="k">class</span> <span class="nc">Nested</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="kd">internal</span> <span class="kd">static</span> <span class="k">readonly</span> <span class="n">WeaponManager_4</span> <span class="n">_instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">WeaponManager_4</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="n">WeaponManager_4</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">get</span>
-</span></span><span class="line"><span class="cl">      <span class="p">{</span>
-</span></span><span class="line"><span class="cl">         <span class="k">return</span> <span class="n">Nested</span><span class="p">.</span><span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">      <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="n">WeaponManager_4</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;静态内部类单例&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>只有第一次访问 <code>Instance</code> 时，内部类才会被加载</li>
-<li>由 CLR 保证线程安全</li>
-<li>代码简洁，性能优异</li>
-</ul>
-<hr>
-<h3 id="5-lazy-超级懒汉单例">5. Lazy 超级懒汉单例
-</h3><p>使用 .NET 提供的 <code>Lazy&lt;T&gt;</code> 类实现延迟初始化。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PackageManager_6</span> 
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="kd">static</span> <span class="k">readonly</span> <span class="n">Lazy</span><span class="p">&lt;</span><span class="n">PackageManager_6</span><span class="p">&gt;</span> <span class="n">_instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Lazy</span><span class="p">&lt;</span><span class="n">PackageManager_6</span><span class="p">&gt;(()</span> <span class="p">=&gt;</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="k">new</span> <span class="n">PackageManager_6</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">   <span class="p">});</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="n">PackageManager_6</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="k">get</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="k">return</span> <span class="n">_instance</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="n">PackageManager_6</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;PackageManager-Lazy超级懒汉&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>基于 <code>Lazy&lt;T&gt;</code> 实现，.NET 框架原生支持</li>
-<li>默认线程安全，支持配置线程安全模式</li>
-<li>支持自定义初始化逻辑</li>
-<li>代码最简洁</li>
-</ul>
-<hr>
-<h3 id="6-泛型单例基类普通-c-版">6. 泛型单例基类（普通 C# 版）
-</h3><p>将单例逻辑封装为泛型基类，方便复用。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">Singleton_1</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">class</span><span class="p">,</span> <span class="k">new</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">get</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                <span class="n">_instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">T</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">            <span class="p">}</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="n">Singleton_1</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>使用方式：</strong></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ItemManager_5</span> <span class="p">:</span> <span class="n">Singleton_1</span><span class="p">&lt;</span><span class="n">ItemManager_5</span><span class="p">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">  <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;ItemManager-继承了Singleton单例基类&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">  <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>所有管理器只需继承基类即可获得单例能力</li>
-<li>减少重复代码，便于统一维护</li>
-<li>泛型约束 <code>where T : class, new()</code> 确保 T 是引用类型且有无参构造函数</li>
-</ul>
-<hr>
-<h2 id="二unity-monobehaviour-单例模式">二、Unity MonoBehaviour 单例模式
-</h2><p>在 Unity 中，很多管理器需要继承 <code>MonoBehaviour</code> 以使用协程、生命周期函数等特性，这时需要特殊的单例实现。</p>
-<h3 id="1-基础-monobehaviour-单例">1. 基础 MonoBehaviour 单例
-</h3><p>手动实现的 MonoBehaviour 单例，需要挂载到场景物体上。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">UIManager_7</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="kd">static</span> <span class="n">UIManager_7</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="n">UIManager_7</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="k">get</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="n">_instance</span> <span class="p">=</span> <span class="k">this</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">           <span class="n">DontDestroyOnLoad</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">gameObject</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">       <span class="k">else</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="n">Destroy</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">gameObject</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;UIManager-继承了Mono的单例模式&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>在 <code>Awake</code> 中初始化实例</li>
-<li><code>DontDestroyOnLoad</code> 确保场景切换时不被销毁</li>
-<li>重复实例自动销毁，保证唯一</li>
-<li>必须手动挂载到场景物体上</li>
-</ul>
-<hr>
-<h3 id="2-monobehaviour-泛型单例基类">2. MonoBehaviour 泛型单例基类
-</h3><p>将 MonoBehaviour 单例封装为泛型基类，支持 <code>Awake</code> 重写。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">Singleton_2</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">MonoBehaviour</span> <span class="k">where</span> <span class="n">T</span><span class="p">:</span> <span class="n">MonoBehaviour</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">Instance</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="k">get</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">           <span class="p">{</span>
-</span></span><span class="line"><span class="cl">               <span class="n">_instance</span> <span class="p">=</span> <span class="n">FindObjectOfType</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;();</span>
-</span></span><span class="line"><span class="cl">           <span class="p">}</span>
-</span></span><span class="line"><span class="cl">           <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">   <span class="kd">protected</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">   <span class="p">{</span>
-</span></span><span class="line"><span class="cl">       <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="n">_instance</span> <span class="p">=</span> <span class="k">this</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">           <span class="n">DontDestroyOnLoad</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">gameObject</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">       <span class="k">else</span>
-</span></span><span class="line"><span class="cl">       <span class="p">{</span>
-</span></span><span class="line"><span class="cl">           <span class="n">Destroy</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">gameObject</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">       <span class="p">}</span>
-</span></span><span class="line"><span class="cl">   <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>使用方式：</strong></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">SceneManager_8</span> <span class="p">:</span> <span class="n">Singleton_2</span><span class="p">&lt;</span><span class="n">SceneManager_8</span><span class="p">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">lev</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">Awake</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">      <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;继承单例基类拓展Awake逻辑&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;SceneManager-继承了Mono单例基类&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>访问 <code>Instance</code> 时会自动在场景中查找</li>
-<li>提供 <code>virtual Awake</code>，子类可重写扩展逻辑</li>
-<li>仍需手动挂载到场景物体</li>
-</ul>
-<hr>
-<h3 id="3-自动创建的-monobehaviour-单例基类">3. 自动创建的 MonoBehaviour 单例基类
-</h3><p>访问时自动创建 GameObject 并挂载组件，无需手动预设。</p>
+    <p>MVC（Model-View-Controller）是一种经典的设计模式，通过将数据、界面、逻辑分离，使代码结构更清晰、更易维护。本文展示在 Unity 中实现 MVC 框架的完整流程。</p>
+<p><img src="/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/MVC%E6%B5%81%E7%A8%8B%E5%9B%BE.png"
+	width="1161"
+	height="832"
+	srcset="/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/MVC%E6%B5%81%E7%A8%8B%E5%9B%BE_hu_c0a62fa05dcd8896.png 480w, /p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/MVC%E6%B5%81%E7%A8%8B%E5%9B%BE_hu_63d2061a680d8e47.png 1024w"
+	loading="lazy"
+	
+		alt="MVC流程图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="139"
+		data-flex-basis="334px"
+	
+></p>
+<h2 id="一model层playermodel">一、Model层：PlayerModel
+</h2><p>Model 层主要负责存储和管理数据，不依赖 MonoBehaviour。这里使用单例模式保证数据唯一性，并通过事件机制通知外部更新。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1166,55 +568,146 @@
 </span><span class="lnt">42
 </span><span class="lnt">43
 </span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">Singleton_3</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="p">:</span> <span class="n">MonoBehaviour</span> <span class="k">where</span> <span class="n">T</span><span class="p">:</span><span class="n">MonoBehaviour</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">_instance</span><span class="p">;</span>
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.Events</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">T</span> <span class="n">Instance</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//主要存储数据,不需要继承Mono</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerModel</span> 
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//数据类具有唯一性,这里直接做成单例</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="n">PlayerModel</span> <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">PlayerModel</span> <span class="n">Instance</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">get</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">            <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                <span class="c1">//手动寻找场景中脚本</span>
-</span></span><span class="line"><span class="cl">                <span class="n">_instance</span> <span class="p">=</span> <span class="n">FindObjectOfType</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;();</span>
-</span></span><span class="line"><span class="cl">                <span class="c1">//找不到就创建</span>
-</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">                <span class="p">{</span>
-</span></span><span class="line"><span class="cl">                    <span class="c1">//直接用继承的Manager来命名</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">GameObject</span> <span class="n">obj</span> <span class="p">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="k">typeof</span><span class="p">(</span><span class="n">T</span><span class="p">).</span><span class="n">Name</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">_instance</span> <span class="p">=</span> <span class="n">obj</span><span class="p">.</span><span class="n">AddComponent</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;();</span>
-</span></span><span class="line"><span class="cl">                    <span class="c1">//脚本是固定在obj物体上,所以保留obj</span>
-</span></span><span class="line"><span class="cl">                    <span class="n">DontDestroyOnLoad</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">                <span class="p">}</span>
-</span></span><span class="line"><span class="cl">            <span class="p">}</span>
-</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">_instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">PlayerModel</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Instance</span><span class="p">.</span><span class="n">Init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>   
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//数据内容</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">string</span> <span class="n">playerName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">int</span> <span class="n">lev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kt">int</span> <span class="n">atk</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//事件用于Model通知外部数据更新,而非直接获取外部面板</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">event</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">PlayerModel</span><span class="p">&gt;</span> <span class="n">updateEvent</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//每个变量都制作public属性方便外部访问</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">PlayerName</span> <span class="p">=&gt;</span> <span class="n">playerName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">Level</span> <span class="p">=&gt;</span> <span class="n">lev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">Atk</span> <span class="p">=&gt;</span> <span class="n">atk</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//初始化(和直接略过的一样使用PlayerPrefs)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">Init</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">_instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">_instance</span> <span class="p">=</span> <span class="k">this</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">            <span class="n">DontDestroyOnLoad</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">gameObject</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">        <span class="k">else</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">Destroy</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">gameObject</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//查看项目注册表Key数值,默认为JOJO</span>
+</span></span><span class="line"><span class="cl">        <span class="n">playerName</span> <span class="p">=</span> <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="s">&#34;PlayerName&#34;</span><span class="p">,</span><span class="s">&#34;JOJO&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">lev</span> <span class="p">=</span> <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">GetInt</span><span class="p">(</span><span class="s">&#34;PlayerLev&#34;</span><span class="p">,</span> <span class="m">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">atk</span> <span class="p">=</span> <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">GetInt</span><span class="p">(</span><span class="s">&#34;PlayerAtk&#34;</span><span class="p">,</span> <span class="m">20</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//更新</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">LevUp</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//升级 改变内容</span>
+</span></span><span class="line"><span class="cl">        <span class="n">lev</span> <span class="p">+=</span> <span class="m">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">atk</span> <span class="p">+=</span> <span class="n">lev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//改变后自动调用保存方法</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SaveData</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//当 Model 层的数据发生变化时，自动通知所有需要刷新界面的 UI 组件</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//UI只需要注册事件,不需要让这个Model层获取组件</span>
+</span></span><span class="line"><span class="cl">        <span class="n">UpdateInfo</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//保存方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">void</span> <span class="n">SaveData</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">SetInt</span><span class="p">(</span><span class="s">&#34;PlayerLev&#34;</span><span class="p">,</span> <span class="n">lev</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">SetInt</span><span class="p">(</span><span class="s">&#34;PlayerAtk&#34;</span><span class="p">,</span> <span class="n">atk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//增减事件监听的方法,外部传入有PlayerModel类型作为参数的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//想要传入方法作为参数,肯定只能用委托啊笨</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">AddEvent</span><span class="p">(</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">PlayerModel</span><span class="p">&gt;</span> <span class="n">action</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">updateEvent</span> <span class="p">+=</span> <span class="n">action</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">RemoveEvent</span><span class="p">(</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">PlayerModel</span><span class="p">&gt;</span> <span class="n">action</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">updateEvent</span> <span class="p">-=</span> <span class="n">action</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">Clear</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//通知外部更新数据的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">void</span> <span class="n">UpdateInfo</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">_instance</span> <span class="p">=</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">updateEvent</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//PlayerModel的唯一实例Instance作为参数传入已经加入事件订阅的方法中</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//这些方法内部写明提取Instance的哪些属性就可以了</span>
+</span></span><span class="line"><span class="cl">            <span class="n">updateEvent</span><span class="p">?.</span><span class="n">Invoke</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><strong>使用方式：</strong></p>
+</div><hr>
+<h2 id="二mainpanel主面板的-view-与-controller">二、MainPanel：主面板的 View 与 Controller
+</h2><h3 id="1-mainview">1. MainView
+</h3><p>View 层只负责获取控件和提供更新界面的方法，不处理任何业务逻辑。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1230,117 +723,459 @@
 </span><span class="lnt">11
 </span><span class="lnt">12
 </span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">NPCManager_9</span> <span class="p">:</span> <span class="n">Singleton_3</span><span class="p">&lt;</span><span class="n">NPCManager_9</span><span class="p">&gt;</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">Awake</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">        <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;继承自动创建obj的单例基类拓展Awake逻辑&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">DataInit</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//这个是针对MainPanel面板</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">MainView</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">//1.获取控件(挂载后关联控件)</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnRole</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnSill</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtLev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtPower</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">//2.提供面板更新的方法给外部(外部调用UpdateInfo方法就可以修改类中数据了)</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">//数据更新:这里传入PlayerModel中的最新数据,赋值到View</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">//同样只是和PlayerModel中的UpdateInfo同名</span>
+</span></span><span class="line"><span class="cl">  <span class="kd">public</span> <span class="k">void</span> <span class="n">UpdateInfo</span><span class="p">(</span><span class="n">PlayerModel</span> <span class="n">player</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">txtName</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">player</span><span class="p">.</span><span class="n">PlayerName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">txtLev</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">player</span><span class="p">.</span><span class="n">Level</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="n">txtPower</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">player</span><span class="p">.</span><span class="n">Atk</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-maincontroller">2. MainController
+</h3><p>Controller 层负责界面的显隐、按钮事件绑定，以及接收 Model 数据并转发给 View。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Unity.VisualScripting</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//挂载到MainPanel上</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">MainController</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//获取View脚本</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="n">MainView</span> <span class="n">mainView</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="kd">static</span> <span class="n">MainController</span> <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="n">MainController</span> <span class="n">Instance</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">get</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="k">return</span> <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="c1">//1.界面的显隐</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">ShowView</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//实例化面板对象</span>
+</span></span><span class="line"><span class="cl">         <span class="n">GameObject</span> <span class="n">res</span> <span class="p">=</span> <span class="n">Resources</span><span class="p">.</span><span class="n">Load</span><span class="p">&lt;</span><span class="n">GameObject</span><span class="p">&gt;(</span><span class="s">&#34;UI/MainPanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">GameObject</span> <span class="n">obj</span> <span class="p">=</span> <span class="n">Instantiate</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//设置它的父对象 为Canvas</span>
+</span></span><span class="line"><span class="cl">         <span class="n">obj</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="n">GameObject</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Canvas&#34;</span><span class="p">).</span><span class="n">transform</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">         <span class="n">instance</span> <span class="p">=</span> <span class="n">obj</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">MainController</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="n">instance</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">SetActive</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">HideView</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">instance</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">SetActive</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="c1">//当调用ShowView-&gt;激活instance-&gt;Start周期函数自动调用</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//获取挂载在同一个对象上的view脚本,赋值给mainView</span>
+</span></span><span class="line"><span class="cl">      <span class="n">mainView</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">MainView</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//第一次界面更新,主动将Model数据传给View,而不是等事件通知(保证面板有初始值)</span>
+</span></span><span class="line"><span class="cl">      <span class="n">mainView</span><span class="p">.</span><span class="n">UpdateInfo</span><span class="p">(</span><span class="n">PlayerModel</span><span class="p">.</span><span class="n">Instance</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//为btnRole添加监听,点击显示Role面板</span>
+</span></span><span class="line"><span class="cl">      <span class="n">mainView</span><span class="p">.</span><span class="n">btnRole</span><span class="p">.</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(</span><span class="n">ClickRoleBtn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PlayerModel</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">AddEvent</span><span class="p">(</span><span class="n">UpdateInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="c1">//点击按钮显示角色面板</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">void</span> <span class="n">ClickRoleBtn</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">RoleController</span><span class="p">.</span><span class="n">ShowView</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">//收到PlayerModel传来的数据包,如果mainView不为空,则将其传入View面板更新</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//和PlayerInfo中的方法同名没有啥实际作用,只是为了代码简单</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">void</span> <span class="n">UpdateInfo</span><span class="p">(</span><span class="n">PlayerModel</span> <span class="n">player</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">mainView</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">mainView</span><span class="p">.</span><span class="n">UpdateInfo</span><span class="p">(</span><span class="n">player</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">void</span> <span class="n">OnDestroy</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">PlayerModel</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">RemoveEvent</span><span class="p">(</span><span class="n">UpdateInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="三rolepanel角色面板的-view-与-controller">三、RolePanel：角色面板的 View 与 Controller
+</h2><h3 id="1-roleview">1. RoleView
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//针对RolePanel面板的方法(需要挂载到物体上,所以还是要继承Mono的)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">RoleView</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnLevelUp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnClose</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtLev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">UpdateInfo</span><span class="p">(</span><span class="n">PlayerModel</span> <span class="n">player</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;NPCManager-自动创建obj的单例模式基类&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">txtLev</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">player</span><span class="p">.</span><span class="n">Level</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><strong>特点：</strong></p>
-<ul>
-<li>访问时自动创建，无需手动挂载</li>
-<li>自动以类名命名 GameObject</li>
-<li>提供 <code>Clear()</code> 方法用于手动清空实例</li>
-<li>使用最方便，推荐用于游戏管理器</li>
-</ul>
-<hr>
-<h2 id="三各实现方式对比">三、各实现方式对比
-</h2><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>实现方式</th>
-					<th>线程安全</th>
-					<th>延迟加载</th>
-					<th>需要挂载</th>
-					<th>推荐场景</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>懒汉式</td>
-					<td>❌</td>
-					<td>✅</td>
-					<td>-</td>
-					<td>单线程、简单管理器</td>
-			</tr>
-			<tr>
-					<td>饿汉式</td>
-					<td>✅</td>
-					<td>❌</td>
-					<td>-</td>
-					<td>确定会使用、初始化简单</td>
-			</tr>
-			<tr>
-					<td>双重锁定</td>
-					<td>✅</td>
-					<td>✅</td>
-					<td>-</td>
-					<td>多线程、性能要求高</td>
-			</tr>
-			<tr>
-					<td>静态内部类</td>
-					<td>✅</td>
-					<td>✅</td>
-					<td>-</td>
-					<td>大多数 C# 单例场景</td>
-			</tr>
-			<tr>
-					<td>Lazy&lt;T&gt;</td>
-					<td>✅</td>
-					<td>✅</td>
-					<td>-</td>
-					<td>.NET 环境，代码简洁</td>
-			</tr>
-			<tr>
-					<td>普通泛型基类</td>
-					<td>❌</td>
-					<td>✅</td>
-					<td>-</td>
-					<td>多个纯 C# 管理器复用</td>
-			</tr>
-			<tr>
-					<td>MonoBehaviour 基础版</td>
-					<td>-</td>
-					<td>❌</td>
-					<td>✅</td>
-					<td>单个 UI 管理器</td>
-			</tr>
-			<tr>
-					<td>MonoBehaviour 泛型基类</td>
-					<td>-</td>
-					<td>⚠️ 需先查找</td>
-					<td>✅</td>
-					<td>多个 MonoBehaviour 管理器</td>
-			</tr>
-			<tr>
-					<td>自动创建 MonoBehaviour</td>
-					<td>-</td>
-					<td>✅</td>
-					<td>❌</td>
-					<td>游戏核心管理器，推荐</td>
-			</tr>
-	</tbody>
-</table></div>
-<hr>
-<h2 id="四使用建议">四、使用建议
+</div><h3 id="2-rolecontroller">2. RoleController
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">RoleController</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">RoleView</span> <span class="n">roleView</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">static</span> <span class="n">RoleController</span> <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">RoleController</span> <span class="n">Controller</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">get</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span>  <span class="n">instance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">       <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">ShowView</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">       <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">             <span class="n">GameObject</span> <span class="n">res</span> <span class="p">=</span> <span class="n">Resources</span><span class="p">.</span><span class="n">Load</span><span class="p">&lt;</span><span class="n">GameObject</span><span class="p">&gt;(</span><span class="s">&#34;UI/RolePanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">             <span class="n">GameObject</span> <span class="n">obj</span> <span class="p">=</span> <span class="n">Instantiate</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">             <span class="n">obj</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="n">GameObject</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Canvas&#34;</span><span class="p">).</span><span class="n">transform</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">             <span class="n">instance</span> <span class="p">=</span> <span class="n">obj</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">RoleController</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="n">instance</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">SetActive</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">       <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">HideView</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">       <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">             <span class="n">instance</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">SetActive</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       
+</span></span><span class="line"><span class="cl">       <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">       <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">roleView</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">RoleView</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">          <span class="n">roleView</span><span class="p">.</span><span class="n">UpdateInfo</span><span class="p">(</span><span class="n">PlayerModel</span><span class="p">.</span><span class="n">Instance</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="n">roleView</span><span class="p">.</span><span class="n">btnClose</span><span class="p">.</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(</span><span class="n">ClickCloseBtn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="n">roleView</span><span class="p">.</span><span class="n">btnLevelUp</span><span class="p">.</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(</span><span class="n">ClickLevUpBtn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="n">PlayerModel</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">AddEvent</span><span class="p">(</span><span class="n">UpdateInfo</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       
+</span></span><span class="line"><span class="cl">       <span class="kd">private</span> <span class="k">void</span> <span class="n">ClickCloseBtn</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">       <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">HideView</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       
+</span></span><span class="line"><span class="cl">       <span class="kd">private</span> <span class="k">void</span> <span class="n">ClickLevUpBtn</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">       <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">PlayerModel</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">LevUp</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">       <span class="kd">private</span> <span class="k">void</span> <span class="n">UpdateInfo</span><span class="p">(</span><span class="n">PlayerModel</span> <span class="n">player</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">       <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span><span class="p">(</span><span class="n">roleView</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">             <span class="n">roleView</span><span class="p">.</span><span class="n">UpdateInfo</span><span class="p">(</span><span class="n">player</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">       <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四测试入口mvctest">四、测试入口：MVCTest
+</h2><p>负责调用 MainController，通过键盘按键控制主面板的显示与隐藏。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">MVCTest</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">J</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">MainController</span><span class="p">.</span><span class="n">ShowView</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">K</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">MainController</span><span class="p">.</span><span class="n">HideView</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="五mvc-数据流向总结">五、MVC 数据流向总结
 </h2><ol>
-<li><strong>纯数据/逻辑管理器</strong>：优先使用 <strong>Lazy&lt;T&gt;</strong> 或 <strong>静态内部类</strong> 实现</li>
-<li><strong>需要协程/生命周期</strong>：使用 <strong>自动创建的 MonoBehaviour 泛型单例基类</strong></li>
-<li><strong>多个同类型管理器</strong>：封装为 <strong>泛型基类</strong> 减少重复代码</li>
-<li><strong>场景切换不销毁</strong>：务必调用 <code>DontDestroyOnLoad</code></li>
-<li><strong>注意初始化顺序</strong>：避免在 <code>Awake</code> 中访问其他单例导致的初始化问题</li>
+<li><strong>View → Controller</strong>：用户在界面上点击按钮，View 上的事件被 Controller 监听并处理</li>
+<li><strong>Controller → Model</strong>：Controller 调用 Model 的方法（如 <code>LevUp()</code>）修改数据</li>
+<li><strong>Model → Controller</strong>：Model 数据变化后通过事件通知所有订阅者</li>
+<li><strong>Controller → View</strong>：Controller 接收更新后，调用 View 的 <code>UpdateInfo()</code> 刷新界面</li>
 </ol>
+<p>整个流程中，Model 不依赖 View，View 不直接操作 Model，Controller 作为中间层协调两者，实现了数据与界面的解耦。</p>
 
 </section>
 
@@ -1353,7 +1188,7 @@
         
             <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
         
-            <a href="/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/">单例模式</a>
+            <a href="/tags/mvc/">MVC</a>
         
     </section>
 
@@ -1387,12 +1222,12 @@
             
                 
 <article class="">
-    <a href="/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity MVC框架实现</h2>
+            <h2 class="article-title">Unity单例模式实现总结</h2>
         </div>
     </a>
 </article>
