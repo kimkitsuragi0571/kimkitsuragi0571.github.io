@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Unity事件中心模块基于观察者模式实现，支持参数传递的事件机制。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 using System.Collections; using System.Collections.Generic; using UnityEngine; using UnityEngine.Events; public class EventCenter : BaseManager&lt;EventCenter&gt; { //Key事件名称,value监听这个事件对应的委托函数们 //private Dictionary&lt;string,UnityAction&gt; eventDic = new Dictionary&lt;string, UnityAction&gt;(); private Dictionary&lt;string,UnityAction&lt;object&gt;&gt; eventDic = new Dictionary&lt;string, UnityAction&lt;object&gt;&gt;(); //添加事件监听 //public void AddEventListener(string name, UnityAction action) public void AddEventListener(string name, UnityAction&lt;object&gt; action) { //如果有对应的事件监听 if (eventDic.ContainsKey(name)) { eventDic[name] += action; } else { eventDic.Add(name, action); } } //一定要记得销毁对应监听,否则物体销毁的时候还是有监听,导致内存泄露 //public void RemoveEventListener(string name, UnityAction action) public void RemoveEventListener(string name, UnityAction&lt;object&gt; action) { //移除时必定有事件监听,都可以不用写if的 if (eventDic.ContainsKey(name)) { eventDic[name] -= action; } } //事件触发 //public void EventTrigger(string name) public void EventTrigger(string name,object info) { if (eventDic.ContainsKey(name)) { //eventDic[name](); //这种会依据加入事件的前后依次触发函数 //eventDic[name].Invoke(); eventDic[name].Invoke(info); } //没有对应事件监听时,不需要管触发 } //清空事件中心(场景切换时) public void Clear() { eventDic.Clear(); } } 功能特点 观察者模式 使用 Dictionary 存储事件名称和对应的事件委托 支持同一事件绑定多个监听函数 事件触发时按绑定顺序依次执行 参数传递 使用 UnityAction&lt;object&gt; 支持任意类型的参数传递 可以传递复杂数据类型作为事件信息 内存管理 重要：在对象销毁时必须移除事件监听 否则会导致内存泄漏和空引用异常 场景切换时调用 Clear() 清空所有事件 使用方法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 // 1. 定义事件 public class GameEventNames { public const string PLAYER_DEAD = &#34;PlayerDead&#34;; public const string SCORE_UPDATE = &#34;ScoreUpdate&#34;; public const string LEVEL_COMPLETE = &#34;LevelComplete&#34;; } // 2. 监听事件 void Start() { EventCenter.Instance.AddEventListener(GameEventNames.PLAYER_DEAD, OnPlayerDead); EventCenter.Instance.AddEventListener(GameEventNames.SCORE_UPDATE, OnScoreUpdate); } private void OnPlayerDead(object info) { Debug.Log(&#34;玩家死亡：&#34; + info); } private void OnScoreUpdate(object info) { int score = (int)info; Debug.Log(&#34;分数更新：&#34; + score); } // 3. 触发事件 public void PlayerTakeDamage(int damage) { EventCenter.Instance.EventTrigger(GameEventNames.PLAYER_DEAD, damage); } public void UpdateScore(int score) { EventCenter.Instance.EventTrigger(GameEventNames.SCORE_UPDATE, score); } // 4. 移除监听（重要！） void OnDestroy() { EventCenter.Instance.RemoveEventListener(GameEventNames.PLAYER_DEAD, OnPlayerDead); EventCenter.Instance.RemoveEventListener(GameEventNames.SCORE_UPDATE, OnScoreUpdate); } // 5. 场景切换时清空 void OnLevelWasLoaded(int level) { EventCenter.Instance.Clear(); } 注意事项 必须移除监听：在 OnDestroy 或 OnDisable 中移除事件监听 及时清空：场景切换时调用 Clear() 防止内存泄漏 类型安全：使用 object 参数需要注意类型转换 线程安全：Unity事件系统在主线程执行，无需担心线程问题 ">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="一、事件中心概念 比如怪物死亡就有玩家奖励，播放动画，任务记录等多种事件，此时就得在怪物死亡 Dead() 方法中写这些逻辑。\n需要先获取 Player 物体然后获取上面的 Player.cs 脚本组件，调用其中的死亡方法，很麻烦，而且脚本间关联性太强，不符合七大设计原则。\n">
 <title>Unity事件中心模块</title>
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/'>
 
 <link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Unity事件中心模块">
-<meta property='og:description' content="Unity事件中心模块基于观察者模式实现，支持参数传递的事件机制。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 using System.Collections; using System.Collections.Generic; using UnityEngine; using UnityEngine.Events; public class EventCenter : BaseManager&lt;EventCenter&gt; { //Key事件名称,value监听这个事件对应的委托函数们 //private Dictionary&lt;string,UnityAction&gt; eventDic = new Dictionary&lt;string, UnityAction&gt;(); private Dictionary&lt;string,UnityAction&lt;object&gt;&gt; eventDic = new Dictionary&lt;string, UnityAction&lt;object&gt;&gt;(); //添加事件监听 //public void AddEventListener(string name, UnityAction action) public void AddEventListener(string name, UnityAction&lt;object&gt; action) { //如果有对应的事件监听 if (eventDic.ContainsKey(name)) { eventDic[name] += action; } else { eventDic.Add(name, action); } } //一定要记得销毁对应监听,否则物体销毁的时候还是有监听,导致内存泄露 //public void RemoveEventListener(string name, UnityAction action) public void RemoveEventListener(string name, UnityAction&lt;object&gt; action) { //移除时必定有事件监听,都可以不用写if的 if (eventDic.ContainsKey(name)) { eventDic[name] -= action; } } //事件触发 //public void EventTrigger(string name) public void EventTrigger(string name,object info) { if (eventDic.ContainsKey(name)) { //eventDic[name](); //这种会依据加入事件的前后依次触发函数 //eventDic[name].Invoke(); eventDic[name].Invoke(info); } //没有对应事件监听时,不需要管触发 } //清空事件中心(场景切换时) public void Clear() { eventDic.Clear(); } } 功能特点 观察者模式 使用 Dictionary 存储事件名称和对应的事件委托 支持同一事件绑定多个监听函数 事件触发时按绑定顺序依次执行 参数传递 使用 UnityAction&lt;object&gt; 支持任意类型的参数传递 可以传递复杂数据类型作为事件信息 内存管理 重要：在对象销毁时必须移除事件监听 否则会导致内存泄漏和空引用异常 场景切换时调用 Clear() 清空所有事件 使用方法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 // 1. 定义事件 public class GameEventNames { public const string PLAYER_DEAD = &#34;PlayerDead&#34;; public const string SCORE_UPDATE = &#34;ScoreUpdate&#34;; public const string LEVEL_COMPLETE = &#34;LevelComplete&#34;; } // 2. 监听事件 void Start() { EventCenter.Instance.AddEventListener(GameEventNames.PLAYER_DEAD, OnPlayerDead); EventCenter.Instance.AddEventListener(GameEventNames.SCORE_UPDATE, OnScoreUpdate); } private void OnPlayerDead(object info) { Debug.Log(&#34;玩家死亡：&#34; + info); } private void OnScoreUpdate(object info) { int score = (int)info; Debug.Log(&#34;分数更新：&#34; + score); } // 3. 触发事件 public void PlayerTakeDamage(int damage) { EventCenter.Instance.EventTrigger(GameEventNames.PLAYER_DEAD, damage); } public void UpdateScore(int score) { EventCenter.Instance.EventTrigger(GameEventNames.SCORE_UPDATE, score); } // 4. 移除监听（重要！） void OnDestroy() { EventCenter.Instance.RemoveEventListener(GameEventNames.PLAYER_DEAD, OnPlayerDead); EventCenter.Instance.RemoveEventListener(GameEventNames.SCORE_UPDATE, OnScoreUpdate); } // 5. 场景切换时清空 void OnLevelWasLoaded(int level) { EventCenter.Instance.Clear(); } 注意事项 必须移除监听：在 OnDestroy 或 OnDisable 中移除事件监听 及时清空：场景切换时调用 Clear() 防止内存泄漏 类型安全：使用 object 参数需要注意类型转换 线程安全：Unity事件系统在主线程执行，无需担心线程问题 ">
+<meta property='og:description' content="一、事件中心概念 比如怪物死亡就有玩家奖励，播放动画，任务记录等多种事件，此时就得在怪物死亡 Dead() 方法中写这些逻辑。\n需要先获取 Player 物体然后获取上面的 Player.cs 脚本组件，调用其中的死亡方法，很麻烦，而且脚本间关联性太强，不符合七大设计原则。\n">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/'>
 <meta property='og:site_name' content='IBN5100'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='事件中心' /><meta property='article:tag' content='观察者模式' /><meta property='article:published_time' content='2026-05-03T10:35:00&#43;08:00'/><meta property='article:modified_time' content='2026-05-03T10:35:00&#43;08:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='事件中心' /><meta property='article:tag' content='观察者模式' /><meta property='article:published_time' content='2026-07-19T18:55:00&#43;08:00'/><meta property='article:modified_time' content='2026-07-19T18:55:00&#43;08:00'/>
 <meta name="twitter:title" content="Unity事件中心模块">
-<meta name="twitter:description" content="Unity事件中心模块基于观察者模式实现，支持参数传递的事件机制。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 using System.Collections; using System.Collections.Generic; using UnityEngine; using UnityEngine.Events; public class EventCenter : BaseManager&lt;EventCenter&gt; { //Key事件名称,value监听这个事件对应的委托函数们 //private Dictionary&lt;string,UnityAction&gt; eventDic = new Dictionary&lt;string, UnityAction&gt;(); private Dictionary&lt;string,UnityAction&lt;object&gt;&gt; eventDic = new Dictionary&lt;string, UnityAction&lt;object&gt;&gt;(); //添加事件监听 //public void AddEventListener(string name, UnityAction action) public void AddEventListener(string name, UnityAction&lt;object&gt; action) { //如果有对应的事件监听 if (eventDic.ContainsKey(name)) { eventDic[name] += action; } else { eventDic.Add(name, action); } } //一定要记得销毁对应监听,否则物体销毁的时候还是有监听,导致内存泄露 //public void RemoveEventListener(string name, UnityAction action) public void RemoveEventListener(string name, UnityAction&lt;object&gt; action) { //移除时必定有事件监听,都可以不用写if的 if (eventDic.ContainsKey(name)) { eventDic[name] -= action; } } //事件触发 //public void EventTrigger(string name) public void EventTrigger(string name,object info) { if (eventDic.ContainsKey(name)) { //eventDic[name](); //这种会依据加入事件的前后依次触发函数 //eventDic[name].Invoke(); eventDic[name].Invoke(info); } //没有对应事件监听时,不需要管触发 } //清空事件中心(场景切换时) public void Clear() { eventDic.Clear(); } } 功能特点 观察者模式 使用 Dictionary 存储事件名称和对应的事件委托 支持同一事件绑定多个监听函数 事件触发时按绑定顺序依次执行 参数传递 使用 UnityAction&lt;object&gt; 支持任意类型的参数传递 可以传递复杂数据类型作为事件信息 内存管理 重要：在对象销毁时必须移除事件监听 否则会导致内存泄漏和空引用异常 场景切换时调用 Clear() 清空所有事件 使用方法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 // 1. 定义事件 public class GameEventNames { public const string PLAYER_DEAD = &#34;PlayerDead&#34;; public const string SCORE_UPDATE = &#34;ScoreUpdate&#34;; public const string LEVEL_COMPLETE = &#34;LevelComplete&#34;; } // 2. 监听事件 void Start() { EventCenter.Instance.AddEventListener(GameEventNames.PLAYER_DEAD, OnPlayerDead); EventCenter.Instance.AddEventListener(GameEventNames.SCORE_UPDATE, OnScoreUpdate); } private void OnPlayerDead(object info) { Debug.Log(&#34;玩家死亡：&#34; + info); } private void OnScoreUpdate(object info) { int score = (int)info; Debug.Log(&#34;分数更新：&#34; + score); } // 3. 触发事件 public void PlayerTakeDamage(int damage) { EventCenter.Instance.EventTrigger(GameEventNames.PLAYER_DEAD, damage); } public void UpdateScore(int score) { EventCenter.Instance.EventTrigger(GameEventNames.SCORE_UPDATE, score); } // 4. 移除监听（重要！） void OnDestroy() { EventCenter.Instance.RemoveEventListener(GameEventNames.PLAYER_DEAD, OnPlayerDead); EventCenter.Instance.RemoveEventListener(GameEventNames.SCORE_UPDATE, OnScoreUpdate); } // 5. 场景切换时清空 void OnLevelWasLoaded(int level) { EventCenter.Instance.Clear(); } 注意事项 必须移除监听：在 OnDestroy 或 OnDisable 中移除事件监听 及时清空：场景切换时调用 Clear() 防止内存泄漏 类型安全：使用 object 参数需要注意类型转换 线程安全：Unity事件系统在主线程执行，无需担心线程问题 "><!DOCTYPE html>
+<meta name="twitter:description" content="一、事件中心概念 比如怪物死亡就有玩家奖励，播放动画，任务记录等多种事件，此时就得在怪物死亡 Dead() 方法中写这些逻辑。\n需要先获取 Player 物体然后获取上面的 Player.cs 脚本组件，调用其中的死亡方法，很麻烦，而且脚本间关联性太强，不符合七大设计原则。\n"><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -411,15 +411,21 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#功能特点">功能特点</a>
+    <li><a href="#一事件中心概念">一、事件中心概念</a></li>
+    <li><a href="#二基础版事件中心实现">二、基础版事件中心实现</a>
       <ol>
-        <li><a href="#观察者模式">观察者模式</a></li>
-        <li><a href="#参数传递">参数传递</a></li>
-        <li><a href="#内存管理">内存管理</a></li>
-        <li><a href="#使用方法">使用方法</a></li>
+        <li><a href="#1-事件中心-eventcenter">1. 事件中心 EventCenter</a></li>
+        <li><a href="#2-事件订阅">2. 事件订阅</a></li>
+        <li><a href="#3-事件触发">3. 事件触发</a></li>
       </ol>
     </li>
-    <li><a href="#注意事项">注意事项</a></li>
+    <li><a href="#三执行流程">三、执行流程</a></li>
+    <li><a href="#四优化泛型版本解决装箱拆箱">四、优化：泛型版本解决装箱拆箱</a>
+      <ol>
+        <li><a href="#泛型委托的意义">泛型委托的意义</a></li>
+        <li><a href="#eventcenter-优化为泛型版本">EventCenter 优化为泛型版本</a></li>
+      </ol>
+    </li>
   </ol>
 </nav>
         </div>
@@ -469,7 +475,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-05-03T10:35:00&#43;08:00'>2026-05-03</time>
+                <time class="article-time--published" datetime='2026-07-19T18:55:00&#43;08:00'>2026-07-19</time>
             </div>
         
 
@@ -484,7 +490,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 2 分钟
+                    阅读时长: 4 分钟
                 </time>
             </div>
         
@@ -499,7 +505,267 @@
     <section class="article-content">
     
     
-    <p>Unity事件中心模块基于观察者模式实现，支持参数传递的事件机制。</p>
+    <h2 id="一事件中心概念">一、事件中心概念
+</h2><p>比如怪物死亡就有玩家奖励，播放动画，任务记录等多种事件，此时就得在怪物死亡 Dead() 方法中写这些逻辑。</p>
+<p>需要先获取 Player 物体然后获取上面的 Player.cs 脚本组件，调用其中的死亡方法，很麻烦，而且脚本间关联性太强，不符合七大设计原则。</p>
+<p>所以我们可以设置<strong>事件中心</strong>：怪物死亡就传递给事件中心，事件中心传递给各种事件让他们执行；事件自己也得告诉事件中心：XX 触发时，就告诉我执行 XX 逻辑。</p>
+<hr>
+<h2 id="二基础版事件中心实现">二、基础版事件中心实现
+</h2><h3 id="1-事件中心-eventcenter">1. 事件中心 EventCenter
+</h3><p>使用 <code>Dictionary&lt;string, UnityAction&gt;</code> 存储事件名称与对应的委托回调。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">EventCenter</span> <span class="p">:</span> <span class="n">BaseManager</span><span class="p">&lt;</span><span class="n">EventCenter</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//string是事件名称,传入函数补充字典泛型,需要用委托</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//这里是string事件加入UnityAction委托对应函数</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//这里用字典主要是方便寻找是否有对应事件以及用参数来添加Key和Value</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&gt;</span> <span class="n">eventDic</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//传入的函数一开始没有被执行,只是被加入了事件订阅列表,所以是回调函数</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//注意这里事件列表实际关联的物体实例+函数 两部分(所以后面销毁订阅呢),除非是静态函数</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">AddEvent</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">UnityAction</span> <span class="n">action</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果字典有对应的事件name，就添加到订阅列表</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">+=</span> <span class="n">action</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 如果没有，就新增</span>
+</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//物体OnDestory()中必须调用RemoveEvent()移除监听</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">RemoveEvent</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">UnityAction</span> <span class="n">action</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 理论上移除时必定有事件监听,不用写if也行</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//实际上eventDic[name]可能报空引用异常,传入未注册key导致报错</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">-=</span> <span class="n">action</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//事件触发,外部直接EventCenter.Instance.EventTrigger(&#34;OnPlayerShoot&#34;);触发指定时事件</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">EventTrigger</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 这种会依据加入事件的前后依次触发函数</span>
+</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">name</span><span class="p">].</span><span class="n">Invoke</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 没有对应事件监听时，不需要管触发</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//场景切换和游戏结束时,记得清空防止内存泄露</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">Clear</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">eventDic</span><span class="p">.</span><span class="n">Clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-事件订阅">2. 事件订阅
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">EnemyScript</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">HP</span> <span class="p">=</span> <span class="m">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//物体添加到订阅列表</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//看似只是存储了一个函数名,实际委托间接创建了一个类实例引用和方法本身的引用</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//总之事件的订阅列表实际上其实关联了实例方法和实例两部分</span>
+</span></span><span class="line"><span class="cl">        <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">AddEvent</span><span class="p">(</span><span class="s">&#34;OnPlayerShoot&#34;</span><span class="p">,</span> <span class="n">OnBeShot</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">OnBeShot</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这里定义类字段HP,并且访问HP时</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//默认相当于this.HP -= 10,优先访问</span>
+</span></span><span class="line"><span class="cl">        <span class="n">HP</span> <span class="p">-=</span> <span class="m">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">HP</span> <span class="p">&lt;=</span> <span class="m">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;敌人死亡！&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 死亡时销毁物体，触发 OnDestroy</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Destroy</span><span class="p">(</span><span class="n">gameObject</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//物体销毁时移除订阅</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">OnDestroy</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//即使方法内部只是Debug.Log仍然需要销毁订阅(因为委托还是关联了实例)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//如果是静态方法就不需要销毁订阅了</span>
+</span></span><span class="line"><span class="cl">        <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">RemoveEvent</span><span class="p">(</span><span class="s">&#34;OnPlayerShoot&#34;</span><span class="p">,</span> <span class="n">OnBeShot</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-事件触发">3. 事件触发
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerController</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">       
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetMouseButtonDown</span><span class="p">(</span><span class="m">0</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">EventTrigger</span><span class="p">(</span><span class="s">&#34;OnPlayerShoot&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>也可以用 <code>EventCenter.Instance.EventTrigger(&quot;PlayerRun&quot;, this)</code>，从原来的只是广播&quot;出事辣&quot;变为广播&quot;我出事辣&quot;。</p>
+<p><code>UnityAction</code> 改为 <code>UnityAction&lt;object&gt;</code>，并更新增删触发方法。触发和监听脚本都要修改，具体懒得搞了。</p>
+<hr>
+<h2 id="三执行流程">三、执行流程
+</h2><ol>
+<li><strong>实例化敌人</strong>：<code>Instantiate(enemyObj)</code> → 触发 <code>EnemyScript.Awake()</code> → 从而将函数添加到事件列表</li>
+<li><strong>用户按下按键</strong>：调用 <code>EventTrigger(&quot;OnPlayerShoot&quot;)</code> → EventCenter 根据 Key 执行列表
+<ul>
+<li>如果有多个敌人，一个 Key 对应多个 Value 全部执行</li>
+</ul>
+</li>
+<li><strong>敌人销毁</strong>：触发 <code>OnDestroy()</code> → 移除该实例相关订阅
+<ul>
+<li>多个物体多个 Value，只会移除那一个而不是全都移除</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="四优化泛型版本解决装箱拆箱">四、优化：泛型版本解决装箱拆箱
+</h2><h3 id="泛型委托的意义">泛型委托的意义
+</h3><p>比如 Monster 死了你咋知道是 BOSS 还是 Goblin 死了？</p>
+<p>这里把委托 <code>UnityAction</code> 都改成泛型委托 <code>UnityAction&lt;object&gt;</code>：</p>
+<ul>
+<li>传入的是万物之父 <code>object</code>，这样你传入什么类型都可以</li>
+<li>装箱拆箱肯定还是有性能开销</li>
+<li>装箱拆箱 + 泛型，还有这种用法的哦嚯嚯嚯</li>
+</ul>
+<h3 id="eventcenter-优化为泛型版本">EventCenter 优化为泛型版本
+</h3><p>使用 <code>Dictionary&lt;Type, Dictionary&lt;string, Delegate&gt;&gt;</code> 双层字典结构，实现零装箱高性能版本。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -559,197 +825,94 @@
 </span><span class="lnt">55
 </span><span class="lnt">56
 </span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.Events</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">EventCenter</span> <span class="p">:</span> <span class="n">BaseManager</span><span class="p">&lt;</span><span class="n">EventCenter</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="cs">/// &lt;summary&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="cs">/// 泛型事件中心 - 零装箱高性能版本</span>
+</span></span><span class="line"><span class="cl"><span class="cs">/// 继承 BaseManager 实现单例模式</span>
+</span></span><span class="line"><span class="cl"><span class="cs">/// &lt;/summary&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">EventCenter_T</span> <span class="p">:</span> <span class="n">BaseManager</span><span class="p">&lt;</span><span class="n">EventCenter_T</span><span class="p">&gt;</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//Key事件名称,value监听这个事件对应的委托函数们</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//private Dictionary&lt;string,UnityAction&gt; eventDic = new Dictionary&lt;string, UnityAction&gt;();</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">&gt;&gt;</span> <span class="n">eventDic</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">&gt;&gt;();</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">Delegate</span><span class="p">&gt;&gt;</span> <span class="n">eventDic</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="n">Type</span><span class="p">,</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">Delegate</span><span class="p">&gt;&gt;();</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">//添加事件监听</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//public void AddEventListener(string name, UnityAction action)</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">AddEventListener</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">&gt;</span> <span class="n">action</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">AddEventListener</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">action</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="c1">//如果有对应的事件监听</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Type</span> <span class="n">typeKey</span> <span class="p">=</span> <span class="k">typeof</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(!</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">typeKey</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">+=</span> <span class="n">action</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">typeKey</span><span class="p">]</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">Delegate</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">typeDic</span> <span class="p">=</span> <span class="n">eventDic</span><span class="p">[</span><span class="n">typeKey</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">typeDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">typeDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">=</span> <span class="p">(</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span><span class="n">typeDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">+</span> <span class="n">action</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="k">else</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">typeDic</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">action</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">//一定要记得销毁对应监听,否则物体销毁的时候还是有监听,导致内存泄露</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//public void RemoveEventListener(string name, UnityAction action)</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">RemoveEventListener</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">&gt;</span> <span class="n">action</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">RemoveEventListener</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">action</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="c1">//移除时必定有事件监听,都可以不用写if的</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Type</span> <span class="n">typeKey</span> <span class="p">=</span> <span class="k">typeof</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">typeKey</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">typeDic</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">-=</span> <span class="n">action</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">typeDic</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">del</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">typeDic</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">=</span> <span class="p">(</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span><span class="n">del</span> <span class="p">-</span> <span class="n">action</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">//事件触发</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">//public void EventTrigger(string name)</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">EventTrigger</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span><span class="kt">object</span> <span class="n">info</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">EventTrigger</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">T</span> <span class="n">data</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">        <span class="p">{</span>
-</span></span><span class="line"><span class="cl">            <span class="c1">//eventDic[name]();</span>
-</span></span><span class="line"><span class="cl">            <span class="c1">//这种会依据加入事件的前后依次触发函数</span>
-</span></span><span class="line"><span class="cl">            <span class="c1">//eventDic[name].Invoke();</span>
-</span></span><span class="line"><span class="cl">            <span class="n">eventDic</span><span class="p">[</span><span class="n">name</span><span class="p">].</span><span class="n">Invoke</span><span class="p">(</span><span class="n">info</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="p">}</span>
-</span></span><span class="line"><span class="cl">        <span class="c1">//没有对应事件监听时,不需要管触发</span>
-</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Type</span> <span class="n">typeKey</span> <span class="p">=</span> <span class="k">typeof</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="c1">//清空事件中心(场景切换时)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">eventDic</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">typeKey</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">typeDic</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">typeDic</span><span class="p">.</span><span class="n">TryGetValue</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="k">out</span> <span class="kt">var</span> <span class="n">del</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="p">((</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;)</span><span class="n">del</span><span class="p">)?.</span><span class="n">Invoke</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
 </span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">Clear</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">typeDic</span> <span class="k">in</span> <span class="n">eventDic</span><span class="p">.</span><span class="n">Values</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">typeDic</span><span class="p">.</span><span class="n">Clear</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="n">eventDic</span><span class="p">.</span><span class="n">Clear</span><span class="p">();</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="功能特点">功能特点
-</h2><h3 id="观察者模式">观察者模式
-</h3><ul>
-<li>使用 Dictionary 存储事件名称和对应的事件委托</li>
-<li>支持同一事件绑定多个监听函数</li>
-<li>事件触发时按绑定顺序依次执行</li>
+</div><p><strong>优化原理：</strong></p>
+<ul>
+<li>第一层 Key 是参数类型 <code>Type</code>，不同类型的事件完全隔离</li>
+<li>第二层 Key 是事件名称 <code>string</code>，存储具体的 <code>UnityAction&lt;T&gt;</code> 委托</li>
+<li>存储时用 <code>Delegate</code> 基类，调用时强转回 <code>UnityAction&lt;T&gt;</code></li>
+<li>全程没有 <code>object</code> 装箱，零性能损耗</li>
 </ul>
-<h3 id="参数传递">参数传递
-</h3><ul>
-<li>使用 <code>UnityAction&lt;object&gt;</code> 支持任意类型的参数传递</li>
-<li>可以传递复杂数据类型作为事件信息</li>
-</ul>
-<h3 id="内存管理">内存管理
-</h3><ul>
-<li><strong>重要</strong>：在对象销毁时必须移除事件监听</li>
-<li>否则会导致内存泄漏和空引用异常</li>
-<li>场景切换时调用 <code>Clear()</code> 清空所有事件</li>
-</ul>
-<h3 id="使用方法">使用方法
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span><span class="lnt">49
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="c1">// 1. 定义事件</span>
-</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">GameEventNames</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">PLAYER_DEAD</span> <span class="p">=</span> <span class="s">&#34;PlayerDead&#34;</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">SCORE_UPDATE</span> <span class="p">=</span> <span class="s">&#34;ScoreUpdate&#34;</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">LEVEL_COMPLETE</span> <span class="p">=</span> <span class="s">&#34;LevelComplete&#34;</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 2. 监听事件</span>
-</span></span><span class="line"><span class="cl"><span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">AddEventListener</span><span class="p">(</span><span class="n">GameEventNames</span><span class="p">.</span><span class="n">PLAYER_DEAD</span><span class="p">,</span> <span class="n">OnPlayerDead</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">AddEventListener</span><span class="p">(</span><span class="n">GameEventNames</span><span class="p">.</span><span class="n">SCORE_UPDATE</span><span class="p">,</span> <span class="n">OnScoreUpdate</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="k">void</span> <span class="n">OnPlayerDead</span><span class="p">(</span><span class="kt">object</span> <span class="n">info</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;玩家死亡：&#34;</span> <span class="p">+</span> <span class="n">info</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">private</span> <span class="k">void</span> <span class="n">OnScoreUpdate</span><span class="p">(</span><span class="kt">object</span> <span class="n">info</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">score</span> <span class="p">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">info</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;分数更新：&#34;</span> <span class="p">+</span> <span class="n">score</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 3. 触发事件</span>
-</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">void</span> <span class="n">PlayerTakeDamage</span><span class="p">(</span><span class="kt">int</span> <span class="n">damage</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">EventTrigger</span><span class="p">(</span><span class="n">GameEventNames</span><span class="p">.</span><span class="n">PLAYER_DEAD</span><span class="p">,</span> <span class="n">damage</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">void</span> <span class="n">UpdateScore</span><span class="p">(</span><span class="kt">int</span> <span class="n">score</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">EventTrigger</span><span class="p">(</span><span class="n">GameEventNames</span><span class="p">.</span><span class="n">SCORE_UPDATE</span><span class="p">,</span> <span class="n">score</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 4. 移除监听（重要！）</span>
-</span></span><span class="line"><span class="cl"><span class="k">void</span> <span class="n">OnDestroy</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">RemoveEventListener</span><span class="p">(</span><span class="n">GameEventNames</span><span class="p">.</span><span class="n">PLAYER_DEAD</span><span class="p">,</span> <span class="n">OnPlayerDead</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">RemoveEventListener</span><span class="p">(</span><span class="n">GameEventNames</span><span class="p">.</span><span class="n">SCORE_UPDATE</span><span class="p">,</span> <span class="n">OnScoreUpdate</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 5. 场景切换时清空</span>
-</span></span><span class="line"><span class="cl"><span class="k">void</span> <span class="n">OnLevelWasLoaded</span><span class="p">(</span><span class="kt">int</span> <span class="n">level</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="n">EventCenter</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">Clear</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="注意事项">注意事项
-</h2><ol>
-<li><strong>必须移除监听</strong>：在 <code>OnDestroy</code> 或 <code>OnDisable</code> 中移除事件监听</li>
-<li><strong>及时清空</strong>：场景切换时调用 <code>Clear()</code> 防止内存泄漏</li>
-<li><strong>类型安全</strong>：使用 <code>object</code> 参数需要注意类型转换</li>
-<li><strong>线程安全</strong>：Unity事件系统在主线程执行，无需担心线程问题</li>
-</ol>
 
 </section>
 
@@ -796,12 +959,12 @@
             
                 
 <article class="">
-    <a href="/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity MVC框架实现</h2>
+            <h2 class="article-title">Unity中C#调用Lua</h2>
         </div>
     </a>
 </article>
@@ -809,12 +972,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/">
+    <a href="/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity单例模式实现总结</h2>
+            <h2 class="article-title">Unity中Lua文件重定向管理器</h2>
         </div>
     </a>
 </article>
@@ -822,12 +985,12 @@
             
                 
 <article class="">
-    <a href="/p/unity-2d%E5%BA%8F%E5%88%97%E5%B8%A7%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity-ab%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity 2D序列帧动画实现</h2>
+            <h2 class="article-title">Unity AB包管理器</h2>
         </div>
     </a>
 </article>
@@ -835,12 +998,25 @@
             
                 
 <article class="">
-    <a href="/p/unity%E5%AF%B9%E8%B1%A1%E6%B1%A0%E7%AE%A1%E7%90%86%E5%99%A8%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity%E5%AF%B9%E8%B1%A1%E7%BC%93%E5%AD%98%E6%B1%A0%E5%AE%9E%E7%8E%B0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity对象池管理器实现</h2>
+            <h2 class="article-title">Unity对象缓存池实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity%E5%85%AC%E5%85%B1mono%E6%A8%A1%E5%9D%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity公共Mono模块</h2>
         </div>
     </a>
 </article>
@@ -900,10 +1076,22 @@
         
             
         
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
         共发表文章数：
-        <span class="number-highlight">6</span>
+        <span class="number-highlight">12</span>
         篇 · 总计
-        <span class="number-highlight">8.33</span>
+        <span class="number-highlight">25.37</span>
         k 字
     </div>
     <div>
