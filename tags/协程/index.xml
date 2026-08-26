@@ -1237,7 +1237,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_cor&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;!=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;null&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;c1&#34;&gt;//停止协程,然后移除句柄引用&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;MonoModuleMgr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Instance&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StopCoroutine&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_cor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;MonoModuleMgr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Instance&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;StopCor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_cor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;_cor&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;null&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
@@ -1299,7 +1299,7 @@
 			&lt;tr&gt;
 					&lt;td&gt;&lt;strong&gt;协程部分&lt;/strong&gt;&lt;/td&gt;
 					&lt;td&gt;&lt;code&gt;StartCor(Cor(1))&lt;/code&gt; → 返回句柄保存到 &lt;code&gt;_cor&lt;/code&gt;&lt;/td&gt;
-					&lt;td&gt;&lt;code&gt;StopCoroutine(_cor)&lt;/code&gt; → 用句柄停止协程，&lt;code&gt;_cor = null&lt;/code&gt; 清空引用&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;StopCor(_cor)&lt;/code&gt; → 用句柄停止协程，&lt;code&gt;_cor = null&lt;/code&gt; 清空引用&lt;/td&gt;
 			&lt;/tr&gt;
 	&lt;/tbody&gt;
 &lt;/table&gt;
@@ -1354,7 +1354,6 @@
 &lt;/h3&gt;&lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;协程句柄必须保存&lt;/strong&gt;：&lt;code&gt;StartCor&lt;/code&gt; 返回的 &lt;code&gt;Coroutine&lt;/code&gt; 要存到 &lt;code&gt;_cor&lt;/code&gt;，后续停止时才能用句柄精准停止，否则只能粗暴 &lt;code&gt;StopAllCoroutines&lt;/code&gt; 影响其他模块&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;多次调用 StartUp 会重复订阅&lt;/strong&gt;：Speak 方法会被加多次，导致一帧执行多次 Speak。需要加 &lt;code&gt;if (_cor == null)&lt;/code&gt; 等防重入判断&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;停止协程方法名&lt;/strong&gt;：脚本中写的是 &lt;code&gt;MonoModuleMgr.Instance.StopCoroutine(_cor)&lt;/code&gt;，建议统一封装为 &lt;code&gt;StopCor(_cor)&lt;/code&gt;，和 &lt;code&gt;StartCor&lt;/code&gt; 对称，避免混用&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;销毁顺序&lt;/strong&gt;：MonoModuleMgr 被销毁时，TrickMgr 的 &lt;code&gt;_cor&lt;/code&gt; 句柄会失效，重新调用 StartUp 时 MonoModuleMgr.Instance 会自动重建，但 &lt;code&gt;_cor&lt;/code&gt; 还持有旧句柄需要清空&lt;/li&gt;
 &lt;/ol&gt;
 </description>

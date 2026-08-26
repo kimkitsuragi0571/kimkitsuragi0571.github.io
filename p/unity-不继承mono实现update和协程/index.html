@@ -996,7 +996,7 @@
 </span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">_cor</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
 </span></span><span class="line"><span class="cl">            <span class="c1">//停止协程,然后移除句柄引用</span>
-</span></span><span class="line"><span class="cl">            <span class="n">MonoModuleMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">StopCoroutine</span><span class="p">(</span><span class="n">_cor</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">MonoModuleMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">StopCor</span><span class="p">(</span><span class="n">_cor</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">            <span class="n">_cor</span> <span class="p">=</span> <span class="kc">null</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -1058,7 +1058,7 @@
 			<tr>
 					<td><strong>协程部分</strong></td>
 					<td><code>StartCor(Cor(1))</code> → 返回句柄保存到 <code>_cor</code></td>
-					<td><code>StopCoroutine(_cor)</code> → 用句柄停止协程，<code>_cor = null</code> 清空引用</td>
+					<td><code>StopCor(_cor)</code> → 用句柄停止协程，<code>_cor = null</code> 清空引用</td>
 			</tr>
 	</tbody>
 </table></div>
@@ -1113,7 +1113,6 @@
 </h3><ol>
 <li><strong>协程句柄必须保存</strong>：<code>StartCor</code> 返回的 <code>Coroutine</code> 要存到 <code>_cor</code>，后续停止时才能用句柄精准停止，否则只能粗暴 <code>StopAllCoroutines</code> 影响其他模块</li>
 <li><strong>多次调用 StartUp 会重复订阅</strong>：Speak 方法会被加多次，导致一帧执行多次 Speak。需要加 <code>if (_cor == null)</code> 等防重入判断</li>
-<li><strong>停止协程方法名</strong>：脚本中写的是 <code>MonoModuleMgr.Instance.StopCoroutine(_cor)</code>，建议统一封装为 <code>StopCor(_cor)</code>，和 <code>StartCor</code> 对称，避免混用</li>
 <li><strong>销毁顺序</strong>：MonoModuleMgr 被销毁时，TrickMgr 的 <code>_cor</code> 句柄会失效，重新调用 StartUp 时 MonoModuleMgr.Instance 会自动重建，但 <code>_cor</code> 还持有旧句柄需要清空</li>
 </ol>
 
@@ -1310,7 +1309,7 @@
         共发表文章数：
         <span class="number-highlight">17</span>
         篇 · 总计
-        <span class="number-highlight">37.30</span>
+        <span class="number-highlight">37.24</span>
         k 字
     </div>
     <div>

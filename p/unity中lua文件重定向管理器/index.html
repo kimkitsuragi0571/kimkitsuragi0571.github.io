@@ -1027,6 +1027,11 @@
 </span><span class="lnt">140
 </span><span class="lnt">141
 </span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
@@ -1114,6 +1119,11 @@
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
 </span></span><span class="line"><span class="cl">        <span class="k">get</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">luaEnv</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="s">&#34;解析器未初始化!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
 </span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">luaEnv</span><span class="p">.</span><span class="n">Global</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
@@ -1499,7 +1509,7 @@
         共发表文章数：
         <span class="number-highlight">17</span>
         篇 · 总计
-        <span class="number-highlight">37.30</span>
+        <span class="number-highlight">37.24</span>
         k 字
     </div>
     <div>
