@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity%E5%AF%B9%E8%B1%A1%E7%BC%93%E5%AD%98%E6%B1%A0%E5%AE%9E%E7%8E%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Unity对象缓存池实现">
+<link rel="stylesheet" href="/scss/style.min.6d829bfe38cd5cdbdecbfc79955536c27946512ffeddd3756f2fe68738c87c72.css"><meta property='og:title' content="Unity对象缓存池实现">
 <meta property='og:description' content="对象池（Object Pool）是游戏开发中提升性能的核心技术，通过复用对象避免频繁实例化和销毁。本文按 基本实现 → 布局优化 → 上限优化 三个迭代版本，逐步演进一个完整的 Unity 对象缓存池。\n">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity%E5%AF%B9%E8%B1%A1%E7%BC%93%E5%AD%98%E6%B1%A0%E5%AE%9E%E7%8E%B0/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -1017,6 +1017,12 @@
 </span><span class="lnt">60
 </span><span class="lnt">61
 </span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
@@ -1025,6 +1031,12 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PoolMgrLayout</span> <span class="p">:</span> <span class="n">BaseManager</span><span class="p">&lt;</span><span class="n">PoolMgrLayout</span><span class="p">&gt;</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">Awake</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="n">print</span><span class="p">(</span><span class="s">&#34;哔哔哔...对象池模块(布局优化)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
 </span></span><span class="line"><span class="cl">   <span class="c1">//是否开启自动布局功能</span>
 </span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="kt">bool</span> <span class="n">isOpenLayout</span> <span class="p">=</span> <span class="kc">true</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">   <span class="c1">//这里直接将游戏物体栈Stack&lt;GameObject&gt;换成了PoolData类对象(封装思想)</span>
@@ -1213,7 +1225,7 @@
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="c1">//如果是Count==0的情况,这行就是冗余的,不过也算保证了代码的统一吧</span>
 </span></span><span class="line"><span class="cl">        <span class="n">obj</span><span class="p">.</span><span class="n">SetActive</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">PoolMgrUpper</span><span class="p">.</span><span class="n">isOpenLayout</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">PoolMgrLayout</span><span class="p">.</span><span class="n">isOpenLayout</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
 </span></span><span class="line"><span class="cl">            <span class="n">obj</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
@@ -1231,7 +1243,7 @@
 </span></span><span class="line"><span class="cl">    <span class="c1">//构造函数新增usedObj参数,以及调用对象压入使用中容器函数</span>
 </span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">PoolDataUpper</span><span class="p">(</span><span class="n">GameObject</span> <span class="n">root</span><span class="p">,</span> <span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="n">GameObject</span> <span class="n">usedObj</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="p">{</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">PoolMgrUpper</span><span class="p">.</span><span class="n">isOpenLayout</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">PoolMgrLayout</span><span class="p">.</span><span class="n">isOpenLayout</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">        <span class="p">{</span>
 </span></span><span class="line"><span class="cl">            <span class="n">rootObj</span> <span class="p">=</span> <span class="k">new</span> <span class="n">GameObject</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl">            <span class="n">rootObj</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="n">root</span><span class="p">.</span><span class="n">transform</span><span class="p">);</span>
@@ -1307,6 +1319,12 @@
 </span><span class="lnt">56
 </span><span class="lnt">57
 </span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
@@ -1315,6 +1333,12 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PoolMgrUpper</span> <span class="p">:</span> <span class="n">BaseManager</span><span class="p">&lt;</span><span class="n">PoolMgrUpper</span><span class="p">&gt;</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">Awake</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="n">print</span><span class="p">(</span><span class="s">&#34;哔哔哔...对象池模块(上限优化)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
 </span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">static</span> <span class="kt">bool</span> <span class="n">isOpenLayout</span> <span class="p">=</span> <span class="kc">true</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="n">PoolDataUpper</span><span class="p">&gt;</span> <span class="n">poolDic</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">PoolDataUpper</span><span class="p">&gt;();</span>
 </span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="n">GameObject</span> <span class="n">poolObj</span><span class="p">;</span>
@@ -1490,19 +1514,6 @@
             
                 
 <article class="">
-    <a href="/p/unity%E5%85%AC%E5%85%B1mono%E6%A8%A1%E5%9D%97/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Unity公共Mono模块</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
     <a href="/p/unity-mvp%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/">
         
         
@@ -1542,12 +1553,25 @@
             
                 
 <article class="">
-    <a href="/p/unity%E5%AF%B9%E8%B1%A1%E6%B1%A0%E7%AE%A1%E7%90%86%E5%99%A8%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity对象池管理器实现</h2>
+            <h2 class="article-title">Unity 资源加载模块(使用await实现)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 资源加载模块(使用旧版callback实现)</h2>
         </div>
     </a>
 </article>
@@ -1619,10 +1643,20 @@
         
             
         
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
         共发表文章数：
-        <span class="number-highlight">12</span>
+        <span class="number-highlight">17</span>
         篇 · 总计
-        <span class="number-highlight">25.37</span>
+        <span class="number-highlight">37.30</span>
         k 字
     </div>
     <div>

@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/'>
 
-<link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Unity中Lua文件重定向管理器">
+<link rel="stylesheet" href="/scss/style.min.6d829bfe38cd5cdbdecbfc79955536c27946512ffeddd3756f2fe68738c87c72.css"><meta property='og:title' content="Unity中Lua文件重定向管理器">
 <meta property='og:description' content="在 Unity 中使用 xLua 时，luaEnv.DoString(&quot;require 'main'&quot;) 默认只会到 xLua 内置的几个路径查找 Lua 文件。如果 Lua 脚本被打进 AB 包，或者放在自定义目录下，就找不到。本文通过自定义 Loader 实现 绝对路径 → AB 包路径 → 默认路径 的三级自动重定向。\n">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -1022,6 +1022,11 @@
 </span><span class="lnt">135
 </span><span class="lnt">136
 </span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
@@ -1032,6 +1037,11 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">LuaReloadMgr</span> <span class="p">:</span> <span class="n">MonoSingletonBase</span><span class="p">&lt;</span><span class="n">LuaReloadMgr</span><span class="p">&gt;</span>
 </span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">Awake</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">print</span><span class="p">(</span><span class="s">&#34;哔哔哔...Lua重定向模块&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
 </span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">LuaEnv</span> <span class="n">luaEnv</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="c1">//总之就是避免_instance不为null,luaEnv为null,结果懒汉单例不初始化</span>
@@ -1347,6 +1357,19 @@
             
                 
 <article class="">
+    <a href="/p/unity%E4%B8%ADlua%E8%BF%81%E7%A7%BB%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity中Lua迁移打包工具</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
     <a href="/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/">
         
         
@@ -1373,12 +1396,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity事件中心模块</h2>
+            <h2 class="article-title">Unity 资源加载模块(使用await实现)</h2>
         </div>
     </a>
 </article>
@@ -1386,25 +1409,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E5%AF%B9%E8%B1%A1%E7%BC%93%E5%AD%98%E6%B1%A0%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity对象缓存池实现</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/unity%E5%85%AC%E5%85%B1mono%E6%A8%A1%E5%9D%97/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Unity公共Mono模块</h2>
+            <h2 class="article-title">Unity 资源加载模块(使用旧版callback实现)</h2>
         </div>
     </a>
 </article>
@@ -1476,10 +1486,20 @@
         
             
         
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
         共发表文章数：
-        <span class="number-highlight">12</span>
+        <span class="number-highlight">17</span>
         篇 · 总计
-        <span class="number-highlight">25.37</span>
+        <span class="number-highlight">37.30</span>
         k 字
     </div>
     <div>

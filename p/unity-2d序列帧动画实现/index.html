@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity-2d%E5%BA%8F%E5%88%97%E5%B8%A7%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.977f3a9165077f4f346b1bd9f7a5af5da86b57613b1c7919e61f4b7b089e6a4c.css"><meta property='og:title' content="Unity 2D序列帧动画实现">
+<link rel="stylesheet" href="/scss/style.min.6d829bfe38cd5cdbdecbfc79955536c27946512ffeddd3756f2fe68738c87c72.css"><meta property='og:title' content="Unity 2D序列帧动画实现">
 <meta property='og:description' content="通过序列帧Sprite数组实现2D动画播放，适用于简单的2D游戏动画效果。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 using System.Collections; using System.Collections.Generic; using UnityEngine; public class Animation2D : MonoBehaviour { //直接定义个序列帧Sprite数组 public Sprite[] sprs; public SpriteRenderer sr; private float time; private int index = 0; void Start() { sr = GetComponent&lt;SpriteRenderer&gt;(); sr.sprite = sprs[index]; // 打印开始信息 Debug.Log(&#34;动画开始，当前帧：&#34; + index); } void Update() { //每次增加帧间隔时间 time += Time.deltaTime; //间隔时间到0.02f if (time &gt;= 0.1f) { index++; //已经显示到最后一张图,从头显示 if (index &gt;= sprs.Length) { index = 0; } sr.sprite = sprs[index]; //记得把间隔也重置下 time = 0; // 打印当前播放的帧 Debug.Log(&#34;正在播放第 &#34; + index + &#34; 帧&#34;); } } } 实现原理 核心机制 Sprite数组：sprs[] 存储所有序列帧图片 帧切换：通过 Time.deltaTime 累加时间，达到间隔后切换帧 循环播放：当播放到最后一张时，重置 index = 0 重新开始 关键参数 参数 说明 sprs[] 序列帧图片数组，在Inspector中拖入 time 时间累加器，记录帧间隔 index 当前播放帧索引 0.1f 每帧播放时长（秒） 使用方法 1. 创建动画控制器脚本 将脚本挂载到包含 SpriteRenderer 组件的GameObject上\n">
 <meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity-2d%E5%BA%8F%E5%88%97%E5%B8%A7%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -884,12 +884,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity中C#调用Lua</h2>
+            <h2 class="article-title">Unity 资源加载模块(使用await实现)</h2>
         </div>
     </a>
 </article>
@@ -897,12 +897,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity中Lua文件重定向管理器</h2>
+            <h2 class="article-title">Unity 资源加载模块(使用旧版callback实现)</h2>
         </div>
     </a>
 </article>
@@ -910,12 +910,12 @@
             
                 
 <article class="">
-    <a href="/p/unity-ab%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/">
+    <a href="/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity AB包管理器</h2>
+            <h2 class="article-title">Unity 场景加载模块</h2>
         </div>
     </a>
 </article>
@@ -923,12 +923,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/">
+    <a href="/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity事件中心模块</h2>
+            <h2 class="article-title">Unity 支持泛型的事件中心模块</h2>
         </div>
     </a>
 </article>
@@ -936,12 +936,12 @@
             
                 
 <article class="">
-    <a href="/p/unity%E5%AF%B9%E8%B1%A1%E7%BC%93%E5%AD%98%E6%B1%A0%E5%AE%9E%E7%8E%B0/">
+    <a href="/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">Unity对象缓存池实现</h2>
+            <h2 class="article-title">Unity 普通事件中心(仅支持无参函数订阅)</h2>
         </div>
     </a>
 </article>
@@ -1013,10 +1013,20 @@
         
             
         
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
         共发表文章数：
-        <span class="number-highlight">12</span>
+        <span class="number-highlight">17</span>
         篇 · 总计
-        <span class="number-highlight">25.37</span>
+        <span class="number-highlight">37.30</span>
         k 字
     </div>
     <div>
