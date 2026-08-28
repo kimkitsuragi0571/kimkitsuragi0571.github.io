@@ -1,0 +1,2919 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="UGUI 项目里，如果每个面板都手写「获取组件 → 绑定 onClick → 分别写方法」，代码会非常臃肿。本文实现一个完整的 UI 模块：UIPanelBase 基类自动抓组件 + 虚方法统一订阅、UIPanelMgr 管理器负责面板加载 / 层级挂载 / 自定义事件封装、具体面板只需重写虚方法即可。\n">
+<title>Unity UI模块实现</title>
+
+<link rel='canonical' href='https://kimkitsuragi-0571.github.io/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.6d829bfe38cd5cdbdecbfc79955536c27946512ffeddd3756f2fe68738c87c72.css"><meta property='og:title' content="Unity UI模块实现">
+<meta property='og:description' content="UGUI 项目里，如果每个面板都手写「获取组件 → 绑定 onClick → 分别写方法」，代码会非常臃肿。本文实现一个完整的 UI 模块：UIPanelBase 基类自动抓组件 + 虚方法统一订阅、UIPanelMgr 管理器负责面板加载 / 层级挂载 / 自定义事件封装、具体面板只需重写虚方法即可。\n">
+<meta property='og:url' content='https://kimkitsuragi-0571.github.io/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/'>
+<meta property='og:site_name' content='IBN5100'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='UGUI' /><meta property='article:tag' content='面板管理' /><meta property='article:tag' content='UIPanelMgr' /><meta property='article:tag' content='虚方法重写' /><meta property='article:published_time' content='2026-08-28T17:45:00&#43;08:00'/><meta property='article:modified_time' content='2026-08-28T17:45:00&#43;08:00'/>
+<meta name="twitter:title" content="Unity UI模块实现">
+<meta name="twitter:description" content="UGUI 项目里，如果每个面板都手写「获取组件 → 绑定 onClick → 分别写方法」，代码会非常臃肿。本文实现一个完整的 UI 模块：UIPanelBase 基类自动抓组件 + 虚方法统一订阅、UIPanelMgr 管理器负责面板加载 / 层级挂载 / 自定义事件封装、具体面板只需重写虚方法即可。\n"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首次访问加载动画（修复闪屏）</title>
+    <style>
+         
+        .loading {
+            position: fixed;
+            display: none;  
+            justify-content: center;
+            align-items: center;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background-color: #0000007e;  
+            perspective: 800px;
+            transition: none;  
+        }
+
+         
+        .spinner {
+            width: 44px;
+            height: 44px;
+            animation: spinner-rotate 4s infinite ease-in-out;  
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
+
+        .spinner > div {
+            background-color: rgba(255, 255, 255, 0.2);
+            height: 100%;
+            position: absolute;
+            width: 100%;
+            border: 1px solid #ffffff;
+            backface-visibility: hidden;
+        }
+
+        .spinner div:nth-of-type(1) { transform: translateZ(-20px) rotateY(180deg); }
+        .spinner div:nth-of-type(2) { transform: rotateY(-270deg) translateX(50%); transform-origin: top right; }
+        .spinner div:nth-of-type(3) { transform: rotateY(270deg) translateX(-50%); transform-origin: center left; }
+        .spinner div:nth-of-type(4) { transform: rotateX(90deg) translateY(-50%); transform-origin: top center; }
+        .spinner div:nth-of-type(5) { transform: rotateX(-90deg) translateY(50%); transform-origin: bottom center; }
+        .spinner div:nth-of-type(6) { transform: translateZ(20px); }
+
+         
+        @keyframes spinner-rotate {
+            0% { transform: rotate(45deg) rotateX(-25deg) rotateY(25deg); }
+            50% { transform: rotate(45deg) rotateX(-385deg) rotateY(25deg); }
+            100% { transform: rotate(45deg) rotateX(-385deg) rotateY(385deg); }
+        }
+
+         
+        .animated-stop {
+            animation-play-state: paused !important;
+        }
+
+         
+        .scaleAndFadeout {
+            animation: scale-fade-out 1.5s ease-in-out forwards !important;
+        }
+
+        @keyframes scale-fade-out {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="loading">
+        <div class="spinner">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <script>
+        function initLoading() {
+            
+            const isFirstVisit = !sessionStorage.getItem('visited');
+            if (!isFirstVisit) return; 
+
+            
+            const loading = document.querySelector(".loading");
+            const spinner = document.querySelector(".spinner");
+            if (!loading || !spinner) return;
+
+            
+            loading.style.display = "flex";
+
+            
+            const loadingDuration = 4000; 
+            setTimeout(() => {
+                
+                loadFinish();
+                
+                setTimeout(() => {
+                    loading.style.display = "none";
+                    
+                    sessionStorage.setItem('visited', 'true');
+                }, 1500);
+            }, loadingDuration);
+        }
+
+        
+        function loadFinish() {
+            const spinner = document.querySelector(".spinner");
+            const loading = document.querySelector(".loading");
+            if (spinner) spinner.classList.add("animated-stop"); 
+            if (loading) loading.classList.add("scaleAndFadeout"); 
+        }
+
+        
+        window.addEventListener('load', initLoading);
+    </script>
+</body>
+</html>
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_ece49314ddad6a7e.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤔</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">IBN5100</a></h1>
+            <h2 class="site-description">相逢在宇宙</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/3546865758898959?spm_id_from=333.788.0.0'
+                        target="_blank"
+                        title="BiliBili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-bilibili"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" /><path d="M8 3l2 3" /><path d="M16 3l-2 3" /><path d="M9 13v-2" /><path d="M15 11v2" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/kimkitsuragi0571/hugo-main/actions'
+                        target="_blank"
+                        title="GitAction"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-upload"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M12 11v6" /><path d="M9.5 13.5l2.5 -2.5l2.5 2.5" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://steamcommunity.com/profiles/76561199047374887/'
+                        target="_blank"
+                        title="Steam"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5 0 1 1 -.653 8.953l-4.347 3.009l0 .038a3 3 0 0 1 -2.824 3l-.176 0a3 3 0 0 1 -2.94 -2.402l-2.56 -1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834 -.635l2.727 -3.818a4.5 4.5 0 0 1 4.429 -5.302z" /><circle cx="16.5" cy="9.5" r="1" fill="currentColor" /></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E7%9B%B8%E5%85%B3/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>相关</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>链接</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一四层结构">一、四层结构</a></li>
+    <li><a href="#二uipanelbase-面板基类">二、UIPanelBase 面板基类</a>
+      <ol>
+        <li><a href="#重点虚方法重写简化订阅">重点：虚方法重写简化订阅</a></li>
+      </ol>
+    </li>
+    <li><a href="#三uipanelmgr-面板管理器">三、UIPanelMgr 面板管理器</a></li>
+    <li><a href="#四playpaneltest-具体面板重写虚方法--重写显隐">四、PlayPanelTest 具体面板（重写虚方法 + 重写显隐）</a></li>
+    <li><a href="#五uipanelmgrtest-调用方">五、UIPanelMgrTest 调用方</a></li>
+    <li><a href="#六四个脚本各自职责总结">六、四个脚本各自职责总结</a>
+      <ol>
+        <li><a href="#61-uipanelbase--面板基类">6.1 UIPanelBase — 面板基类</a></li>
+        <li><a href="#62-uipanelmgr--面板管理器">6.2 UIPanelMgr — 面板管理器</a></li>
+        <li><a href="#63-playpaneltest--具体面板">6.3 PlayPanelTest — 具体面板</a></li>
+        <li><a href="#64-uipanelmgrtest--调用方">6.4 UIPanelMgrTest — 调用方</a></li>
+      </ol>
+    </li>
+    <li><a href="#七开发时踩过的坑--对应解释">七、开发时踩过的坑 &amp; 对应解释</a>
+      <ol>
+        <li><a href="#坑-1场景中始终有重复的-canvas-和-canvas-clone">坑 1：场景中始终有重复的 Canvas 和 Canvas (Clone)</a></li>
+        <li><a href="#坑-2面板在场景中不显示但-hierarchy-中依旧存在">坑 2：面板在场景中不显示（但 Hierarchy 中依旧存在）</a></li>
+        <li><a href="#坑-3重写面板基类的显隐方法应该写在哪">坑 3：重写面板基类的显隐方法应该写在哪</a></li>
+      </ol>
+    </li>
+    <li><a href="#八协作关系一览">八、协作关系一览</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/unity/" >
+                Unity
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/">Unity UI模块实现</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2026-08-28T17:45:00&#43;08:00'>2026-08-28</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 16 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>UGUI 项目里，如果每个面板都手写「获取组件 → 绑定 onClick → 分别写方法」，代码会非常臃肿。本文实现一个完整的 UI 模块：<strong>UIPanelBase 基类自动抓组件 + 虚方法统一订阅、UIPanelMgr 管理器负责面板加载 / 层级挂载 / 自定义事件封装、具体面板只需重写虚方法即可。</strong></p>
+<hr>
+<h2 id="一四层结构">一、四层结构
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">UIPanelBase (面板基类)
+</span></span><span class="line"><span class="cl">    ↳ 自动扫 Button / Image / Text / Slider / Toggle → 存入 Dict
+</span></span><span class="line"><span class="cl">    ↳ 自动为 Button / Toggle 订阅 OnClick / OnValueChanged 虚函数
+</span></span><span class="line"><span class="cl">    ↳ 提供 GetConFromDict&lt;T&gt;(uiName) 获取控件
+</span></span><span class="line"><span class="cl">    ↳ 提供 ShowMe / HideMe 显隐虚方法
+</span></span><span class="line"><span class="cl">           ↓
+</span></span><span class="line"><span class="cl">UIPanelMgr (面板管理器, MonoSingleton)
+</span></span><span class="line"><span class="cl">    ↳ 自动初始化 Canvas / EventSystem (先搜场景,没有就 Resources 加载)
+</span></span><span class="line"><span class="cl">    ↳ 分三层挂载：Top / Middle / Bottom
+</span></span><span class="line"><span class="cl">    ↳ ShowPanel&lt;T&gt;(name, layer, callback) 异步加载 + 设置父物体 + 调用 callback + 调用 ShowMe
+</span></span><span class="line"><span class="cl">    ↳ HidePanel(name) 调用 HideMe + 销毁 + 移除字典
+</span></span><span class="line"><span class="cl">    ↳ AddCustomEvent(con, triType, callback) 代码方式添加 EventTrigger 自定义逻辑
+</span></span><span class="line"><span class="cl">           ↓
+</span></span><span class="line"><span class="cl">PlayPanelTest (具体面板)
+</span></span><span class="line"><span class="cl">    ↳ 继承 UIPanelBase
+</span></span><span class="line"><span class="cl">    ↳ 只需 override OnClick(btnName) 用 switch 区分不同按钮
+</span></span><span class="line"><span class="cl">    ↳ override OnValueChanged(togName, isOn) 处理多选框
+</span></span><span class="line"><span class="cl">    ↳ override ShowMe / HideMe 执行面板专属逻辑
+</span></span><span class="line"><span class="cl">           ↓
+</span></span><span class="line"><span class="cl">UIPanelMgrTest (调用方)
+</span></span><span class="line"><span class="cl">    ↳ 仅负责在 Update 里按 Z 显示 / X 隐藏 面板
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="二uipanelbase-面板基类">二、UIPanelBase 面板基类
+</h2><p>核心思路：<strong>基类 Awake 里自动扫描所有子控件（包括未激活的）并分类存入字典，遇到 Button 就闭包订阅同一个 <code>OnClick</code> 虚方法，遇到 Toggle 就订阅 <code>OnValueChanged</code>。子类只需重写这两个虚方法，不用再写 <code>GetComponent</code> + <code>AddListener</code>。</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.EventSystems</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//UIPanel面板基类</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">UIPanelBase</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//要存储多种UI组件,所有组件父类容器都是UIBehaviour</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//一个UI可能有多个组件比如Image和Button,添加了Button后,同一个UI的Image就没法添加了(因为Key无法重复嘛)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//所以这里改为使用List</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">UIBehaviour</span><span class="p">&gt;&gt;</span> <span class="n">conDict</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">UIBehaviour</span><span class="p">&gt;&gt;();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//事件监听中用于重写的虚函数</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">OnClick</span><span class="p">(</span><span class="kt">string</span> <span class="n">btnName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">OnValueChanged</span><span class="p">(</span><span class="kt">string</span> <span class="n">togName</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">isOn</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//虚方法方便子类在Awake中处理额外逻辑</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AddConToDict</span><span class="p">&lt;</span><span class="n">Button</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AddConToDict</span><span class="p">&lt;</span><span class="n">Image</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AddConToDict</span><span class="p">&lt;</span><span class="n">Text</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AddConToDict</span><span class="p">&lt;</span><span class="n">Slider</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">AddConToDict</span><span class="p">&lt;</span><span class="n">Toggle</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//基类首先要提供获取所有组件然后显隐的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//找到对应类型控件,然后添加到Dict里面,不需要以前一样依次声明变量然后拖拽</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">void</span> <span class="n">AddConToDict</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;()</span><span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">UIBehaviour</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//未激活对象仍然获取</span>
+</span></span><span class="line"><span class="cl">        <span class="n">T</span><span class="p">[]</span> <span class="n">cons</span> <span class="p">=</span>  <span class="k">this</span><span class="p">.</span><span class="n">GetComponentsInChildren</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">       
+</span></span><span class="line"><span class="cl">      
+</span></span><span class="line"><span class="cl">        <span class="k">foreach</span> <span class="p">(</span><span class="n">T</span> <span class="n">con</span> <span class="k">in</span> <span class="n">cons</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">con</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">continue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//检测是否已经有了对应的Key,没有就创建有了就添加</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//之前uiName变量是写在Foreach外部的,现在必须改到内部</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//不然uiName始终是被更新为最后一个foreach的con的名称,后面的闭包捕获就会出错</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">string</span> <span class="n">uiName</span> <span class="p">=</span> <span class="n">con</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">conDict</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">uiName</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">              
+</span></span><span class="line"><span class="cl">                <span class="c1">//如果一个UI上有两个Button(UGUI不允许重复添加同类型组件,一般来说不会有这种情况)</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//但比如你不小心调用了两次Add方法或者脚本重复添加,就会导致List有重复项</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//为了避免上面的重复项,还是得判断该物体下是否已经有同类型组件</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(!</span><span class="n">conDict</span><span class="p">[</span><span class="n">uiName</span><span class="p">].</span><span class="n">Contains</span><span class="p">(</span><span class="n">con</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">//不添加上面的约束这里就会报错</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">//有就直接指定Key(也就是指定了List.Add)添加Value</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">conDict</span><span class="p">[</span><span class="n">uiName</span><span class="p">].</span><span class="n">Add</span><span class="p">(</span><span class="n">con</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//没有就创建新的键值对(也是要new List并添加con)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">conDict</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">uiName</span><span class="p">,</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">UIBehaviour</span><span class="p">&gt;()</span> <span class="p">{</span> <span class="n">con</span> <span class="p">});</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="c1">//新增:根据类型直接添加监听虚函数,后面重写即可</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">con</span> <span class="k">is</span> <span class="n">Button</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//这里onClick限定添加无参函数不能直接传入OnClick,所以用闭包</span>
+</span></span><span class="line"><span class="cl">               
+</span></span><span class="line"><span class="cl">                <span class="c1">//每次循环,btn1和btn2两个不同的按钮,各自不同的onClick事件但是都注册了同一个onClick方法,只是传入的不同参数.</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//当我们点击其中任意一个按钮都会触发onClick函数,此时就需要通过传入uiName参数区分(用switch语句之类的)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">(</span><span class="n">con</span> <span class="k">as</span> <span class="n">Button</span><span class="p">).</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">OnClick</span><span class="p">(</span><span class="n">uiName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">});</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">con</span> <span class="k">is</span> <span class="n">Toggle</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//这里订阅函数需要有个bool参数</span>
+</span></span><span class="line"><span class="cl">                <span class="p">(</span><span class="n">con</span> <span class="k">as</span> <span class="n">Toggle</span><span class="p">).</span><span class="n">onValueChanged</span><span class="p">.</span><span class="n">AddListener</span><span class="p">((</span><span class="kt">bool</span> <span class="n">isOn</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">OnValueChanged</span><span class="p">(</span><span class="n">uiName</span><span class="p">,</span> <span class="n">isOn</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">});</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="n">T</span> <span class="n">GetConFromDict</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">uiName</span><span class="p">)</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">UIBehaviour</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">conDict</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">uiName</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//如果包含某UI,则遍历其包含的List</span>
+</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="p">(</span><span class="n">UIBehaviour</span> <span class="n">con</span> <span class="k">in</span> <span class="n">conDict</span><span class="p">[</span><span class="n">uiName</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//List中某个组件如果是指定类型(UGUI不允许重复添加同类型组件,所以List中没有重复类型组件)</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//也和向下转型一样有简易写法 if (con is T target)return target;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">con</span> <span class="k">is</span> <span class="n">T</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="n">con</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//显隐方法:这个我们在UIPanelMgr中调用(比如显示面板的时候调用对应面板ShowMe)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">ShowMe</span><span class="p">(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">print</span><span class="p">(</span><span class="s">&#34;已经显示&#34;</span> <span class="p">+</span> <span class="n">panelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">virtual</span> <span class="k">void</span> <span class="n">HideMe</span><span class="p">(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">print</span><span class="p">(</span><span class="s">&#34;已经隐藏&#34;</span> <span class="p">+</span> <span class="n">panelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="重点虚方法重写简化订阅">重点：虚方法重写简化订阅
+</h3><blockquote>
+<p><strong>每次循环，btn1 和 btn2 两个不同的按钮，各自不同的 onClick 事件，但是都注册了同一个 <code>OnClick</code> 方法，只是传入的不同参数（<code>uiName</code>）。</strong>
+<strong>当我们点击其中任意一个按钮都会触发 <code>OnClick</code> 函数，此时就需要通过传入 <code>uiName</code> 参数区分（用 switch 语句之类的）。</strong></p>
+</blockquote>
+<p>这是整个 UI 模块最核心的设计：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>传统写法</th>
+					<th>基类自动订阅写法</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>每个面板声明 <code>public Button btn1; public Button btn2;</code> 拖拽</td>
+					<td>声明 0 个变量，基类按名字全自动存入 conDict</td>
+			</tr>
+			<tr>
+					<td><code>btn1.onClick.AddListener(OnBtn1Click); btn2.onClick.AddListener(OnBtn2Click);</code></td>
+					<td>基类闭包：<code>AddListener(() =&gt; OnClick(uiName));</code> 一行搞定所有按钮</td>
+			</tr>
+			<tr>
+					<td>每个按钮一个方法：<code>OnBtn1Click()</code> / <code>OnBtn2Click()</code></td>
+					<td>一个方法 <code>OnClick(btnName)</code> 内 switch 分支</td>
+			</tr>
+			<tr>
+					<td>加新按钮：声明变量 → 拖 → AddListener → 写方法（3~4 处改动）</td>
+					<td>加新按钮：在 switch 里加一个 case（1 处改动）</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>注意闭包陷阱</strong>：<code>uiName</code> 必须写在 <code>foreach</code> 内部。如果写在外部，所有闭包捕获的都是最后一次循环的变量值，导致所有按钮都被识别为同一个按钮名。</p>
+<hr>
+<h2 id="三uipanelmgr-面板管理器">三、UIPanelMgr 面板管理器
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//using UnityEditorInternal.Profiling.Memory.Experimental.FileFormat;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.EventSystems</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//各个子对象面板层级,直接用枚举来表示</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kd">enum</span> <span class="n">E_UILayer</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Top</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Middle</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">   <span class="n">Bottom</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">UIPanelMgr</span> <span class="p">:</span> <span class="n">MonoSingletonBase</span><span class="p">&lt;</span><span class="n">UIPanelMgr</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//这里存储各种面板,同样直接使用UI面板基类就可以</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">UIPanelBase</span><span class="p">&gt;</span> <span class="n">panelDict</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Dictionary</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span> <span class="n">UIPanelBase</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">//获取Canvas的Transform方便后续设置子面板,以及获取子对象的Transform</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">RectTransform</span> <span class="n">canvasTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//虽然EventSystem并不需要设置子对象,但是我后面封装了方法传参,还是装模作样写一个吧</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">Transform</span> <span class="n">eventSystemTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">RectTransform</span> <span class="n">botTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">RectTransform</span> <span class="n">topTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">RectTransform</span> <span class="n">midTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl">   <span class="c1">//如果是纯C#单例就在构造函数中设置咯</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Awake</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">Awake</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//初始化负责防止重复 + 实例化 + 跨场景保留 + 获取Transform信息</span>
+</span></span><span class="line"><span class="cl">      <span class="n">InitPanelRoot</span><span class="p">(</span><span class="s">&#34;Canvas&#34;</span><span class="p">,</span> <span class="k">ref</span> <span class="n">canvasTrans</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">InitPanelRoot</span><span class="p">(</span><span class="s">&#34;EventSystem&#34;</span><span class="p">,</span> <span class="k">ref</span> <span class="n">eventSystemTrans</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      
+</span></span><span class="line"><span class="cl">      <span class="c1">//找到各层Transform</span>
+</span></span><span class="line"><span class="cl">      <span class="n">botTrans</span> <span class="p">=</span> <span class="n">canvasTrans</span><span class="p">?.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Bottom&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">topTrans</span> <span class="p">=</span> <span class="n">canvasTrans</span><span class="p">?.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Top&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">midTrans</span> <span class="p">=</span> <span class="n">canvasTrans</span><span class="p">?.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Middle&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">//加载EventSystem和Canvas我们直接抽成一个方法了</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//传入的应该是组件名称(要么Canvas要么EventSystem)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//以及需要用于存储的组件Transform(就是canvasTrans或者eventSystemTrans)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//这里改为传入泛型而非直接Transform(为了可以传入RectTransform)</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">private</span> <span class="k">void</span> <span class="n">InitPanelRoot</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">conName</span><span class="p">,</span> <span class="k">ref</span> <span class="n">T</span> <span class="n">trans</span><span class="p">)</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">Transform</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//为了避免场景中已经有Canvas/EventSystem,需要先检测(要么手动设置,要么之前脚本已经赋值)</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//但是Find方法找不到未激活的物体,更保险的方法是用Canvas[] allCanvases = FindObjectsOfType&lt;Canvas&gt;(true); </span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//但是这个API偏偏只能返回数组,必须遍历获取,我真懒得写了</span>
+</span></span><span class="line"><span class="cl">      <span class="n">GameObject</span> <span class="n">existingCon</span> <span class="p">=</span> <span class="n">GameObject</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="n">conName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">existingCon</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//如果有就直接用</span>
+</span></span><span class="line"><span class="cl">         <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">$&#34;检测到场景中已有  {conName},直接复用&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">trans</span> <span class="p">=</span> <span class="n">existingCon</span><span class="p">.</span><span class="n">transform</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="n">DontDestroyOnLoad</span><span class="p">(</span><span class="n">existingCon</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">else</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//当场景中没有现存Canvas(我们手动设置的),且没有重复设置(如果是重复设置,这里canvasTrans肯定有值)</span>
+</span></span><span class="line"><span class="cl">         <span class="k">if</span> <span class="p">(</span><span class="n">trans</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">         <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">$&#34;检测到场景/内存中没有  {conName},终于可以Res加载了哈&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//注意Canvas的子对象本身也是分层级的:</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//比如面板在分别在Top,Bottom,Middle等子对象下,又或者某个面板始终在另一个面板上方</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//所以我们分别设置Canvas和EventSystem作为预设体(Canvas需要设置为Scale with Screen Size)</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//这里不要异步加载了,容易导致时序灾难</span>
+</span></span><span class="line"><span class="cl">            <span class="n">GameObject</span> <span class="n">entityPanel</span> <span class="p">=</span> <span class="n">ResLoadMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">LoadRes</span><span class="p">&lt;</span><span class="n">GameObject</span><span class="p">&gt;(</span><span class="s">&#34;Panel/&#34;</span> <span class="p">+</span> <span class="n">conName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//哎呀怪不得场景上没有变化,忘了实例化了哈</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//GameObject EntityCon = Instantiate(prefab);好吧其实不用,我们ResLoadMgr里面就会自动实例化,这里导致重复</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//这是为了去掉实例化时的去掉(Clone)后缀,不然后面脚本就没法用了</span>
+</span></span><span class="line"><span class="cl">            <span class="n">entityPanel</span><span class="p">.</span><span class="n">name</span> <span class="p">=</span> <span class="n">conName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//之前canvasTrans = Canvas.transform;还有DontDestroyOnLoad(Canvas);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">trans</span> <span class="p">=</span> <span class="n">entityPanel</span><span class="p">.</span><span class="n">transform</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">DontDestroyOnLoad</span><span class="p">(</span><span class="n">entityPanel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span>
+</span></span><span class="line"><span class="cl">         <span class="k">else</span>
+</span></span><span class="line"><span class="cl">         <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//比如刚从其他场景里面切换</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">$&#34;内存里还有缓存的{conName},{conName}Trans依旧有效&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl"><span class="c1">//这里也新增传入枚举</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//这里还可以传入callback回调函数预设体执行成功后自动执行的函数,默认null,调用的时候传入</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">ShowPanel</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">,</span> <span class="n">E_UILayer</span> <span class="n">uiLayer</span> <span class="p">=</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Middle</span><span class="p">,</span> <span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;</span> <span class="n">callback</span> <span class="p">=</span> <span class="kc">null</span><span class="p">)</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">UIPanelBase</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//如果重复调用ShowPanel,之前已经有对应Key</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//如果这里异步加载还没完成又有其他地方调用异步,这里Dict[panelName]就是空的,不过暂时也不纠结这个了</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//直接调用callback</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">panelDict</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">panelName</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//加载完毕后调用</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//注意这里字典里面都是存放的基类,所以需要转化为泛型指定类型</span>
+</span></span><span class="line"><span class="cl">            <span class="n">callback</span><span class="p">?.</span><span class="n">Invoke</span><span class="p">(</span><span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">]</span> <span class="k">as</span> <span class="n">T</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="c1">//游戏面板体积较大,还是得用加载,传入的是面板在Resources下的路径</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//额,要是想加载AB包下的预制体,干脆就不要用ResLoadMgr</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//之前讲的,这个方法需要用callback函数来获取返回值</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ResLoadMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">LoadResAsync</span><span class="p">&lt;</span><span class="n">GameObject</span><span class="p">&gt;(</span><span class="s">&#34;Panel/&#34;</span><span class="p">+</span><span class="n">panelName</span><span class="p">,</span> <span class="p">(</span><span class="n">GameObject</span> <span class="n">panel</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;加载面板&#34;</span><span class="p">+</span> <span class="n">panel</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//只是加载出了面板,还需要将其设置为Canvas的子对象 + 设置其相对位置 + 设置所属层级</span>
+</span></span><span class="line"><span class="cl">         
+</span></span><span class="line"><span class="cl">         <span class="c1">//代表物体父对象的Transform,默认是botTrans(好吧现在改成RectTransform了)</span>
+</span></span><span class="line"><span class="cl">         <span class="n">RectTransform</span> <span class="n">panelFather</span> <span class="p">=</span> <span class="n">botTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="k">switch</span> <span class="p">(</span><span class="n">uiLayer</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">         <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Top</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">               <span class="n">panelFather</span> <span class="p">=</span> <span class="n">topTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">               <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Middle</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">               <span class="n">panelFather</span> <span class="p">=</span> <span class="n">midTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">               <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Bottom</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">               <span class="n">panelFather</span> <span class="p">=</span> <span class="n">botTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">               <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//检查完毕直接设置父对象,并添加到字典</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panel</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="n">panelFather</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">]</span> <span class="p">=</span> <span class="n">panel</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//设置物体相对位置</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panel</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">localPosition</span> <span class="p">=</span> <span class="n">Vector3</span><span class="p">.</span><span class="n">zero</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panel</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">localScale</span> <span class="p">=</span> <span class="n">Vector3</span><span class="p">.</span><span class="n">one</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//设置RectTransform</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//之前(panel.transform as RectTransform).offsetMax = Vector3.zero;</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//修改为了直接使用 RectTransform不然每次都得修改</span>
+</span></span><span class="line"><span class="cl">         <span class="p">(</span><span class="n">panel</span><span class="p">.</span><span class="n">transform</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">).</span><span class="n">offsetMax</span> <span class="p">=</span> <span class="n">Vector3</span><span class="p">.</span><span class="n">zero</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="p">(</span><span class="n">panel</span><span class="p">.</span><span class="n">transform</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">).</span><span class="n">offsetMin</span> <span class="p">=</span> <span class="n">Vector3</span><span class="p">.</span><span class="n">zero</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         
+</span></span><span class="line"><span class="cl">         <span class="c1">//面板加载完成后,调用callback</span>
+</span></span><span class="line"><span class="cl">         <span class="n">callback</span><span class="p">?.</span><span class="n">Invoke</span><span class="p">(</span><span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">]</span> <span class="k">as</span> <span class="n">T</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         
+</span></span><span class="line"><span class="cl">         <span class="c1">//顺带调用面板基类里面的ShowMe()</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">].</span><span class="n">ShowMe</span><span class="p">(</span><span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">].</span><span class="n">gameObject</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">});</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">HidePanel</span><span class="p">(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">panelDict</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">panelName</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//顺带调用面板基类里的HideMe()</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">].</span><span class="n">HideMe</span><span class="p">(</span><span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">].</span><span class="n">gameObject</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//好吧这里并不是频繁销毁,直接Destory就行</span>
+</span></span><span class="line"><span class="cl">         <span class="n">GameObject</span><span class="p">.</span><span class="n">Destroy</span><span class="p">(</span><span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">].</span><span class="n">gameObject</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">panelDict</span><span class="p">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">panelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">       
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">//再来个获取已经显示的面板的方法</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">T</span> <span class="n">GetPanel</span><span class="p">&lt;</span><span class="n">T</span><span class="p">&gt;(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span> <span class="k">where</span> <span class="n">T</span> <span class="p">:</span> <span class="n">UIPanelBase</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">panelDict</span><span class="p">.</span><span class="n">ContainsKey</span><span class="p">(</span><span class="n">panelName</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//注意不要和面板基类存储的那个Dict搞混,这里Value直接就是面板基类</span>
+</span></span><span class="line"><span class="cl">         <span class="k">return</span> <span class="n">panelDict</span><span class="p">[</span><span class="n">panelName</span><span class="p">]</span> <span class="k">as</span> <span class="n">T</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">//再来个获取层级对应父对象的方法</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="n">Transform</span> <span class="n">GetLayFather</span><span class="p">(</span><span class="n">E_UILayer</span> <span class="n">uiLayer</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">switch</span> <span class="p">(</span><span class="n">uiLayer</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="k">case</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Top</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">topTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">         <span class="k">case</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Middle</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">midTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">         <span class="k">case</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Bottom</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">botTrans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">//代码实现自定义逻辑的方法----&gt;我们直接封装在UIMgr,其他详细解释看那个PlayPanelTest的老版</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//任意控件都可以添加自定义事件(吗?)所以这里直接填入UI基类</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//传入检测的事件类型,以及回调的函数</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="k">void</span> <span class="n">AddCustomEvent</span><span class="p">(</span><span class="n">UIBehaviour</span> <span class="n">con</span><span class="p">,</span><span class="n">EventTriggerType</span> <span class="n">triType</span><span class="p">,</span><span class="n">UnityAction</span><span class="p">&lt;</span><span class="n">BaseEventData</span><span class="p">&gt;</span> <span class="n">callback</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">EventTrigger</span> <span class="n">trig</span> <span class="p">=</span> <span class="n">con</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">EventTrigger</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">trig</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">trig</span> <span class="p">=</span> <span class="n">con</span><span class="p">.</span><span class="n">gameObject</span><span class="p">.</span><span class="n">AddComponent</span><span class="p">&lt;</span><span class="n">EventTrigger</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// 新建 EventTrigger 时 triggers 为 null,必须先初始化</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">trig</span><span class="p">.</span><span class="n">triggers</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">trig</span><span class="p">.</span><span class="n">triggers</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">EventTrigger</span><span class="p">.</span><span class="n">Entry</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="n">EventTrigger</span><span class="p">.</span><span class="n">Entry</span> <span class="n">entry</span> <span class="p">=</span> <span class="k">new</span> <span class="n">EventTrigger</span><span class="p">.</span><span class="n">Entry</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="n">entry</span><span class="p">.</span><span class="n">eventID</span> <span class="p">=</span> <span class="n">triType</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">entry</span><span class="p">.</span><span class="n">callback</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(</span><span class="n">callback</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      
+</span></span><span class="line"><span class="cl">      <span class="n">trig</span><span class="p">.</span><span class="n">triggers</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">entry</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="四playpaneltest-具体面板重写虚方法--重写显隐">四、PlayPanelTest 具体面板（重写虚方法 + 重写显隐）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.EventSystems</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayPanelTest</span> <span class="p">:</span> <span class="n">UIPanelBase</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//直接获取组件然后添加事件就可以了</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// GetConFromDict&lt;Button&gt;(&#34;GreenBtn&#34;).onClick.AddListener(() =&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// {</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//    print(&#34;点击了绿色Play按钮&#34;);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//    GetConFromDict&lt;Slider&gt;(&#34;Slider&#34;).value += 0.1f;</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// });</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//老版本:每个子面板里面对特定按钮添加监听</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//改进版本:在面板基类中,每次检测到Button就自动添加虚函数监听,现在只需要重写虚函数本身就可以了</span>
+</span></span><span class="line"><span class="cl">      
+</span></span><span class="line"><span class="cl">      <span class="c1">//</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// //如果直接写自定义点击逻辑--&gt;用了这个Button.onClick自动失效</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// //1.获取指定Button并为其添加EventTrigger组件</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// EventTrigger trig = GetConFromDict&lt;Button&gt;(&#34;GreenBtn&#34;).gameObject.AddComponent&lt;EventTrigger&gt;();</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// //2.创建Entry监听条目(相当于个空的表格嘛)</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// EventTrigger.Entry entryDrag = new EventTrigger.Entry();</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// //3.指定事件类型,点击就是PointerClick,按下就是PointerDown</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// //这里就指定Drag拖拽(entryDrag这一个对象只能指定这一种类型)</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// entryDrag.eventID = EventTriggerType.Drag;</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// //4.绑定回调函数,当发生拖拽的时候调用OnDrag函数</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">// entryDrag.callback.AddListener(OnDrag);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//改进版:每种操作每个面板都得写一大串,直接在UIPanelMgr(注意不是面板基类)写方法</span>
+</span></span><span class="line"><span class="cl">      
+</span></span><span class="line"><span class="cl">      <span class="n">UIPanelMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">AddCustomEvent</span><span class="p">(</span><span class="n">GetConFromDict</span><span class="p">&lt;</span><span class="n">Button</span><span class="p">&gt;(</span><span class="s">&#34;GreenBtn&#34;</span><span class="p">),</span> <span class="n">EventTriggerType</span><span class="p">.</span><span class="n">PointerDown</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;正在按下按钮&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">});</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl">   <span class="c1">// //OnDrag要求必须有BaseEventData类型参数</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// void OnDrag(BaseEventData data)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// {</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//    // 1. 必须先强转为 PointerEventData (拖拽/点击 用的是 PointerEventData)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//    //下拉菜单选择变化 用的是 SelectionEventData,输入框内容变化 用的是 InputField.SubmitEvent子类等等</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//    PointerEventData pointerData = data as PointerEventData;</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//    if (pointerData != null)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//    {</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       print(&#34;开始拖拽!!!&#34;);</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       // 2. 获取当前鼠标/手指的屏幕坐标</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       Vector2 currentPos = pointerData.position; </span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       // 3. 获取从上次触发 OnDrag 到现在的位移增量 (最常用！)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       Vector2 delta = pointerData.delta; </span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       // 4. 获取按下的是哪个键 (左键/右键/中键)</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//       PointerEventData.InputButton button = pointerData.button;</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//    }</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// }</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="c1">//重写参数不能变吧,权限也要注意</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//所有按钮的不同onClick事件都是触发同一个OnClick函数,所以这里直接分情况写逻辑</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">OnClick</span><span class="p">(</span><span class="kt">string</span> <span class="n">btnName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">switch</span><span class="p">(</span><span class="n">btnName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="k">case</span> <span class="s">&#34;GreenBtn&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;点击了绿色Play按钮&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">GetConFromDict</span><span class="p">&lt;</span><span class="n">Slider</span><span class="p">&gt;(</span><span class="s">&#34;Slider&#34;</span><span class="p">).</span><span class="k">value</span> <span class="p">+=</span> <span class="m">0.1f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">         <span class="k">case</span> <span class="s">&#34;BlueBtn&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;点击了蓝色Play按钮&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">GetConFromDict</span><span class="p">&lt;</span><span class="n">Slider</span><span class="p">&gt;(</span><span class="s">&#34;Slider&#34;</span><span class="p">).</span><span class="k">value</span> <span class="p">-=</span> <span class="m">0.1f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">OnValueChanged</span><span class="p">(</span><span class="kt">string</span> <span class="n">togName</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">isOn</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//这里就是多选框啥的,开始判断</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="c1">//应该在面板本体中重写基类,不要在调用者UIPanelMgrTest里面写</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//重写基类中的显隐调用逻辑</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">ShowMe</span><span class="p">(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">ShowMe</span><span class="p">(</span><span class="n">panelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">print</span><span class="p">(</span><span class="s">&#34;法!显示了PlayPanel面板&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">HideMe</span><span class="p">(</span><span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">HideMe</span><span class="p">(</span><span class="n">panelName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">print</span><span class="p">(</span><span class="s">&#34;法!隐藏了PlayPanel面板&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><strong>重写面板基类的显隐方法：应该在面板本体 <code>PlayPanel</code> 中重写基类，不要在调用者 <code>UIPanelMgrTest</code> 里面写。</strong></p>
+<p>显隐逻辑是「面板自己的事」，调用方只管说「显示 / 隐藏 PlayPanel」，至于显示时要不要播放动画、发数据请求、重置控件值，全由具体面板自己决定，这才符合单一职责。</p>
+</blockquote>
+<p>调用显隐的链路是：
+<code>UIPanelMgr.Instance.ShowPanel&lt;PlayPanelTest&gt;(&quot;PlayPanel&quot;)</code> → 资源管理器加载完预制体 → <code>panelDict[panelName].ShowMe(...)</code> → 触发子类 override 的 ShowMe。</p>
+<hr>
+<h2 id="五uipanelmgrtest-调用方">五、UIPanelMgrTest 调用方
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//UIPanelMgrTest不是面板本体,只是个调用脚本</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">UIPanelMgrTest</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Z</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//这里只需要传入Panel名称即可,方法内部自动拼接Res文件夹下路径</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//callback传参以及泛型填面板预制体上的脚本</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//UnityAction要求的传入方法需要有一个T同款类型参数</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UIPanelMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">ShowPanel</span><span class="p">&lt;</span><span class="n">PlayPanelTest</span><span class="p">&gt;(</span><span class="s">&#34;PlayPanel&#34;</span><span class="p">,</span> <span class="n">E_UILayer</span><span class="p">.</span><span class="n">Top</span><span class="p">,</span> <span class="p">(</span><span class="n">PlayPanelTest</span> <span class="n">panel</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="n">panel</span><span class="p">.</span><span class="n">name</span> <span class="p">+</span> <span class="s">&#34;加载完成了喵&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">X</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">UIPanelMgr</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">HidePanel</span><span class="p">(</span><span class="s">&#34;PlayPanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个脚本非常薄，只是用 Update 轮询输入演示用法。实际项目里可以放在主控制器里，或者通过事件中心触发 <code>ShowPanel</code> / <code>HidePanel</code>。</p>
+<hr>
+<h2 id="六四个脚本各自职责总结">六、四个脚本各自职责总结
+</h2><h3 id="61-uipanelbase--面板基类">6.1 UIPanelBase — 面板基类
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>部分</th>
+					<th>代码位置</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>conDict</code></td>
+					<td><code>Dictionary&lt;string, List&lt;UIBehaviour&gt;&gt;</code></td>
+					<td>按 UI 名称存放该物体下所有 UIBehaviour 子组件（Button / Image 同属一个物体就都塞 List 里）</td>
+			</tr>
+			<tr>
+					<td><code>virtual void Awake()</code></td>
+					<td>第 26-33 行</td>
+					<td>调用 5 次 <code>AddConToDict&lt;T&gt;()</code> 扫控件；子类重写时记得 <code>base.Awake()</code></td>
+			</tr>
+			<tr>
+					<td><code>AddConToDict&lt;T&gt;()</code></td>
+					<td>第 38-94 行</td>
+					<td>扫控件 + 存字典；<strong>遇到 Button 闭包订阅 OnClick(uiName)，遇到 Toggle 闭包订阅 OnValueChanged(uiName, isOn)</strong> — 这是整个 UI 模块的核心</td>
+			</tr>
+			<tr>
+					<td><code>GetConFromDict&lt;T&gt;(uiName)</code></td>
+					<td>第 96-112 行</td>
+					<td>从字典找控件并按类型返回；没找到返回 null，子类随便用</td>
+			</tr>
+			<tr>
+					<td><code>virtual void OnClick(btnName)</code> / <code>OnValueChanged(togName, isOn)</code></td>
+					<td>第 16-24 行</td>
+					<td>留空的虚方法，供子类 switch 重写</td>
+			</tr>
+			<tr>
+					<td><code>ShowMe / HideMe</code></td>
+					<td>第 115-123 行</td>
+					<td>基类仅打一条日志，具体面板 override 后可加动画、请求数据等</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="62-uipanelmgr--面板管理器">6.2 UIPanelMgr — 面板管理器
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>部分</th>
+					<th>代码位置</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>枚举 <code>E_UILayer</code></td>
+					<td>第 9-14 行</td>
+					<td>Top / Middle / Bottom 三个层级，决定面板挂到 Canvas 的哪个子物体下</td>
+			</tr>
+			<tr>
+					<td><code>override void Awake()</code></td>
+					<td>第 31-42 行</td>
+					<td>调用两次 <code>InitPanelRoot</code> 初始化 Canvas / EventSystem，然后取各层 RectTransform</td>
+			</tr>
+			<tr>
+					<td><code>InitPanelRoot&lt;T&gt;(...)</code></td>
+					<td>第 48-86 行</td>
+					<td><strong>先 GameObject.Find 场景内是否已有同名物体（防重复）</strong>，没有且缓存 trans == null 时，通过 ResLoadMgr 从 <code>Panel/xxx</code> 路径加载预制体，再重命名为原名（去掉 (Clone) 后缀）并 DontDestroyOnLoad</td>
+			</tr>
+			<tr>
+					<td><code>ShowPanel&lt;T&gt;(...)</code></td>
+					<td>第 91-144 行</td>
+					<td>字典已存在 → 直接 callback；不存在 → <code>ResLoadMgr</code> 异步加载 → 按层级 SetParent → 存字典 → 调 callback → 调面板 <code>ShowMe</code></td>
+			</tr>
+			<tr>
+					<td><code>HidePanel(...)</code></td>
+					<td>第 146-157 行</td>
+					<td>调面板 <code>HideMe</code> → Destroy 面板对象 → 移除字典条目</td>
+			</tr>
+			<tr>
+					<td><code>GetPanel / GetLayFather</code></td>
+					<td>第 160-187 行</td>
+					<td>辅助查询：按名拿面板、按层拿父 Transform</td>
+			</tr>
+			<tr>
+					<td><code>AddCustomEvent(...)</code></td>
+					<td>第 193-210 行</td>
+					<td>代码方式一键加 EventTrigger.Entry（含 triggers == null 时初始化），无需每个面板手写 4 步</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="63-playpaneltest--具体面板">6.3 PlayPanelTest — 具体面板
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>部分</th>
+					<th>代码位置</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>Start()</code></td>
+					<td>第 9-37 行</td>
+					<td>演示：<code>AddCustomEvent</code> 给 GreenBtn 加 <code>PointerDown</code> 事件（按下即触发，不等抬起）；大量旧写法注释用于对比</td>
+			</tr>
+			<tr>
+					<td><code>override OnClick(btnName)</code></td>
+					<td>第 59-72 行</td>
+					<td><strong>switch 区分 GreenBtn / BlueBtn</strong>，分别让 Slider 加减 0.1f；<strong>这就是基类统一订阅后的写法——完全不用写 GetComponent 和 AddListener</strong></td>
+			</tr>
+			<tr>
+					<td><code>override OnValueChanged(...)</code></td>
+					<td>第 74-77 行</td>
+					<td>占位，留给多选框逻辑</td>
+			</tr>
+			<tr>
+					<td><code>override ShowMe / HideMe</code></td>
+					<td>第 81-91 行</td>
+					<td><strong>重写面板基类的显隐方法</strong>（在面板本体中重写，而不是调用方），打印额外日志演示</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="64-uipanelmgrtest--调用方">6.4 UIPanelMgrTest — 调用方
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>部分</th>
+					<th>代码位置</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Update 中按 Z</td>
+					<td>第 10-19 行</td>
+					<td>顶层挂载 PlayPanel，callback 里打印加载完成</td>
+			</tr>
+			<tr>
+					<td>Update 中按 X</td>
+					<td>第 21-24 行</td>
+					<td>隐藏并销毁 PlayPanel</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="七开发时踩过的坑--对应解释">七、开发时踩过的坑 &amp; 对应解释
+</h2><h3 id="坑-1场景中始终有重复的-canvas-和-canvas-clone">坑 1：场景中始终有重复的 Canvas 和 Canvas (Clone)
+</h3><p><strong>原因</strong>：<code>ResLoadMgr.LoadRes&lt;GameObject&gt;()</code> 在基类中对于 <code>GameObject</code> 返回的是 <strong>Instantiate 后的实例</strong>（所以原预制体 Canvas 被实例化为 Canvas (Clone)），而如果你的场景里本来就手动放了一个 Canvas，调用 <code>ShowPanel</code> 时 <code>InitPanelRoot</code> 会先走 <code>GameObject.Find(&quot;Canvas&quot;)</code> 找到场景中已有的 Canvas，然后再调用 Resources 加载出来的（Clone）就是多余的。</p>
+<p><strong>代码中怎么防的</strong>：<code>InitPanelRoot</code> 里先用 <code>GameObject.Find(conName)</code> 搜场景中已存在的物体，只有找不到且 <code>trans == null</code> 时才走 Resources 加载。只要场景中已有 <code>Canvas</code>，就不会再实例化第二个。</p>
+<blockquote>
+<p>另外 <code>ResLoadMgr</code> 内部对于 GameObject 会自动 Instantiate，所以加载出来的对象名字会带 <code>(Clone)</code>，代码里用 <code>entityPanel.name = conName;</code> 强制改回原名，避免后续依赖名字的脚本找不到。</p>
+</blockquote>
+<h3 id="坑-2面板在场景中不显示但-hierarchy-中依旧存在">坑 2：面板在场景中不显示（但 Hierarchy 中依旧存在）
+</h3><p><strong>现象</strong>：面板对象确实实例化了，层级也对，但 Scene / Game 视图都看不到。</p>
+<p><strong>原因</strong>：Canvas 预制体里<strong>没有 Top、Bottom、Middle 三个子物体</strong>，导致：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="n">botTrans</span> <span class="p">=</span> <span class="n">canvasTrans</span><span class="p">?.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Bottom&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">;</span>  <span class="c1">// ← 返回 null</span>
+</span></span><span class="line"><span class="cl"><span class="n">topTrans</span> <span class="p">=</span> <span class="n">canvasTrans</span><span class="p">?.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Top&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">;</span>     <span class="c1">// ← 返回 null</span>
+</span></span><span class="line"><span class="cl"><span class="n">midTrans</span> <span class="p">=</span> <span class="n">canvasTrans</span><span class="p">?.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Middle&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">RectTransform</span><span class="p">;</span>  <span class="c1">// ← 返回 null</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后 <code>ShowPanel</code> 里根据层级选 <code>panelFather</code> 时拿到 null，<code>panel.transform.SetParent(null)</code> 就把面板挂到了根节点下（挂到根的 RectTransform 不会被 Canvas 渲染管线绘制，当然看不到）。</p>
+<p><strong>解决</strong>：Canvas 预制体里必须有三个名为 <code>Top</code>、<code>Middle</code>、<code>Bottom</code> 的空物体（RectTransform），作为面板的三个父节点。</p>
+<h3 id="坑-3重写面板基类的显隐方法应该写在哪">坑 3：重写面板基类的显隐方法应该写在哪
+</h3><p><strong>错误写法</strong>：在 <code>UIPanelMgrTest</code>（调用方）里写 <code>panel.ShowMe(...)</code> 的专属逻辑。</p>
+<p><strong>正确写法</strong>：<strong>在面板本体 PlayPanelTest 中重写基类的 ShowMe / HideMe</strong>（见第 81-91 行）。调用方只需要 <code>ShowPanel(&quot;PlayPanel&quot;)</code>，具体面板显示时要做什么（动画 / 请求 / 重置）是面板自己的事，外部不用知道。</p>
+<hr>
+<h2 id="八协作关系一览">八、协作关系一览
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">玩家按 Z
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">UIPanelMgrTest.Update
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">UIPanelMgr.ShowPanel&lt;PlayPanelTest&gt;(&#34;PlayPanel&#34;, E_UILayer.Top, cb)
+</span></span><span class="line"><span class="cl">   ├─ 1. InitPanelRoot → Canvas 场景有就用，没有就 Res 加载 + DontDestroyOnLoad
+</span></span><span class="line"><span class="cl">   ├─ 2. ResLoadMgr.LoadResAsync(&#34;Panel/PlayPanel&#34;, panel =&gt; { ... })
+</span></span><span class="line"><span class="cl">   │       ↓ (异步完成后)
+</span></span><span class="line"><span class="cl">   │   ├─ panel.SetParent(topTrans)   // 顶层挂载
+</span></span><span class="line"><span class="cl">   │   ├─ panelDict[&#34;PlayPanel&#34;] = PlayPanelTest实例
+</span></span><span class="line"><span class="cl">   │   ├─ localPosition / localScale / offsetMax/Min 归零
+</span></span><span class="line"><span class="cl">   │   ├─ callback?.Invoke(panel)     // 外部回调：打印「加载完成了喵」
+</span></span><span class="line"><span class="cl">   │   └─ panel.ShowMe(&#34;PlayPanel&#34;)   // 走 PlayPanelTest override
+</span></span><span class="line"><span class="cl">   │          ├─ base.ShowMe → 打印&#34;已经显示PlayPanel&#34;
+</span></span><span class="line"><span class="cl">   │          └─ 子类打印&#34;法!显示了PlayPanel面板&#34;
+</span></span><span class="line"><span class="cl">   │
+</span></span><span class="line"><span class="cl">   └─ PlayPanelTest.Awake（自动）
+</span></span><span class="line"><span class="cl">          ├─ AddConToDict&lt;Button&gt; → 扫到 GreenBtn、BlueBtn
+</span></span><span class="line"><span class="cl">          │     各自闭包：() =&gt; OnClick(&#34;GreenBtn&#34;) / OnClick(&#34;BlueBtn&#34;)
+</span></span><span class="line"><span class="cl">          └─ AddConToDict&lt;Image / Text / Slider / Toggle&gt;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">玩家点击 GreenBtn
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">OnClick(&#34;GreenBtn&#34;) (PlayPanelTest override)
+</span></span><span class="line"><span class="cl">   ├─ switch (btnName) case &#34;GreenBtn&#34;
+</span></span><span class="line"><span class="cl">   └─ Slider.value += 0.1f
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">玩家按 X
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">UIPanelMgr.HidePanel(&#34;PlayPanel&#34;)
+</span></span><span class="line"><span class="cl">   ├─ panel.HideMe(&#34;PlayPanel&#34;)  → 子类 override 的 HideMe
+</span></span><span class="line"><span class="cl">   └─ Destroy(obj) + Remove(&#34;PlayPanel&#34;)
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">玩家在 GreenBtn 上按下（不等抬起）
+</span></span><span class="line"><span class="cl">   ↓
+</span></span><span class="line"><span class="cl">AddCustomEvent(GreenBtn, PointerDown, data =&gt; print(...))
+</span></span><span class="line"><span class="cl">   → 通过 EventTrigger 封装，等价于上篇 CustomBtnClick 的 4 步流程
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a>
+        
+            <a href="/tags/ugui/">UGUI</a>
+        
+            <a href="/tags/%E9%9D%A2%E6%9D%BF%E7%AE%A1%E7%90%86/">面板管理</a>
+        
+            <a href="/tags/uipanelmgr/">UIPanelMgr</a>
+        
+            <a href="/tags/%E8%99%9A%E6%96%B9%E6%B3%95%E9%87%8D%E5%86%99/">虚方法重写</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>KK57-0803.0815</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/unity-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%82%B9%E5%87%BB%E9%80%BB%E8%BE%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 代码实现自定义点击逻辑</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 资源加载模块(使用await实现)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 资源加载模块(使用旧版callback实现)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 场景加载模块</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 支持泛型的事件中心模块</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2025 - 
+        
+        2026 KimKitsuragi
+    </section>
+    
+
+
+   
+<section class="count_info">
+    <div>
+        本站稳定运行：
+        <span id="ds" class="running-days number-highlight"></span>
+        天
+        <span id="hs" class="running-days number-highlight"></span>
+        小时
+        <span id="ms" class="running-days number-highlight"></span>
+        分钟
+    </div>
+    <div>
+        
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+        共发表文章数：
+        <span class="number-highlight">19</span>
+        篇 · 总计
+        <span class="number-highlight">46.89</span>
+        k 字
+    </div>
+    <div>
+        <span id="busuanzi_container_site_pv">
+            本站总访问量：
+            <span id="busuanzi_value_site_pv" class="number-highlight"></span>
+            次
+        </span>
+    </div>
+</section>
+
+
+<script>
+(function() {
+    
+    const startDate = '2026-01-01';
+    const s1 = new Date(startDate.replace(/-/g, "/"));
+    const s2 = new Date();
+    const diff = s2.getTime() - s1.getTime();
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const ds = document.getElementById('ds');
+    const hs = document.getElementById('hs');
+    const ms = document.getElementById('ms');
+
+    if (ds) ds.textContent = days;
+    if (hs) hs.textContent = hours;
+    if (ms) ms.textContent = minutes;
+
+    const pv = document.getElementById('busuanzi_value_site_pv');
+    if (pv) {
+        pv.classList.add('number-highlight');
+        
+        pv.addEventListener('DOMNodeInserted', function() {
+            const value = parseInt(this.textContent);
+            if (value > 1000) {
+                this.textContent = '1';
+            }
+        });
+    }
+})();
+</script>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.dcfe2741e50c072b0417741064a00a4f8fabadfc20ae376ed2cabde4607937e9.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+
+<style>
+  @font-face {
+    font-family: 'MengWaXiYuan';
+    src: url('/font/JianShouMengWaChaoCuYuanTi-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    --font-primary: 'MengWaXiYuan', sans-serif;
+  }
+  html, body,
+  .article-content,
+  .single__contents,
+  .widget--toc,
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary) !important;
+  }
+  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
+    font-family: inherit !important;
+  }
+</style>
+
+
+
+<style>
+  #TableOfContents > ul ul,
+  #TableOfContents > ul ol,
+  #TableOfContents > ol ul,
+  #TableOfContents > ol ol {
+    display: none;
+  }
+  #TableOfContents .open {
+    display: block !important;
+  }
+</style>
+
+
+<style>
+  #backTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 20px;  
+    z-index: 99;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-image: url('https://kimkitsuragi-0571.github.io/icons/backTop.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    outline: none;
+  }
+</style>
+
+
+<style>
+  .highlight {
+    max-height: 400px;
+    overflow: hidden;
+    position: relative;
+  }
+  .code-show {
+    max-height: none !important;
+  }
+  .code-more-box {
+    width: 100%;
+    padding-top: 78px;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0), #fff);
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .code-more-btn {
+    display: block;
+    margin: auto;
+    width: 44px;
+    height: 22px;
+    background: #f0f0f5;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding-top: 6px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .code-more-img {
+    display: block;
+    margin: auto;
+    width: 22px;
+    height: 16px;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    function initTocHide() {
+      const toc = document.querySelector(".widget--toc");
+      if (!toc) return;
+
+      let timer = null;
+      window.addEventListener('scroll', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          
+          document.querySelectorAll('.open').forEach(el => el.classList.remove('open'));
+
+          
+          const activeLink = document.querySelector(
+            ".toc-link.active, .toc-link.active-class, .active, .active-class"
+          );
+          if (!activeLink) return;
+
+          
+          const nextSibling = activeLink.nextElementSibling;
+          if (nextSibling && (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL')) {
+            nextSibling.classList.add('open');
+          }
+
+          
+          let parent = activeLink.parentElement;
+          while (parent && parent.parentElement) {
+            if (parent.tagName === 'UL' || parent.tagName === 'OL') {
+              parent.classList.add('open');
+            }
+            parent = parent.parentElement;
+          }
+        }, 80);
+      });
+    }
+
+    
+    function initScrollTop() {
+      const rightSidebar = document.querySelector(".right-sidebar");
+      if (!rightSidebar) return;
+
+      const btn = document.createElement("div");
+      btn.id = "backTopBtn";
+      btn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+      rightSidebar.appendChild(btn);
+
+      window.addEventListener('scroll', () => {
+        btn.style.display = window.scrollY > 20 ? "block" : "none";
+      });
+    }
+
+    
+    function initCodeMoreBox() {
+      const codeBlocks = document.querySelectorAll(".highlight");
+      if (!codeBlocks.length) return;
+
+      
+      const iconSrc = 
+        "/icons/codeMore.png";
+      
+
+      codeBlocks.forEach(block => {
+        if (block.scrollHeight <= block.clientHeight) return;
+
+        const moreBox = document.createElement('div');
+        moreBox.className = 'code-more-box';
+
+        const moreBtn = document.createElement('span');
+        moreBtn.className = 'code-more-btn';
+        moreBtn.addEventListener('click', () => {
+          block.classList.add('code-show');
+          moreBox.style.display = 'none';
+          window.dispatchEvent(new Event('resize')); 
+        });
+
+        const img = document.createElement('img');
+        img.className = 'code-more-img';
+        img.src = iconSrc;
+        moreBtn.appendChild(img);
+        moreBox.appendChild(moreBtn);
+        block.appendChild(moreBox);
+      });
+    }
+
+    
+    initTocHide();
+    initScrollTop();
+    initCodeMoreBox();
+  });
+</script>
+
+
+
+<style>
+    .highlight {
+        max-height: 400px;
+        overflow: hidden;
+        position: relative;  
+    }
+
+    .code-show {
+        max-height: none !important;
+    }
+
+    .code-more-box {
+        width: 100%;
+        padding-top: 78px;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(#fff));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .code-more-btn {
+        display: block;
+        margin: auto;
+        width: 44px;
+        height: 22px;
+        background: #f0f0f5;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-top: 6px;
+        cursor: pointer;
+    }
+
+    .code-more-img {
+        cursor: pointer !important;
+        display: block;
+        margin: auto;
+        width: 22px;
+        height: 16px;
+    }
+</style>
+
+<script>
+  function initCodeMoreBox() {
+    document.querySelectorAll(".highlight").forEach(codeBlock => {
+      if (codeBlock.querySelector('.code-more-box')) return;
+      if (codeBlock.scrollHeight <= codeBlock.clientHeight) return;
+
+      const codeMoreBox = document.createElement('div');
+      codeMoreBox.classList.add('code-more-box');
+
+      const codeMoreBtn = document.createElement('span');
+      codeMoreBtn.classList.add('code-more-btn');
+      codeMoreBtn.addEventListener('click', () => {
+        codeBlock.classList.add('code-show');
+        codeMoreBox.style.display = 'none';
+      });
+
+      const img = document.createElement('img');
+      img.classList.add('code-more-img');
+      
+      img.src = "/icons/codeMore.png";
+
+      codeMoreBtn.appendChild(img);
+      codeMoreBox.appendChild(codeMoreBtn);
+      codeBlock.appendChild(codeMoreBox);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCodeMoreBox);
+</script>
+
+<div id="jsi-flying-fish-container"></div>
+
+
+<style>
+#jsi-flying-fish-container {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    z-index: -1;
+    opacity: 0;           
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity .3s;
+}
+ 
+.show-fish #jsi-flying-fish-container {
+    opacity: .5;
+}
+</style>
+
+
+<script>
+window.initFlyingFish = function () {
+    const container = document.getElementById('jsi-flying-fish-container');
+    if (!container) return;
+
+     
+    const oldCanvas = container.querySelector('canvas');
+    if (oldCanvas) oldCanvas.remove();
+
+     
+    const script = document.createElement('script');
+    script.src = 'https://cdn.meimolihan.eu.org/hugo/fish/fish.js';
+    script.onload = function () {
+        if (typeof RENDERER !== 'undefined') RENDERER.init();
+    };
+    document.head.appendChild(script);
+
+     
+    function checkBottom() {
+        const doc = document.documentElement;
+        const isBottom = (window.innerHeight + Math.ceil(window.pageYOffset))
+                         >= (doc.scrollHeight - 10);
+        document.body.classList.toggle('show-fish', isBottom);
+    }
+
+     
+    window.addEventListener('scroll', checkBottom);
+    checkBottom(); 
+};
+
+ 
+document.addEventListener('DOMContentLoaded', initFlyingFish);
+
+ 
+document.addEventListener('pjax:complete', initFlyingFish);
+</script>
+
+
+<div id="toast-stack"></div>
+
+<script>
+ 
+(() => {
+  const toastStack = document.getElementById('toast-stack');
+  let toastCount = 0;
+  const MAX_TOAST = 5;
+  const DURATION  = 2500;
+
+   
+  let lastText = '';
+  let lastTime = 0;
+
+  window.pushToast = function (msg = '✅ 复制成功 ') {
+    const now = Date.now();
+    if (msg === lastText && now - lastTime < 500) return; 
+    lastText = msg;
+    lastTime = now;
+
+     
+    if (toastCount >= MAX_TOAST) toastStack.firstElementChild?.closeToast();
+
+    const item = document.createElement('div');
+    item.className = 'snack-left-top';
+    item.textContent = msg;
+
+    let closeTimer = null;
+    function closeToast() {
+      if (item.isClosing) return;
+      item.isClosing = true;
+      item.classList.remove('show');
+      item.addEventListener('transitionend', () => {
+        item.remove();
+        toastCount--;
+      }, { once: true });
+      clearTimeout(closeTimer);
+    }
+    item.closeToast = closeToast;
+
+    toastStack.appendChild(item);
+    toastCount++;
+    void item.offsetWidth;
+    item.classList.add('show');
+    closeTimer = setTimeout(closeToast, DURATION);
+  };
+
+   
+  document.addEventListener('copy', e => {
+    const text = window.getSelection().toString().trim();
+    if (!text) return;
+    e.preventDefault();
+    navigator.clipboard.writeText(text)
+      .then(() => pushToast())
+      .catch(console.warn);
+  });
+
+   
+  const container = document.querySelector('.article-content');
+  if (container) {
+    container.addEventListener('click', e => {
+      if (!e.target.matches('.copyCodeButton')) return;
+      const wrap = e.target.closest('pre, .highlight');
+      const codeTd = wrap?.querySelector('td:nth-child(2)') || wrap;
+      const txt = codeTd ? codeTd.textContent.trim() : '';
+      navigator.clipboard.writeText(txt)
+        .then(() => pushToast())
+        .catch(err => alert('复制失败：' + err));
+    });
+  }
+})();
+</script>
+
+<style>
+ 
+.copyCodeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #3d3c3c;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.copyCodeButton:hover {
+  background: var(--hover-text-color);
+  color: #fff;
+}
+
+ 
+.snack-left-top {
+  position: fixed;
+  left: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  transform: translateX(calc(-100% - 20px));
+  width: 300px;
+  height: 60px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 15px;
+  background: var(--hover-text-color);
+  color: #fff;
+  box-shadow: 4px 4px 14px rgba(0, 0, 0, .35);
+  z-index: 9999;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+}
+ 
+.snack-left-top.show {
+  transform: translateX(0);
+}
+ 
+#toast-stack {
+  position: fixed;
+  left: 0;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  z-index: 9999;
+  pointer-events: none;
+}
+
+ 
+#toast-stack .snack-left-top {
+  position: relative;    
+  margin-bottom: 12px;   
+  pointer-events: auto;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1),
+              opacity   .35s cubic-bezier(.4, 0, .2, 1);
+  opacity: 0;
+  transform: translateX(calc(-100% - 20px));
+}
+
+#toast-stack .snack-left-top.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>
+
+
+<style>
+   
+  .fixed-ghost-box {
+    position: fixed;
+    bottom: 20px;      
+    right: 20px;       
+    z-index: 10;       
+    background-color: transparent;
+    margin: 0;
+    pointer-events: none;  
+    overflow: visible;
+  }
+
+   
+  #ghost {
+    position: relative;
+    transform: scale(0.3);   
+    transform-origin: center center;  
+    pointer-events: none;
+  }
+
+  #red {
+    animation: upNDown infinite 0.5s;
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    grid-template-rows: repeat(14, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    grid-template-areas:
+      "a1  a2  a3  a4  a5  top0  top0  top0  top0  a10 a11 a12 a13 a14"
+      "b1  b2  b3  top1 top1 top1 top1 top1 top1 top1 top1 b12 b13 b14"
+      "c1 c2 top2 top2 top2 top2 top2 top2 top2 top2 top2 top2 c13 c14"
+      "d1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 d14"
+      "e1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 e14"
+      "f1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 f14"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "st0 st0 an4 st1 an7 st2 an10 an10 st3 an13 st4 an16 st5 st5"
+      "an1 an2 an3 an5 an6 an8 an9 an9 an11 an12 an14 an15 an17 an18";
+  }
+
+  @keyframes upNDown {
+    0%,49% { transform: translateY(0px); }
+    50%,100% { transform: translateY(-10px); }
+  }
+
+  #top0,#top1,#top2,#top3,#top4,#st0,#st1,#st2,#st3,#st4,#st5 {
+    background-color: rgba(255, 0, 0, 0.397);
+  }
+  #top0 { grid-area: top0; }
+  #top1 { grid-area: top1; }
+  #top2 { grid-area: top2; }
+  #top3 { grid-area: top3; }
+  #top4 { grid-area: top4; }
+  #st0 { grid-area: st0; }
+  #st1 { grid-area: st1; }
+  #st2 { grid-area: st2; }
+  #st3 { grid-area: st3; }
+  #st4 { grid-area: st4; }
+  #st5 { grid-area: st5; }
+
+  #an1 { grid-area: an1; animation: flicker0 infinite 0.5s; }
+  #an18 { grid-area: an18; animation: flicker0 infinite 0.5s; }
+  #an2 { grid-area: an2; animation: flicker1 infinite 0.5s; }
+  #an17 { grid-area: an17; animation: flicker1 infinite 0.5s; }
+  #an3 { grid-area: an3; animation: flicker1 infinite 0.5s; }
+  #an16 { grid-area: an16; animation: flicker1 infinite 0.5s; }
+  #an4 { grid-area: an4; animation: flicker1 infinite 0.5s; }
+  #an15 { grid-area: an15; animation: flicker1 infinite 0.5s; }
+  #an6 { grid-area: an6; animation: flicker0 infinite 0.5s; }
+  #an12 { grid-area: an12; animation: flicker0 infinite 0.5s; }
+  #an7 { grid-area: an7; animation: flicker0 infinite 0.5s; }
+  #an13 { grid-area: an13; animation: flicker0 infinite 0.5s; }
+  #an9 { grid-area: an9; animation: flicker1 infinite 0.5s; }
+  #an10 { grid-area: an10; animation: flicker1 infinite 0.5s; }
+  #an8 { grid-area: an8; animation: flicker0 infinite 0.5s; }
+  #an11 { grid-area: an11; animation: flicker0 infinite 0.5s; }
+
+  @keyframes flicker0 {
+    0%,49% { background-color: rgba(255, 0, 0, 0.397); }
+    50%,100% { background-color: transparent; }
+  }
+  @keyframes flicker1 {
+    0%,49% { background-color: transparent; }
+    50%,100% { background-color: rgba(255, 0, 0, 0.397); }
+  }
+
+  #eye { width: 40px; height: 50px; position: absolute; top: 30px; left: 10px; }
+  #eye::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #eye1 { width: 40px; height: 50px; position: absolute; top: 30px; right: 30px; }
+  #eye1::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye1::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #pupil { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; left: 10px; z-index: 1; animation: eyesMovement infinite 3s; }
+  #pupil1 { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; right: 50px; z-index: 1; animation: eyesMovement infinite 3s; }
+
+  @keyframes eyesMovement {
+    0%,49% { transform: translateX(0px); }
+    50%,99% { transform: translateX(10px); }
+    100% { transform: translateX(0px); }
+  }
+
+  #shadow {
+    background-color: black;
+    width: 140px;
+    height: 140px;
+    position: absolute;
+	border-radius: 50%;
+    transform: rotateX(80deg);
+    filter: blur(20px);
+    top: 80%;
+    animation: shadowMovement infinite 0.5s;
+  }
+  @keyframes shadowMovement {
+    0%,49% { opacity: 0.5; }
+    50%,100% { opacity: 0.2; }
+  }
+
+   
+  @media (max-width: 1444px) {
+    #ghost { 
+      transform: scale(0.3) !important; 
+      transform-origin: center center !important;
+    }
+    .fixed-ghost-box {
+      bottom: 10px !important;
+      right: 5px !important;
+    }
+  }
+</style>
+
+
+<div class="fixed-ghost-box">
+  <div id="ghost">
+    <div id="red">
+      <div id="pupil"></div>
+      <div id="pupil1"></div>
+      <div id="eye"></div>
+      <div id="eye1"></div>
+      <div id="top0"></div>
+      <div id="top1"></div>
+      <div id="top2"></div>
+      <div id="top3"></div>
+      <div id="top4"></div>
+      <div id="st0"></div>
+      <div id="st1"></div>
+      <div id="st2"></div>
+      <div id="st3"></div>
+      <div id="st4"></div>
+      <div id="st5"></div>
+      <div id="an1"></div>
+      <div id="an2"></div>
+      <div id="an3"></div>
+      <div id="an4"></div>
+      <div id="an5"></div>
+      <div id="an6"></div>
+      <div id="an7"></div>
+      <div id="an8"></div>
+      <div id="an9"></div>
+      <div id="an10"></div>
+      <div id="an11"></div>
+      <div id="an12"></div>
+      <div id="an13"></div>
+      <div id="an14"></div>
+      <div id="an15"></div>
+      <div id="an16"></div>
+      <div id="an17"></div>
+      <div id="an18"></div>
+    </div>
+    <div id="shadow"></div>
+  </div>
+</div>
+
+
+<style>
+   
+  .btn-wrap {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    position: fixed;    
+    bottom: 90px;       
+    right: -5px;        
+    z-index: 9999;      
+    display: inline-block;
+    position: relative;
+  }
+
+   
+  .footer-hover-btn {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    outline: none;
+	padding: 12px 20px;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+    pointer-events: none;  
+  }
+
+   
+  .btn-wrap::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;  
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    top: 8px;
+  }
+  .btn-wrap::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;  
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    top: 8px;
+  }
+
+   
+  .footer-hover-btn::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;  
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+  }
+  .footer-hover-btn::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;  
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    bottom: 8px;
+  }
+
+   
+  .btn-wrap:hover::before,
+  .btn-wrap:hover::after,
+  .btn-wrap:hover .footer-hover-btn::before,
+  .btn-wrap:hover .footer-hover-btn::after {
+    width: 50%;
+  }
+
+   
+  @media (max-width: 768px) {
+    .btn-wrap {
+      font-size: 14px;    
+      bottom: 25px;       
+      right: 15px;        
+    }
+    .footer-hover-btn {
+      padding: 8px 12px;  
+    }
+  }
+</style>
+
+<div class="btn-wrap">
+  <button class="footer-hover-btn">
+    --KK57-0803.0815--
+  </button>
+</div>
+    </body>
+</html>
