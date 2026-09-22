@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>委托 on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%A7%94%E6%89%98/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%A7%94%E6%89%98/</link>
         <description>Recent content in 委托 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Wed, 26 Aug 2026 10:17:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/%E5%A7%94%E6%89%98/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 26 Aug 2026 10:17:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E5%A7%94%E6%89%98/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity 资源加载模块(使用旧版callback实现)</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</link>
         <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</guid>
         <description>&lt;p&gt;Unity 中 &lt;code&gt;Resources.Load&lt;/code&gt; 同步加载资源会卡帧，&lt;code&gt;Resources.LoadAsync&lt;/code&gt; 异步加载需要配合协程。资源加载模块 &lt;code&gt;ResLoadMgr&lt;/code&gt; 封装了同步和异步两种加载方式，自动判断 GameObject 类型并实例化。&lt;/p&gt;
 &lt;p&gt;异步加载中有一个核心问题：&lt;strong&gt;协程无法直接返回值给调用方&lt;/strong&gt;。旧版方案通过 callback（回调函数）解决，把结果作为参数传入回调执行。&lt;/p&gt;
 &lt;hr&gt;
@@ -349,10 +349,10 @@
         </item>
         <item>
         <title>Unity 普通事件中心(仅支持无参函数订阅)</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</link>
         <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</guid>
         <description>&lt;p&gt;事件中心模块解决的核心问题是&lt;strong&gt;脚本间强耦合&lt;/strong&gt;：比如怪物死亡时要触发玩家奖励、播放动画、任务记录等多种逻辑，传统做法是在怪物 &lt;code&gt;Dead()&lt;/code&gt; 方法中获取 Player 物体再调用其方法，脚本间关联性太强，不符合七大设计原则。&lt;/p&gt;
 &lt;p&gt;事件中心的思想是：&lt;strong&gt;怪物死亡时通知事件中心，事件中心再通知所有订阅了这个事件的脚本执行各自逻辑。&lt;/strong&gt; 订阅者也要提前告诉事件中心：&amp;ldquo;XX 事件触发时，请执行我的 XX 方法。&amp;rdquo;&lt;/p&gt;
 &lt;p&gt;本篇是基础版事件中心，仅支持无参函数订阅（&lt;code&gt;UnityAction&lt;/code&gt;）。&lt;/p&gt;
@@ -696,10 +696,10 @@
         </item>
         <item>
         <title>Unity 支持泛型的事件中心模块</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</link>
         <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</guid>
         <description>&lt;p&gt;前面的事件中心模块中，&lt;code&gt;UnityAction&lt;/code&gt; 只能存放无参数类型的函数。升级为泛型版本后，事件可以携带参数（比如怪物死亡时传递怪物类型、玩家攻击时传递伤害值），同时&lt;strong&gt;兼容无参数版本&lt;/strong&gt;。&lt;/p&gt;
 &lt;h2 id=&#34;一核心思路&#34;&gt;一、核心思路
 &lt;/h2&gt;&lt;p&gt;普通事件中心用 &lt;code&gt;Dictionary&amp;lt;string, UnityAction&amp;gt;&lt;/code&gt; 存储事件，Key 是事件名，Value 是无参委托。问题在于：&lt;strong&gt;所有事件都只能是无参的&lt;/strong&gt;。&lt;/p&gt;
@@ -1123,10 +1123,10 @@
         </item>
         <item>
         <title>Unity中C#调用Lua</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</link>
         <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</guid>
         <description>&lt;p&gt;本文基于 &lt;strong&gt;Lua 文件重定向管理器&lt;/strong&gt;，演示 C# 调用 Lua 中各种成员的方法：函数、类、List、Dictionary、普通变量等。委托类型声明独立放在专门脚本中，和函数调用脚本分离。&lt;/p&gt;
 &lt;h2 id=&#34;一委托类型声明-xdel_reloaddel&#34;&gt;一、委托类型声明 xDel_ReLoadDel
 &lt;/h2&gt;&lt;p&gt;委托类型声明单独放一个脚本，直接写在&lt;strong&gt;命名空间裸区域&lt;/strong&gt;而非类内部（因为本身就是类型声明）。&lt;/p&gt;

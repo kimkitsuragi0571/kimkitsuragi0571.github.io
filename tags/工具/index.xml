@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>工具 on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%B7%A5%E5%85%B7/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%B7%A5%E5%85%B7/</link>
         <description>Recent content in 工具 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Sat, 22 Aug 2026 15:20:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/%E5%B7%A5%E5%85%B7/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 22 Aug 2026 15:20:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E5%B7%A5%E5%85%B7/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity中Lua迁移打包工具</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADlua%E8%BF%81%E7%A7%BB%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADlua%E8%BF%81%E7%A7%BB%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7/</link>
         <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADlua%E8%BF%81%E7%A7%BB%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADlua%E8%BF%81%E7%A7%BB%E6%89%93%E5%8C%85%E5%B7%A5%E5%85%B7/</guid>
         <description>&lt;p&gt;在 Unity 中使用 xLua + AB 包热更新时，Lua 脚本需要被当作 &lt;code&gt;TextAsset&lt;/code&gt; 打进 AB 包。但 AB 包只能识别 &lt;code&gt;.txt&lt;/code&gt; 后缀的文本文件，无法直接识别 &lt;code&gt;.lua&lt;/code&gt; 后缀。本工具实现一键将 &lt;code&gt;.lua&lt;/code&gt; 文件复制为 &lt;code&gt;.txt&lt;/code&gt; 并自动打入 AB 包。&lt;/p&gt;
 &lt;h2 id=&#34;一核心概念&#34;&gt;一、核心概念
 &lt;/h2&gt;&lt;h3 id=&#34;1-继承-editor-类&#34;&gt;1. 继承 Editor 类

@@ -1,0 +1,3229 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="PureMVC 是对经典 MVC 的进一步抽象：Model / View / Controller 三大核心全部由 Facade 门面统一管理，三者之间通过 Notification 通知通信、互不直接引用。本文基于 PureMVC 官方库（PureMVC.Interfaces / PureMVC.Patterns.*）实现一个完整的「主面板 → 角色面板 → 升级 → 关闭」流程，包含 11 个脚本。\n">
+<title>Unity PureMVC 框架示例</title>
+
+<link rel='canonical' href='https://kimkitsuragi0571.github.io/p/puremvc-framework-example/'>
+
+<link rel="stylesheet" href="/scss/style.min.2eacd74f1dc9eabced815ff53e1794b040da36d37594c05055ed2f0726d654e0.css"><meta property='og:title' content="Unity PureMVC 框架示例">
+<meta property='og:description' content="PureMVC 是对经典 MVC 的进一步抽象：Model / View / Controller 三大核心全部由 Facade 门面统一管理，三者之间通过 Notification 通知通信、互不直接引用。本文基于 PureMVC 官方库（PureMVC.Interfaces / PureMVC.Patterns.*）实现一个完整的「主面板 → 角色面板 → 升级 → 关闭」流程，包含 11 个脚本。\n">
+<meta property='og:url' content='https://kimkitsuragi0571.github.io/p/puremvc-framework-example/'>
+<meta property='og:site_name' content='IBN5100'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='PureMVC' /><meta property='article:tag' content='MVC' /><meta property='article:tag' content='框架' /><meta property='article:tag' content='设计模式' /><meta property='article:tag' content='通知' /><meta property='article:tag' content='解耦' /><meta property='article:published_time' content='2026-09-17T09:30:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-17T09:30:00&#43;08:00'/>
+<meta name="twitter:title" content="Unity PureMVC 框架示例">
+<meta name="twitter:description" content="PureMVC 是对经典 MVC 的进一步抽象：Model / View / Controller 三大核心全部由 Facade 门面统一管理，三者之间通过 Notification 通知通信、互不直接引用。本文基于 PureMVC 官方库（PureMVC.Interfaces / PureMVC.Patterns.*）实现一个完整的「主面板 → 角色面板 → 升级 → 关闭」流程，包含 11 个脚本。\n">
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_93e389bf4708e7c7.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤔</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">IBN5100</a></h1>
+            <h2 class="site-description">相逢在宇宙</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/3546865758898959?spm_id_from=333.788.0.0'
+                        target="_blank"
+                        title="BiliBili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-bilibili"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" /><path d="M8 3l2 3" /><path d="M16 3l-2 3" /><path d="M9 13v-2" /><path d="M15 11v2" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/kimkitsuragi0571/hugo-main/actions'
+                        target="_blank"
+                        title="GitAction"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-upload"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M12 11v6" /><path d="M9.5 13.5l2.5 -2.5l2.5 2.5" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://steamcommunity.com/profiles/76561199047374887/'
+                        target="_blank"
+                        title="Steam"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5 0 1 1 -.653 8.953l-4.347 3.009l0 .038a3 3 0 0 1 -2.824 3l-.176 0a3 3 0 0 1 -2.94 -2.402l-2.56 -1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834 -.635l2.727 -3.818a4.5 4.5 0 0 1 4.429 -5.302z" /><circle cx="16.5" cy="9.5" r="1" fill="currentColor" /></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E7%9B%B8%E5%85%B3/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>相关</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>链接</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一puremvc-与普通-mvcmvp-的区别">一、PureMVC 与普通 MVC/MVP 的区别</a></li>
+    <li><a href="#二文件结构">二、文件结构</a>
+      <ol>
+        <li><a href="#各文件职责一句话总结">各文件职责一句话总结</a></li>
+      </ol>
+    </li>
+    <li><a href="#三通知常量-pure_notification">三、通知常量 pure_Notification</a></li>
+    <li><a href="#四model-层数据结构--数据代理">四、Model 层：数据结构 + 数据代理</a>
+      <ol>
+        <li><a href="#41-pure_playerdataobj--纯数据结构">4.1 pure_PlayerDataObj — 纯数据结构</a></li>
+        <li><a href="#42-pure_playerproxy--数据代理">4.2 pure_PlayerProxy — 数据代理</a></li>
+      </ol>
+    </li>
+    <li><a href="#五view-层view-脚本--mediator-中介者">五、View 层：View 脚本 + Mediator 中介者</a>
+      <ol>
+        <li><a href="#51-pure_mainview--主面板">5.1 pure_MainView — 主面板</a></li>
+        <li><a href="#52-pure_mainview_mediator--主面板中介者">5.2 pure_MainView_Mediator — 主面板中介者</a></li>
+        <li><a href="#53-pure_roleview--角色面板">5.3 pure_RoleView — 角色面板</a></li>
+        <li><a href="#54-pure_roleview_mediator--角色面板中介者">5.4 pure_RoleView_Mediator — 角色面板中介者</a></li>
+        <li><a href="#mediator-关键设计">Mediator 关键设计</a></li>
+      </ol>
+    </li>
+    <li><a href="#六controller-层4-个-command">六、Controller 层：4 个 Command</a>
+      <ol>
+        <li><a href="#61-pure_startupcommand--启动命令">6.1 pure_StartUpCommand — 启动命令</a></li>
+        <li><a href="#62-pure_showpanelcommand--显示面板命令">6.2 pure_ShowPanelCommand — 显示面板命令</a></li>
+        <li><a href="#63-pure_hidepanelcommand--隐藏面板命令">6.3 pure_HidePanelCommand — 隐藏面板命令</a></li>
+        <li><a href="#64-pure_levupcommand--升级命令">6.4 pure_LevUpCommand — 升级命令</a></li>
+        <li><a href="#command-设计要点">Command 设计要点</a></li>
+      </ol>
+    </li>
+    <li><a href="#七facade-门面--mainentry-入口">七、Facade 门面 + MainEntry 入口</a>
+      <ol>
+        <li><a href="#71-pure_facade--门面外观">7.1 pure_Facade — 门面/外观</a></li>
+        <li><a href="#72-pure_mainentry--场景入口">7.2 pure_MainEntry — 场景入口</a></li>
+      </ol>
+    </li>
+    <li><a href="#八通知的双分发机制">八、通知的双分发机制</a></li>
+    <li><a href="#九完整调用链路">九、完整调用链路</a>
+      <ol>
+        <li><a href="#91-启动流程">9.1 启动流程</a></li>
+        <li><a href="#92-点击角色按钮--显示角色面板">9.2 点击「角色」按钮 → 显示角色面板</a></li>
+        <li><a href="#93-点击升级按钮">9.3 点击「升级」按钮</a></li>
+        <li><a href="#94-点击关闭按钮">9.4 点击「关闭」按钮</a></li>
+        <li><a href="#95-按-w-键隐藏-mainpanel">9.5 按 W 键隐藏 MainPanel</a></li>
+      </ol>
+    </li>
+    <li><a href="#十几个关键设计点">十、几个关键设计点</a>
+      <ol>
+        <li><a href="#101-为什么-mediator-要在-showpanelcommand-里注册而不是在-facade-里">10.1 为什么 Mediator 要在 ShowPanelCommand 里注册，而不是在 Facade 里</a></li>
+        <li><a href="#102-为什么-mediator-持有-viewcomponent-而不是直接继承-view-脚本">10.2 为什么 Mediator 持有 ViewComponent 而不是直接继承 View 脚本</a></li>
+        <li><a href="#103-为什么-hidepanelcommand-支持两种-body-类型">10.3 为什么 HidePanelCommand 支持两种 Body 类型</a></li>
+        <li><a href="#104-关键风险点">10.4 关键风险点</a></li>
+      </ol>
+    </li>
+    <li><a href="#十一和上篇普通-mvc--mvp-的对比">十一、和上篇普通 MVC / MVP 的对比</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/unity/" >
+                Unity
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/puremvc-framework-example/">Unity PureMVC 框架示例</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2026-09-17T09:30:00&#43;08:00'>2026-09-17</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 19 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>PureMVC 是对经典 MVC 的进一步抽象：<strong>Model / View / Controller 三大核心全部由 Facade 门面统一管理，三者之间通过 Notification 通知通信、互不直接引用</strong>。本文基于 PureMVC 官方库（<code>PureMVC.Interfaces</code> / <code>PureMVC.Patterns.*</code>）实现一个完整的「主面板 → 角色面板 → 升级 → 关闭」流程，包含 11 个脚本。</p>
+<hr>
+<h2 id="一puremvc-与普通-mvcmvp-的区别">一、PureMVC 与普通 MVC/MVP 的区别
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>普通 MVC</th>
+					<th>MVP</th>
+					<th><strong>PureMVC</strong></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>通信方式</td>
+					<td>View 直接调 Model</td>
+					<td>View ↔ Presenter ↔ Model</td>
+					<td>全部走 Notification，三者互不引用</td>
+			</tr>
+			<tr>
+					<td>中间层</td>
+					<td>Controller</td>
+					<td>Presenter</td>
+					<td><strong>Facade</strong> + 三大核心（Model/View/Controller）</td>
+			</tr>
+			<tr>
+					<td>View 与 Model 关系</td>
+					<td>强耦合</td>
+					<td>通过 Presenter</td>
+					<td>完全解耦</td>
+			</tr>
+			<tr>
+					<td>多界面协作</td>
+					<td>各自直接通信</td>
+					<td>各 Presenter 互相引用</td>
+					<td>都通过 Notification，发通知方不知道谁收</td>
+			</tr>
+			<tr>
+					<td>单元测试</td>
+					<td>难，View 依赖 Model</td>
+					<td>中等，Presenter 可测</td>
+					<td>易，三大核心都是纯 C#</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>PureMVC 的核心思想：<strong>「发通知的人不知道谁会处理，处理通知的人也不知道是谁发的。」</strong> 这让面板之间、面板与数据之间彻底解耦，加新面板 / 加新数据源对老代码零侵入。</p>
+<hr>
+<h2 id="二文件结构">二、文件结构
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">PureMVC/
+</span></span><span class="line"><span class="cl">├── pure_Notification.cs        # 通知名字符串常量
+</span></span><span class="line"><span class="cl">├── pure_Facade.cs              # 门面：初始化 + 注册 Command
+</span></span><span class="line"><span class="cl">├── pure_MainEntry.cs           # MonoBehaviour 入口
+</span></span><span class="line"><span class="cl">├── Controller/
+</span></span><span class="line"><span class="cl">│   ├── pure_StartUpCommand.cs  # 启动：注册 Proxy
+</span></span><span class="line"><span class="cl">│   ├── pure_ShowPanelCommand.cs# 显示面板：注册 Mediator + 加载预制体
+</span></span><span class="line"><span class="cl">│   ├── pure_HidePanelCommand.cs# 隐藏面板：销毁 GameObject
+</span></span><span class="line"><span class="cl">│   └── pure_LevUpCommand.cs    # 升级：调 Proxy.LevUp 后通知更新
+</span></span><span class="line"><span class="cl">├── Model/
+</span></span><span class="line"><span class="cl">│   ├── pure_PlayerDataObj.cs   # 玩家数据结构
+</span></span><span class="line"><span class="cl">│   └── pure_PlayerProxy.cs     # 数据代理：PlayerPrefs 读写
+</span></span><span class="line"><span class="cl">└── View/
+</span></span><span class="line"><span class="cl">    ├── pure_MainView.cs            # 主面板 MonoBehaviour
+</span></span><span class="line"><span class="cl">    ├── pure_MainView_Mediator.cs   # 主面板中介者
+</span></span><span class="line"><span class="cl">    ├── pure_RoleView.cs            # 角色面板 MonoBehaviour
+</span></span><span class="line"><span class="cl">    └── pure_RoleView_Mediator.cs   # 角色面板中介者
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="各文件职责一句话总结">各文件职责一句话总结
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>文件</th>
+					<th>角色</th>
+					<th>职责</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>pure_Notification</code></td>
+					<td>常量</td>
+					<td>声明 5 个通知名（START_UP / SHOW_PANEL / HIDE_PANEL / UPDATE_PLAYER_INFO / LEVEL_UP）</td>
+			</tr>
+			<tr>
+					<td><code>pure_Facade</code></td>
+					<td>门面</td>
+					<td>单例；初始化 Controller；<code>RegisterCommand</code> 把通知名映射到 Command 工厂；对外暴露 <code>StartUp()</code></td>
+			</tr>
+			<tr>
+					<td><code>pure_MainEntry</code></td>
+					<td>入口</td>
+					<td>场景挂载的 MonoBehaviour，<code>Start</code> 调 <code>Facade.StartUp()</code>；Update 中按 Q/W 触发显隐</td>
+			</tr>
+			<tr>
+					<td><code>pure_StartUpCommand</code></td>
+					<td>启动命令</td>
+					<td>注册 <code>pure_PlayerProxy</code>（数据代理）</td>
+			</tr>
+			<tr>
+					<td><code>pure_ShowPanelCommand</code></td>
+					<td>显示命令</td>
+					<td>按通知 Body 中的面板名 switch；注册对应 Mediator；<code>Resources.Load</code> 加载预制体；<code>SetView</code> 绑定 ViewComponent；触发首次 UPDATE_PLAYER_INFO</td>
+			</tr>
+			<tr>
+					<td><code>pure_HidePanelCommand</code></td>
+					<td>隐藏命令</td>
+					<td>从 Body 取 Mediator 或面板名 → 销毁 GameObject → <code>ViewComponent = null</code></td>
+			</tr>
+			<tr>
+					<td><code>pure_LevUpCommand</code></td>
+					<td>升级命令</td>
+					<td>取 Proxy → <code>LevUp()</code> → 通知 UPDATE_PLAYER_INFO</td>
+			</tr>
+			<tr>
+					<td><code>pure_PlayerDataObj</code></td>
+					<td>数据结构</td>
+					<td><code>playerName / playerLev / playerAtk</code> 三字段</td>
+			</tr>
+			<tr>
+					<td><code>pure_PlayerProxy</code></td>
+					<td>数据代理</td>
+					<td>构造时从 PlayerPrefs 读；<code>LevUp</code> 加 1 级 + 加攻击；<code>SaveData</code> 回写 PlayerPrefs</td>
+			</tr>
+			<tr>
+					<td><code>pure_MainView</code></td>
+					<td>主面板</td>
+					<td>持有 4 个 Button + 3 个 Text；<code>UpdateInfo_View</code> 把数据刷到 Text</td>
+			</tr>
+			<tr>
+					<td><code>pure_MainView_Mediator</code></td>
+					<td>主面板中介者</td>
+					<td>监听 UPDATE_PLAYER_INFO；<code>SetView</code> 绑定 btnRole → 发 SHOW_PANEL(&ldquo;RolePanel&rdquo;)</td>
+			</tr>
+			<tr>
+					<td><code>pure_RoleView</code></td>
+					<td>角色面板</td>
+					<td>btnClose + btnLevUp + txtAtk；<code>UpdateInfo_View</code></td>
+			</tr>
+			<tr>
+					<td><code>pure_RoleView_Mediator</code></td>
+					<td>角色中介者</td>
+					<td>监听 UPDATE/SHOW/HIDE；<code>SetView</code> 绑定 btnClose → 发 HIDE_PANEL(this)；btnLevUp → 发 LEVEL_UP</td>
+			</tr>
+	</tbody>
+</table></div>
+<hr>
+<h2 id="三通知常量-pure_notification">三、通知常量 pure_Notification
+</h2><p>PureMVC 里所有跨模块通信都靠「通知名」字符串。集中声明避免拼写错误。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//通知名类:主要用来声明各个通知的名字</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_Notification</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//显隐面板通知</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">SHOW_PANEL</span> <span class="p">=</span> <span class="s">&#34;show_panel&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">HIDE_PANEL</span> <span class="p">=</span> <span class="s">&#34;hide_panel&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//代表玩家信息更新的通知</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">UPDATE_PLAYER_INFO</span> <span class="p">=</span> <span class="s">&#34;updatePlayerInfo&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//启动通知</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">START_UP</span> <span class="p">=</span> <span class="s">&#34;startUp&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//升级通知</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">LEVEL_UP</span> <span class="p">=</span> <span class="s">&#34;levUp&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>命名规范：常量全大写 + 下划线分隔；值用小驼峰，避免和类名冲突。</p>
+</blockquote>
+<hr>
+<h2 id="四model-层数据结构--数据代理">四、Model 层：数据结构 + 数据代理
+</h2><h3 id="41-pure_playerdataobj--纯数据结构">4.1 pure_PlayerDataObj — 纯数据结构
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//存储玩家数据结构</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_PlayerDataObj</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kt">string</span> <span class="n">playerName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kt">int</span> <span class="n">playerLev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kt">int</span> <span class="n">playerAtk</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="42-pure_playerproxy--数据代理">4.2 pure_PlayerProxy — 数据代理
+</h3><p><code>Proxy</code> 是 PureMVC 的 Model 核心。它的 <code>Data</code> 属性是 <code>object</code>，所以要用一个自定义数据结构 <code>pure_PlayerDataObj</code> 包一层再赋值给 <code>Data</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Proxy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//继承Proxy父类后,还必须实现对应的构造函数</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_PlayerProxy</span> <span class="p">:</span> <span class="n">Proxy</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">new</span> <span class="kd">const</span> <span class="kt">string</span> <span class="n">NAME</span> <span class="p">=</span> <span class="s">&#34;pure_PlayerProxy&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//构造函数:初始化代理类的时候,统一添加到Proxy成员便于管理(相当于字典嘛,名字和数据)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//参数分别为:代理名称,代理相关数据(这里是指定参数传入父类构造),这里用简便一点的写法(data默认null,本来就可以不用写)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//public pure_PlayerProxy(string proxyName, object data = null) : base(proxyName, data)</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//这个base构造:只有一个pure_PlayerProxy实例,调用base只是初始化父类的字段,然后初始化子类独有字段</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">pure_PlayerProxy</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">pure_PlayerProxy</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pure_PlayerDataObj</span> <span class="n">playerData</span> <span class="p">=</span> <span class="k">new</span> <span class="n">pure_PlayerDataObj</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//初始化(后面的只是默认值)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">playerData</span><span class="p">.</span><span class="n">playerName</span> <span class="p">=</span> <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="s">&#34;PlayerName&#34;</span><span class="p">,</span><span class="s">&#34;JOJO&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">playerData</span><span class="p">.</span><span class="n">playerLev</span> <span class="p">=</span> <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">GetInt</span><span class="p">(</span><span class="s">&#34;PlayerLevel&#34;</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">playerData</span><span class="p">.</span><span class="n">playerAtk</span> <span class="p">=</span> <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">GetInt</span><span class="p">(</span><span class="s">&#34;PlayerAtk&#34;</span><span class="p">,</span> <span class="m">99</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">//Data是Proxy内部的一个属性(是单独的Object,肯定没法直接存储多个字段,所以需要playerData对象)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//就是把playerData实例中的字段赋值给自身pure_PlayerProxy对象的Data字段</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Data</span> <span class="p">=</span> <span class="n">playerData</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">LevUp</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//需要先向下转型</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pure_PlayerDataObj</span> <span class="n">data</span> <span class="p">=</span> <span class="n">Data</span> <span class="k">as</span> <span class="n">pure_PlayerDataObj</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">data</span><span class="p">.</span><span class="n">playerLev</span> <span class="p">+=</span> <span class="m">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">data</span><span class="p">.</span><span class="n">playerAtk</span> <span class="p">+=</span> <span class="n">data</span><span class="p">.</span><span class="n">playerLev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SaveData</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">void</span> <span class="n">SaveData</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pure_PlayerDataObj</span> <span class="n">data</span> <span class="p">=</span> <span class="n">Data</span> <span class="k">as</span> <span class="n">pure_PlayerDataObj</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">SetString</span><span class="p">(</span><span class="s">&#34;PlayerName&#34;</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">playerName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">SetInt</span><span class="p">(</span><span class="s">&#34;PlayerLevel&#34;</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">playerLev</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerPrefs</span><span class="p">.</span><span class="n">SetInt</span><span class="p">(</span><span class="s">&#34;PlayerAtk&#34;</span><span class="p">,</span> <span class="n">data</span><span class="p">.</span><span class="n">playerAtk</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键点</strong>：</p>
+<ul>
+<li><code>NAME</code> 是注册到 Facade 字典里的 key，必须 <code>new const</code> 隐藏父类的同名字段。</li>
+<li><code>Data</code> 是 <code>object</code>，所以每次用都要 <code>as pure_PlayerDataObj</code> 向下转型。</li>
+<li>Proxy <strong>完全不知道 View 的存在</strong>——它只是改自己的数据 + 存盘，谁通知它升级它不管，升完级也不主动通知 View（由 Command 来发通知）。</li>
+</ul>
+<hr>
+<h2 id="五view-层view-脚本--mediator-中介者">五、View 层：View 脚本 + Mediator 中介者
+</h2><p>PureMVC 的 View 分两层：<strong>View 脚本</strong>（MonoBehaviour，挂在预制体上，负责具体 UI 控件引用 + 显示数据）和 <strong>Mediator</strong>（纯 C#，注册到 Facade，监听通知 + 处理业务 + 转发到 View 脚本）。</p>
+<h3 id="51-pure_mainview--主面板">5.1 pure_MainView — 主面板
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_MainView</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnRole</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnSkill</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtLevel</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtAtk</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="c1">//如果是根据MVC的思路来做,这里就可以传入更新方法</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//按照MVP的话只需要放到Presenter里面</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">UpdateInfo_View</span><span class="p">(</span><span class="n">pure_PlayerDataObj</span> <span class="n">playerData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">txtName</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">playerData</span><span class="p">.</span><span class="n">playerName</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">txtAtk</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">playerData</span><span class="p">.</span><span class="n">playerAtk</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">txtLevel</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">playerData</span><span class="p">.</span><span class="n">playerLev</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="52-pure_mainview_mediator--主面板中介者">5.2 pure_MainView_Mediator — 主面板中介者
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//负责管理UI具体面板与UI框架间的通信</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_MainView_Mediator</span> <span class="p">:</span> <span class="n">Mediator</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//查询Facade字典避免重复的时候用得上if (!Facade.HasMediator(pure_MainView_Mediator.NAME)) </span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">new</span> <span class="kt">string</span> <span class="n">NAME</span> <span class="p">=</span> <span class="s">&#34;pure_MainView&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//虽然啥都没写,还是有初始化NAME字段的作用</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">pure_MainView_Mediator</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">NAME</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//界面的创建应该由触发逻辑来实现,而且这么多界面也不能重复写</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//重写监听通知的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//双分发机制:当我们SendNotification(XXX)时,Facade同时转发两种路线</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//这里UPDATE_PLAYER_INFO没有 RegisterCommand,但是Mediator路线仍然是Facade转发的</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">ListNotificationInterests</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//PureMVC的规则:监听哪些通知,就将其用String[]返回(类似通过事件名注册监听)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//当有人SendNotification(XXX)--&gt;Facade 遍历所有已注册的 Mediator并且查看其 ListNotificationInterests()</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//如果 XXX 在这个数组里,调它的 HandleNotification</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">new</span> <span class="kt">string</span><span class="p">[]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//好吧这里其实也没有必要监听</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// pure_Notification.SHOW_PANEL,</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// pure_Notification.HIDE_PANEL</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//重写处理通知的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//要是只有Command路径,这里处理就需要每个面板在Excute中单独写转化并调用UpdateInfo_View</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">HandleNotification</span><span class="p">(</span><span class="n">INotification</span> <span class="n">notification</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//INotification对象中包含通知名+通知包含信息</span>
+</span></span><span class="line"><span class="cl">        <span class="k">switch</span> <span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">Name</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//额,说啥监听了 SendNotification(pure_Notification.UPDATE_PLAYER_INFO);就都会执行更新的方法?</span>
+</span></span><span class="line"><span class="cl">           <span class="k">case</span> <span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">               <span class="c1">//收到通知所做的处理</span>
+</span></span><span class="line"><span class="cl">               <span class="c1">//ViewComponent就是Mediator中具体存储的面板属性</span>
+</span></span><span class="line"><span class="cl">               <span class="p">(</span><span class="n">ViewComponent</span> <span class="k">as</span> <span class="n">pure_MainView</span><span class="p">)?.</span><span class="n">UpdateInfo_View</span><span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">Body</span> <span class="k">as</span> <span class="n">pure_PlayerDataObj</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">//这俩已经由command处理了,这里空着也行(不如说注释掉比较好,浪费性能)</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">// case pure_Notification.SHOW_PANEL:</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">//      break;</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">// case pure_Notification.HIDE_PANEL:</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">//      break;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//可选: 重写注册时的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//Mediator 被 注册到 Facade 时自动调用(这个注册在pure_ShowPanelCommand.cs 里,不在 Facade)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">OnRegister</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">OnRegister</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//额外的初始化内容</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//封装设置View上控件的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">SetView</span><span class="p">(</span><span class="n">pure_MainView</span> <span class="n">view</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// mediatorMain.SetView(mainPanel.GetComponent&lt;pure_MainView&gt;());</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//显示面板的时候把上面的脚本(提前挂载了View脚本)绑定到ViewComponent</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ViewComponent</span> <span class="p">=</span> <span class="n">view</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 统一判空,避免 Inspector 漏拖引用直接崩</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">view</span> <span class="p">==</span> <span class="kc">null</span><span class="p">||</span><span class="n">view</span><span class="p">.</span><span class="n">btnRole</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;view == null||view.btnRole == null,无法执行&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="n">view</span><span class="p">.</span><span class="n">btnRole</span><span class="p">.</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;点击了btnRole,自动发送通知&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">SHOW_PANEL</span><span class="p">,</span> <span class="s">&#34;RolePanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="53-pure_roleview--角色面板">5.3 pure_RoleView — 角色面板
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine.UI</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_RoleView</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnClose</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Button</span> <span class="n">btnLevUp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">Text</span> <span class="n">txtAtk</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">UpdateInfo_View</span><span class="p">(</span><span class="n">pure_PlayerDataObj</span> <span class="n">playerData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">playerData</span> <span class="p">==</span> <span class="kc">null</span> <span class="p">||</span> <span class="n">txtAtk</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">txtAtk</span><span class="p">.</span><span class="n">text</span> <span class="p">=</span> <span class="n">playerData</span><span class="p">.</span><span class="n">playerAtk</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="54-pure_roleview_mediator--角色面板中介者">5.4 pure_RoleView_Mediator — 角色面板中介者
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_RoleView_Mediator</span> <span class="p">:</span> <span class="n">Mediator</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">new</span> <span class="kt">string</span> <span class="n">NAME</span> <span class="p">=</span> <span class="s">&#34;pure_RoleView&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">pure_RoleView_Mediator</span><span class="p">()</span> <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">NAME</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这时面板还没有实例化,没有view对象能拿来赋值,只能默认null了</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">//实际父类构造函数有(string mediatorName, object viewComponent = null)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这里没有给viewComponent赋值,放在SetView(pure_RoleView view)里面</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//重写监听通知的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="kt">string</span><span class="p">[]</span> <span class="n">ListNotificationInterests</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">new</span> <span class="kt">string</span><span class="p">[]</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_Notification</span><span class="p">.</span><span class="n">SHOW_PANEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_Notification</span><span class="p">.</span><span class="n">HIDE_PANEL</span>
+</span></span><span class="line"><span class="cl">        <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//重写处理通知的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">HandleNotification</span><span class="p">(</span><span class="n">INotification</span> <span class="n">notification</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">switch</span> <span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">Name</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//这里按LevUp就会报错,好像是这个时候ViewComponent已经为空,所以需要判空</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//UPDATE_PLAYER_INFO 触发时 RolePanel 已关闭,Mediator 仍会接收通知,有点浪费</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">ViewComponent</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">(</span><span class="n">ViewComponent</span> <span class="k">as</span> <span class="n">pure_RoleView</span><span class="p">)?.</span><span class="n">UpdateInfo_View</span><span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">Body</span> <span class="k">as</span> <span class="n">pure_PlayerDataObj</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="n">pure_Notification</span><span class="p">.</span><span class="n">SHOW_PANEL</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="n">pure_Notification</span><span class="p">.</span><span class="n">HIDE_PANEL</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//封装设置View上控件的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">SetView</span><span class="p">(</span><span class="n">pure_RoleView</span> <span class="n">view</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//哦哦是在这里赋值的,这tm太容易看漏了</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ViewComponent</span> <span class="p">=</span> <span class="n">view</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 统一判空,避免 Inspector 漏拖引用直接崩</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">view</span> <span class="p">==</span> <span class="kc">null</span> <span class="p">||</span> <span class="n">view</span><span class="p">.</span><span class="n">btnClose</span> <span class="p">==</span> <span class="kc">null</span> <span class="p">||</span> <span class="n">view</span><span class="p">.</span><span class="n">btnLevUp</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;view == null||view.btnClose == null,无法执行&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//监听关闭按钮</span>
+</span></span><span class="line"><span class="cl">        <span class="n">view</span><span class="p">.</span><span class="n">btnClose</span><span class="p">.</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;点击了btnClose,自动发送HIDE_PANEL通知&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//这里this就是pure_RoleView_Mediator实例,因为HidePanelCommand会访问ViewComponent字段</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//注意ViewComponent初始=null,上面才 ViewComponent = view;赋值</span>
+</span></span><span class="line"><span class="cl">                <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">HIDE_PANEL</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//监听升级按钮</span>
+</span></span><span class="line"><span class="cl">        <span class="n">view</span><span class="p">.</span><span class="n">btnLevUp</span><span class="p">.</span><span class="n">onClick</span><span class="p">.</span><span class="n">AddListener</span><span class="p">(()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;点击了btnLevUp,自动发送通知&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//这里其实没用到this</span>
+</span></span><span class="line"><span class="cl">                <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">LEVEL_UP</span><span class="p">,</span> <span class="k">this</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//可选: 重写注册时的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">OnRegister</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">OnRegister</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//额外的初始化内容</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="mediator-关键设计">Mediator 关键设计
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>方法</th>
+					<th>作用</th>
+					<th>PureMVC 规则</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>ListNotificationInterests()</code></td>
+					<td>返回该 Mediator 关心哪些通知</td>
+					<td>Facade 在 <code>SendNotification</code> 时遍历所有 Mediator，看通知名是否在数组里</td>
+			</tr>
+			<tr>
+					<td><code>HandleNotification(INotification)</code></td>
+					<td>收到关心通知后的处理</td>
+					<td><code>notification.Name</code> 是通知名，<code>notification.Body</code> 是 <code>object</code> 携带的数据</td>
+			</tr>
+			<tr>
+					<td><code>OnRegister()</code></td>
+					<td>注册到 Facade 时调用一次</td>
+					<td>适合做 Mediator 自身的初始化（<strong>面板 GameObject 还没创建</strong>，不能在这里碰 View）</td>
+			</tr>
+			<tr>
+					<td><code>SetView(view)</code></td>
+					<td>把 GameObject 上的 View 脚本绑定到 <code>ViewComponent</code></td>
+					<td><strong>自定义方法</strong>（非 PureMVC 标准），但很常用——显示面板的 Command 加载完预制体后调它</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>Mediator <strong>持有 ViewComponent</strong>（<code>object</code> 类型，可强转为具体 View 脚本），所以 Mediator 是 View 与 PureMVC 框架之间的桥。View 脚本不懂框架，只懂 UI；Mediator 懂框架 + 懂 View 的接口。</p>
+</blockquote>
+<hr>
+<h2 id="六controller-层4-个-command">六、Controller 层：4 个 Command
+</h2><p>Command 是 PureMVC 处理业务逻辑的地方。<strong><code>Execute(INotification)</code> 在 <code>new</code> 出来时由 Controller 自动调用</strong>，无需手动执行。</p>
+<h3 id="61-pure_startupcommand--启动命令">6.1 pure_StartUpCommand — 启动命令
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Command</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//继承SimpleCommand</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_StartUpCommand</span> <span class="p">:</span> <span class="n">SimpleCommand</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//重写其中的执行函数(命令被执行时自动调用该方法)</span>
+</span></span><span class="line"><span class="cl">   <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Execute</span><span class="p">(</span><span class="n">INotification</span> <span class="n">notification</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">base</span><span class="p">.</span><span class="n">Execute</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;执行pure_StartUpCommand命令,自动调用其中函数&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//避免重复,没有有数据代理才注册</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span><span class="p">(!</span><span class="n">Facade</span><span class="p">.</span><span class="n">HasProxy</span><span class="p">(</span><span class="n">pure_PlayerProxy</span><span class="p">.</span><span class="n">NAME</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//pure_PlayerProxy 实例存进Facade字典</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//后面任何地方(Command、Mediator)都能通过 Facade.RetrieveProxy(NAME) 拿到同一个实例</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">//不注册就每次 new 一个新 Proxy,数据各存各的,升级了也白升,下次拿又是初始值</span>
+</span></span><span class="line"><span class="cl">         <span class="n">Facade</span><span class="p">.</span><span class="n">RegisterProxy</span><span class="p">(</span><span class="k">new</span> <span class="n">pure_PlayerProxy</span><span class="p">());</span> 
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="62-pure_showpanelcommand--显示面板命令">6.2 pure_ShowPanelCommand — 显示面板命令
+</h3><p>这是最复杂的一个 Command：根据通知 Body 中的面板名 switch，注册对应 Mediator，加载预制体，绑定 ViewComponent，并触发首次数据刷新。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Command</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_ShowPanelCommand</span> <span class="p">:</span> <span class="n">SimpleCommand</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//依旧重写方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Execute</span><span class="p">(</span><span class="n">INotification</span> <span class="n">notification</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">Execute</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;执行pure_ShowPanelCommand命令,自动调用其中函数&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//面板创建相关的具体逻辑</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//SendNotification(pure_Notification.SHOW_PANEL, &#34;MainPanel&#34;);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这里notification应该是包含Name和Body两部分?</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">panelName</span> <span class="p">=</span> <span class="n">notification</span><span class="p">.</span><span class="n">Body</span><span class="p">.</span><span class="n">ToString</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">switch</span> <span class="p">(</span><span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="s">&#34;MainPanel&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//显示面板相关的逻辑</span>
+</span></span><span class="line"><span class="cl">          
+</span></span><span class="line"><span class="cl">            <span class="c1">//使用Mediator前也一定要在Facade里面去注册(和Command,Proxy都一样)</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//直接在命令中使用Facade,代表全局唯一的Facade</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//额...每个面板的Mediator也是全局唯一的?</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(!</span><span class="n">Facade</span><span class="p">.</span><span class="n">HasMediator</span><span class="p">(</span><span class="n">pure_MainView_Mediator</span><span class="p">.</span><span class="n">NAME</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//这里就会调用pure_MainView_Mediator构造函数</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Facade</span><span class="p">.</span><span class="n">RegisterMediator</span><span class="p">(</span><span class="k">new</span> <span class="n">pure_MainView_Mediator</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//通过Facade获取Mediator的方法</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_MainView_Mediator</span> <span class="n">mediatorMain</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Facade</span><span class="p">.</span><span class="n">RetrieveMediator</span><span class="p">(</span><span class="n">pure_MainView_Mediator</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_MainView_Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            <span class="c1">//后面写了的,显示面板时会把面板上脚本绑定到ViewComponent</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">mediatorMain</span><span class="p">.</span><span class="n">ViewComponent</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//有了Mediator 下一步就是创建界面预设体(已经提前挂载好了View脚本)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">GameObject</span> <span class="n">res</span> <span class="p">=</span> <span class="n">Resources</span><span class="p">.</span><span class="n">Load</span><span class="p">&lt;</span><span class="n">GameObject</span><span class="p">&gt;(</span><span class="s">&#34;Panel/MainPanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">GameObject</span> <span class="n">mainPanel</span> <span class="p">=</span> <span class="n">GameObject</span><span class="p">.</span><span class="n">Instantiate</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">mainPanel</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="n">GameObject</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Canvas&#34;</span><span class="p">).</span><span class="n">transform</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//获取预设体上面的View脚本然后关联到Mediator上</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//mediatorMain.ViewComponent = mainPanel.GetComponent&lt;pure_MainView&gt;();</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//还可以直接获取控件</span>
+</span></span><span class="line"><span class="cl">               <span class="c1">//(mediatorMain.ViewComponent as pure_MainView).btnRole</span>
+</span></span><span class="line"><span class="cl">                
+</span></span><span class="line"><span class="cl">               <span class="c1">//但是这里还是使用对应mediator类中的封装方法吧</span>
+</span></span><span class="line"><span class="cl">               <span class="c1">//面板View脚本(预制体中已经挂载)绑定到Mediator .ViewComponent</span>
+</span></span><span class="line"><span class="cl">               <span class="n">mediatorMain</span><span class="p">.</span><span class="n">SetView</span><span class="p">(</span><span class="n">mainPanel</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">pure_MainView</span><span class="p">&gt;());</span>
+</span></span><span class="line"><span class="cl">                
+</span></span><span class="line"><span class="cl">               <span class="c1">//实现面板后需要进行第一次更新</span>
+</span></span><span class="line"><span class="cl">               <span class="c1">//需要把数据通过参数一起传出去</span>
+</span></span><span class="line"><span class="cl">               <span class="kt">var</span> <span class="n">proxyMain</span> <span class="p">=</span> <span class="n">Facade</span><span class="p">.</span><span class="n">RetrieveProxy</span><span class="p">(</span><span class="n">pure_PlayerProxy</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_PlayerProxy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">               <span class="k">if</span> <span class="p">(</span><span class="n">proxyMain</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                   <span class="c1">//通过Mediator线路,实现不需要每个面板单独写转化并调用UpdateInfo_View逻辑</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">,</span> <span class="n">proxyMain</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">               <span class="k">else</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&#34;pure_PlayerProxy 未注册,跳过第一次 UPDATE_PLAYER_INFO 刷新&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            
+</span></span><span class="line"><span class="cl">            <span class="k">case</span> <span class="s">&#34;RolePanel&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(!</span><span class="n">Facade</span><span class="p">.</span><span class="n">HasMediator</span><span class="p">(</span><span class="n">pure_RoleView_Mediator</span><span class="p">.</span><span class="n">NAME</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Facade</span><span class="p">.</span><span class="n">RegisterMediator</span><span class="p">(</span><span class="k">new</span> <span class="n">pure_RoleView_Mediator</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="n">pure_RoleView_Mediator</span> <span class="n">mediatorRole</span> <span class="p">=</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Facade</span><span class="p">.</span><span class="n">RetrieveMediator</span><span class="p">(</span><span class="n">pure_RoleView_Mediator</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_RoleView_Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">mediatorRole</span><span class="p">.</span><span class="n">ViewComponent</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">GameObject</span> <span class="n">res</span> <span class="p">=</span> <span class="n">Resources</span><span class="p">.</span><span class="n">Load</span><span class="p">&lt;</span><span class="n">GameObject</span><span class="p">&gt;(</span><span class="s">&#34;Panel/RolePanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">GameObject</span> <span class="n">rolePanel</span> <span class="p">=</span> <span class="n">GameObject</span><span class="p">.</span><span class="n">Instantiate</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">rolePanel</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">SetParent</span><span class="p">(</span><span class="n">GameObject</span><span class="p">.</span><span class="n">Find</span><span class="p">(</span><span class="s">&#34;Canvas&#34;</span><span class="p">).</span><span class="n">transform</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">mediatorRole</span><span class="p">.</span><span class="n">SetView</span><span class="p">(</span><span class="n">rolePanel</span><span class="p">.</span><span class="n">GetComponent</span><span class="p">&lt;</span><span class="n">pure_RoleView</span><span class="p">&gt;());</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">//同样需要更新</span>
+</span></span><span class="line"><span class="cl">                    <span class="kt">var</span> <span class="n">proxyROle</span> <span class="p">=</span> <span class="n">Facade</span><span class="p">.</span><span class="n">RetrieveProxy</span><span class="p">(</span><span class="n">pure_PlayerProxy</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_PlayerProxy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">if</span> <span class="p">(</span><span class="n">proxyROle</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">,</span> <span class="n">proxyROle</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">                        <span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&#34;pure_PlayerProxy 未注册,跳过第一次 UPDATE_PLAYER_INFO 刷新&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="63-pure_hidepanelcommand--隐藏面板命令">6.3 pure_HidePanelCommand — 隐藏面板命令
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Command</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_HidePanelCommand</span> <span class="p">:</span> <span class="n">SimpleCommand</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//依旧重写方法</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//return new时controller自动调用类中重写的Execute函数</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//controller自动把 SendNotification(pure_Notification.HIDE_PANEL, this);的通知名和参数组合为INotification 对象</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Execute</span><span class="p">(</span><span class="n">INotification</span> <span class="n">notification</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">Execute</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Debug</span><span class="p">.</span><span class="n">Log</span><span class="p">(</span><span class="s">&#34;执行pure_HidePanelCommand命令,自动调用其中函数&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//面板隐藏相关的具体逻辑</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//因为我们之前传入的this就是pure_RoleView_Mediator实例嘛,就把这里notification.Body(Object类型)向下转型</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Mediator</span> <span class="n">mediator</span> <span class="p">=</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// body 是字符串:当做面板名,自己查 Mediator</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">Body</span> <span class="k">is</span> <span class="kt">string</span> <span class="n">panelName</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// 约定:面板名 = Mediator.NAME(比如 &#34;MainPanel&#34; 对应 pure_MainView_Mediator.NAME)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mediator</span> <span class="p">=</span> <span class="n">Facade</span><span class="p">.</span><span class="n">RetrieveMediator</span><span class="p">(</span><span class="n">panelName</span><span class="p">)</span> <span class="k">as</span> <span class="n">Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// body 是 Mediator:直接用</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">notification</span><span class="p">.</span><span class="n">Body</span> <span class="k">is</span> <span class="n">Mediator</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mediator</span> <span class="p">=</span> <span class="n">notification</span><span class="p">.</span><span class="n">Body</span> <span class="k">as</span> <span class="n">Mediator</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">mediator</span> <span class="p">!=</span> <span class="kc">null</span> <span class="p">&amp;&amp;</span> <span class="n">mediator</span><span class="p">.</span><span class="n">ViewComponent</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//直接删除场景上对象(AI建议还是改为SetActive方案)</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//HidePanel要处理多种面板,这里就不要转化为具体面板如pure_RoleView</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//所有面板都是Mono的子类,这里就相当于Object爷转化为Mono儿,而不是具体Panel孙</span>
+</span></span><span class="line"><span class="cl">            <span class="n">GameObject</span><span class="p">.</span><span class="n">Destroy</span><span class="p">((</span><span class="n">mediator</span><span class="p">.</span><span class="n">ViewComponent</span> <span class="k">as</span> <span class="n">MonoBehaviour</span><span class="p">).</span><span class="n">gameObject</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//删掉后一定要置空</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mediator</span><span class="p">.</span><span class="n">ViewComponent</span> <span class="p">=</span> <span class="kc">null</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="64-pure_levupcommand--升级命令">6.4 pure_LevUpCommand — 升级命令
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Command</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_LevUpCommand</span> <span class="p">:</span> <span class="n">SimpleCommand</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">Execute</span><span class="p">(</span><span class="n">INotification</span> <span class="n">notification</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//好吧,没啥卵用的代码,留着纯习惯</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">Execute</span><span class="p">(</span><span class="n">notification</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//得到数据代理,调用升级,完成后通知别人更新数据</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//前面StartUpCommand中注册了,反正RegisterProxy和RetrieveProxy这俩方法知道是存取同一个实例就行</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pure_PlayerProxy</span> <span class="n">playerProxy</span> <span class="p">=</span> <span class="n">Facade</span><span class="p">.</span><span class="n">RetrieveProxy</span><span class="p">(</span><span class="n">pure_PlayerProxy</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span> <span class="k">as</span> <span class="n">pure_PlayerProxy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">playerProxy</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">playerProxy</span><span class="p">.</span><span class="n">LevUp</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//注意发送的不是LEV_UP通知</span>
+</span></span><span class="line"><span class="cl">            <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">UPDATE_PLAYER_INFO</span><span class="p">,</span> <span class="n">playerProxy</span><span class="p">.</span><span class="n">Data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="command-设计要点">Command 设计要点
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>命令</th>
+					<th>触发者</th>
+					<th>作用</th>
+					<th>关键调用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>StartUpCommand</td>
+					<td><code>Facade.StartUp()</code> 发 START_UP</td>
+					<td>注册 PlayerProxy</td>
+					<td><code>Facade.RegisterProxy(new pure_PlayerProxy())</code></td>
+			</tr>
+			<tr>
+					<td>ShowPanelCommand</td>
+					<td><code>Facade.StartUp()</code> / MainView.btnRole 发 SHOW_PANEL + 面板名</td>
+					<td>注册 Mediator + 加载预制体 + 绑定 ViewComponent + 首次刷新</td>
+					<td><code>Facade.RegisterMediator</code> + <code>Resources.Load</code> + <code>mediator.SetView</code> + <code>SendNotification(UPDATE_PLAYER_INFO)</code></td>
+			</tr>
+			<tr>
+					<td>HidePanelCommand</td>
+					<td>RoleView.btnClose 发 HIDE_PANEL + this</td>
+					<td>销毁 GameObject + 置空 ViewComponent</td>
+					<td><code>GameObject.Destroy</code> + <code>mediator.ViewComponent = null</code></td>
+			</tr>
+			<tr>
+					<td>LevUpCommand</td>
+					<td>RoleView.btnLevUp 发 LEVEL_UP</td>
+					<td>取 Proxy 调 LevUp 后通知更新</td>
+					<td><code>Facade.RetrieveProxy</code> + <code>playerProxy.LevUp()</code> + <code>SendNotification(UPDATE_PLAYER_INFO)</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><strong>Command 是一次性的</strong>：每次 <code>SendNotification</code> 触发对应 Command 时，工厂 <code>() =&gt; new xxxCommand()</code> 都会 <code>new</code> 一个新实例，执行完 <code>Execute</code> 后丢弃。所以不要在 Command 里存状态字段，状态都放 Proxy 里。</p>
+</blockquote>
+<hr>
+<h2 id="七facade-门面--mainentry-入口">七、Facade 门面 + MainEntry 入口
+</h2><h3 id="71-pure_facade--门面外观">7.1 pure_Facade — 门面/外观
+</h3><p>Facade 是 PureMVC 的「总管」：单例 + 初始化三大核心 + 注册命令映射 + 对外暴露 <code>StartUp()</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Interfaces</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">PureMVC.Patterns.Facade</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//Facade负责初始化框架，并统一管理 Model、View 和 Controller 三大核心模块</span>
+</span></span><span class="line"><span class="cl"><span class="c1">//1.首先继承</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_Facade</span> <span class="p">:</span> <span class="n">Facade</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//父类Facade里面有 protected static IFacade instance;</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">//和单例基类一个作用就对了,只是把向下转型放在了子类来写</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">pure_Facade</span> <span class="n">Instance</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">get</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">instance</span> <span class="p">==</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">instance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">pure_Facade</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//返回值为子类这里就要向下转型了(因为instance是IFacade类型嘛)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="n">instance</span> <span class="k">as</span> <span class="n">pure_Facade</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//Facade通过IController,IModel,IView三个接口管理对应的Core模块</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//初始化Controller相关的方法</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">protected</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">InitializeController</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">base</span><span class="p">.</span><span class="n">InitializeController</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//相当于在字典中添加映射,当SendNotification(&#34;START_UP&#34;)时,调用工厂(其中是怎么制造command的逻辑)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这里我们写的逻辑(或者说工厂函数)就是直接new一个pure_StartUpCommand实例(注意此时并不会执行Excute)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">RegisterCommand</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">START_UP</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//return new时controller自动调用类中的Execute函数</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">new</span> <span class="n">pure_StartUpCommand</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="n">RegisterCommand</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">SHOW_PANEL</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">new</span> <span class="n">pure_ShowPanelCommand</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="n">RegisterCommand</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">HIDE_PANEL</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">new</span> <span class="n">pure_HidePanelCommand</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="n">RegisterCommand</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">LEVEL_UP</span><span class="p">,</span> <span class="p">()</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span> <span class="k">new</span> <span class="n">pure_LevUpCommand</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">});</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">//一定有一个启动函数(我们在Entry中调用的)</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">StartUp</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//发送通知--&gt;返回new pure_StartUpCommand()--&gt;执行 Debug.Log(&#34;执行命令时自动调用的函数&#34;);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">START_UP</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="c1">//发送通知的时候也可以传入参数body,就是个Object类实例,收到通知直接Body取出要用的成员就行</span>
+</span></span><span class="line"><span class="cl">        <span class="n">SendNotification</span><span class="p">(</span><span class="n">pure_Notification</span><span class="p">.</span><span class="n">SHOW_PANEL</span><span class="p">,</span> <span class="s">&#34;MainPanel&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键设计</strong>：</p>
+<ul>
+<li><code>InitializeController()</code> 是 PureMVC 父类的虚方法，<strong>Facade 第一次被 <code>Instance</code> 访问时自动调用一次</strong>。所有 <code>RegisterCommand</code> 都写在这里。</li>
+<li><code>RegisterCommand(通知名, 工厂)</code> 把「通知名 → Command 工厂」存进 Controller 的字典。<code>SendNotification(通知名)</code> 时 Controller 查字典、调工厂 <code>new</code> 出 Command、调 <code>Execute</code>、丢弃。</li>
+<li><strong>没注册的通知名不会触发任何 Command</strong>——但仍然会走 Mediator 路径（双分发机制）。</li>
+</ul>
+<h3 id="72-pure_mainentry--场景入口">7.2 pure_MainEntry — 场景入口
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">pure_MainEntry</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pure_Facade</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">StartUp</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Q</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_Facade</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">SendNotification</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="n">pure_Notification</span><span class="p">.</span><span class="n">SHOW_PANEL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="s">&#34;MainPanel&#34;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">);</span>      
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">W</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">pure_Facade</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">SendNotification</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="n">pure_Notification</span><span class="p">.</span><span class="n">HIDE_PANEL</span><span class="p">,</span> 
+</span></span><span class="line"><span class="cl">                <span class="c1">//经过我们修改,这里直接传入&#34;MainView&#34;也可以了</span>
+</span></span><span class="line"><span class="cl">                <span class="n">pure_Facade</span><span class="p">.</span><span class="n">Instance</span><span class="p">.</span><span class="n">RetrieveMediator</span><span class="p">(</span><span class="n">pure_MainView_Mediator</span><span class="p">.</span><span class="n">NAME</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">);</span>   
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>入口脚本只做两件事：启动 Facade + 把外部输入（按键）转成通知。所有业务逻辑都在 Command / Mediator / Proxy 里。</p>
+</blockquote>
+<hr>
+<h2 id="八通知的双分发机制">八、通知的双分发机制
+</h2><p><code>SendNotification(通知名, body)</code> 时，Facade 内部<strong>同时</strong>做两件事：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">SendNotification(&#34;SHOW_PANEL&#34;, &#34;MainPanel&#34;)
+</span></span><span class="line"><span class="cl">        │
+</span></span><span class="line"><span class="cl">        ├─→ Controller 路径：查 RegisterCommand 字典
+</span></span><span class="line"><span class="cl">        │     找到 &#34;SHOW_PANEL&#34; → new pure_ShowPanelCommand() → Execute(notification)
+</span></span><span class="line"><span class="cl">        │
+</span></span><span class="line"><span class="cl">        └─→ Mediator 路径：遍历所有已注册的 Mediator
+</span></span><span class="line"><span class="cl">              对每个 Mediator 调 ListNotificationInterests()
+</span></span><span class="line"><span class="cl">              如果返回的 string[] 包含 &#34;SHOW_PANEL&#34;，调它的 HandleNotification(notification)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>示例</strong>：</p>
+<ul>
+<li><code>SHOW_PANEL</code> 注册了 Command（<code>pure_ShowPanelCommand</code>），同时 <code>pure_RoleView_Mediator</code> 的 <code>ListNotificationInterests</code> 也包含它——所以两边都会触发。</li>
+<li><code>UPDATE_PLAYER_INFO</code> <strong>没注册 Command</strong>，只有 Mediator 监听——只走 Mediator 路径。</li>
+<li><code>LEVEL_UP</code> 注册了 Command（<code>pure_LevUpCommand</code>），没 Mediator 监听——只走 Command 路径。</li>
+</ul>
+<blockquote>
+<p>这是 PureMVC 解耦的核心：<strong>发通知的人不需要知道是 Command 处理还是 Mediator 处理，甚至两者都处理</strong>。Command 负责业务逻辑（创建面板 / 调 Proxy），Mediator 负责界面刷新（更新 Text）。两者通过通知名约定协作，但互不引用。</p>
+</blockquote>
+<hr>
+<h2 id="九完整调用链路">九、完整调用链路
+</h2><h3 id="91-启动流程">9.1 启动流程
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">场景启动
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">pure_MainEntry.Start()
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">pure_Facade.Instance.StartUp()
+</span></span><span class="line"><span class="cl">  ├─ 1. SendNotification(START_UP)
+</span></span><span class="line"><span class="cl">  │     ↓ Controller 路径
+</span></span><span class="line"><span class="cl">  │     pure_StartUpCommand.Execute()
+</span></span><span class="line"><span class="cl">  │       └─ Facade.RegisterProxy(new pure_PlayerProxy())
+</span></span><span class="line"><span class="cl">  │            （Proxy 构造时从 PlayerPrefs 读 JOJO/2/99）
+</span></span><span class="line"><span class="cl">  │
+</span></span><span class="line"><span class="cl">  └─ 2. SendNotification(SHOW_PANEL, &#34;MainPanel&#34;)
+</span></span><span class="line"><span class="cl">        ↓ Controller 路径
+</span></span><span class="line"><span class="cl">        pure_ShowPanelCommand.Execute()
+</span></span><span class="line"><span class="cl">          ├─ Facade.RegisterMediator(new pure_MainView_Mediator())
+</span></span><span class="line"><span class="cl">          ├─ Resources.Load(&#34;Panel/MainPanel&#34;) → Instantiate
+</span></span><span class="line"><span class="cl">          ├─ mediatorMain.SetView(view)  // 绑定 ViewComponent + btnRole.onClick
+</span></span><span class="line"><span class="cl">          └─ SendNotification(UPDATE_PLAYER_INFO, proxyMain.Data)
+</span></span><span class="line"><span class="cl">                ↓ Mediator 路径（无 Command 注册）
+</span></span><span class="line"><span class="cl">                pure_MainView_Mediator.HandleNotification()
+</span></span><span class="line"><span class="cl">                  └─ (ViewComponent as pure_MainView).UpdateInfo_View(data)
+</span></span><span class="line"><span class="cl">                       └─ txtName.text = &#34;JOJO&#34;; txtAtk.text = &#34;99&#34;; ...
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="92-点击角色按钮--显示角色面板">9.2 点击「角色」按钮 → 显示角色面板
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">玩家点击 btnRole
+</span></span><span class="line"><span class="cl">  ↓ (pure_MainView_Mediator.SetView 中绑定的闭包)
+</span></span><span class="line"><span class="cl">SendNotification(SHOW_PANEL, &#34;RolePanel&#34;)
+</span></span><span class="line"><span class="cl">  ↓ Controller 路径
+</span></span><span class="line"><span class="cl">pure_ShowPanelCommand.Execute()
+</span></span><span class="line"><span class="cl">  ├─ Facade.RegisterMediator(new pure_RoleView_Mediator())
+</span></span><span class="line"><span class="cl">  ├─ Resources.Load(&#34;Panel/RolePanel&#34;) → Instantiate
+</span></span><span class="line"><span class="cl">  ├─ mediatorRole.SetView(view)  // 绑定 ViewComponent + btnClose/btnLevUp.onClick
+</span></span><span class="line"><span class="cl">  └─ SendNotification(UPDATE_PLAYER_INFO, proxy.Data)
+</span></span><span class="line"><span class="cl">        ↓ Mediator 路径
+</span></span><span class="line"><span class="cl">        ├─ pure_MainView_Mediator.HandleNotification()  // 主面板也刷新（其实没变化）
+</span></span><span class="line"><span class="cl">        └─ pure_RoleView_Mediator.HandleNotification()
+</span></span><span class="line"><span class="cl">              └─ (ViewComponent as pure_RoleView).UpdateInfo_View(data)
+</span></span><span class="line"><span class="cl">                   └─ txtAtk.text = &#34;99&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="93-点击升级按钮">9.3 点击「升级」按钮
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">玩家点击 btnLevUp
+</span></span><span class="line"><span class="cl">  ↓ (pure_RoleView_Mediator.SetView 中绑定的闭包)
+</span></span><span class="line"><span class="cl">SendNotification(LEVEL_UP, this)
+</span></span><span class="line"><span class="cl">  ↓ Controller 路径
+</span></span><span class="line"><span class="cl">pure_LevUpCommand.Execute()
+</span></span><span class="line"><span class="cl">  ├─ playerProxy = Facade.RetrieveProxy(NAME) as pure_PlayerProxy
+</span></span><span class="line"><span class="cl">  ├─ playerProxy.LevUp()
+</span></span><span class="line"><span class="cl">  │     ├─ data.playerLev += 1   // 2 → 3
+</span></span><span class="line"><span class="cl">  │     ├─ data.playerAtk += data.playerLev  // 99 + 3 = 102
+</span></span><span class="line"><span class="cl">  │     └─ SaveData()  // 回写 PlayerPrefs
+</span></span><span class="line"><span class="cl">  └─ SendNotification(UPDATE_PLAYER_INFO, playerProxy.Data)
+</span></span><span class="line"><span class="cl">        ↓ Mediator 路径
+</span></span><span class="line"><span class="cl">        ├─ pure_MainView_Mediator.HandleNotification()
+</span></span><span class="line"><span class="cl">        │     └─ MainView.UpdateInfo_View()  // txtLevel=&#34;3&#34; txtAtk=&#34;102&#34;
+</span></span><span class="line"><span class="cl">        └─ pure_RoleView_Mediator.HandleNotification()
+</span></span><span class="line"><span class="cl">              └─ RoleView.UpdateInfo_View()  // txtAtk=&#34;102&#34;
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="94-点击关闭按钮">9.4 点击「关闭」按钮
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">玩家点击 btnClose
+</span></span><span class="line"><span class="cl">  ↓ (pure_RoleView_Mediator.SetView 中绑定的闭包)
+</span></span><span class="line"><span class="cl">SendNotification(HIDE_PANEL, this)  // this = pure_RoleView_Mediator 实例
+</span></span><span class="line"><span class="cl">  ↓ Controller 路径
+</span></span><span class="line"><span class="cl">pure_HidePanelCommand.Execute()
+</span></span><span class="line"><span class="cl">  ├─ notification.Body is Mediator → mediator = Body as Mediator
+</span></span><span class="line"><span class="cl">  ├─ GameObject.Destroy((mediator.ViewComponent as MonoBehaviour).gameObject)
+</span></span><span class="line"><span class="cl">  └─ mediator.ViewComponent = null
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="95-按-w-键隐藏-mainpanel">9.5 按 W 键隐藏 MainPanel
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">pure_MainEntry.Update() 检测到 W 键
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">pure_Facade.Instance.SendNotification(HIDE_PANEL, RetrieveMediator(NAME))
+</span></span><span class="line"><span class="cl">  // 这里 Body 是 Mediator 实例（也可以传 &#34;MainView&#34; 字符串，HidePanelCommand 两种都支持）
+</span></span><span class="line"><span class="cl">  ↓ Controller 路径
+</span></span><span class="line"><span class="cl">pure_HidePanelCommand.Execute()
+</span></span><span class="line"><span class="cl">  └─ 销毁 MainPanel GameObject
+</span></span></code></pre></td></tr></table>
+</div>
+</div><hr>
+<h2 id="十几个关键设计点">十、几个关键设计点
+</h2><h3 id="101-为什么-mediator-要在-showpanelcommand-里注册而不是在-facade-里">10.1 为什么 Mediator 要在 ShowPanelCommand 里注册，而不是在 Facade 里
+</h3><ul>
+<li>Facade 的 <code>InitializeController()</code> 在第一次访问 <code>Instance</code> 时调用一次，适合注册<strong>全局唯一</strong>的东西（Command、启动时的 Proxy）。</li>
+<li>面板 Mediator 是<strong>按需注册</strong>的：玩家没打开 RolePanel 之前，<code>pure_RoleView_Mediator</code> 不应该占着 Facade 字典，否则它会收到无用的 UPDATE_PLAYER_INFO 通知白白浪费性能。</li>
+<li><code>ShowPanelCommand</code> 里 <code>if (!Facade.HasMediator(NAME))</code> 保证只注册一次，重复显示同一面板不会重复注册。</li>
+</ul>
+<h3 id="102-为什么-mediator-持有-viewcomponent-而不是直接继承-view-脚本">10.2 为什么 Mediator 持有 ViewComponent 而不是直接继承 View 脚本
+</h3><ul>
+<li>Mediator 是<strong>纯 C# 类</strong>（继承 <code>Mediator</code>，不继承 MonoBehaviour），不能挂在 GameObject 上。</li>
+<li>View 脚本是 MonoBehaviour，挂在预制体上，负责 Inspector 拖拽的控件引用。</li>
+<li>二者通过 <code>ViewComponent</code>（<code>object</code> 类型）关联：Command 加载预制体 → <code>GetComponent&lt;pure_MainView&gt;()</code> → <code>mediator.SetView(view)</code> → Mediator 内部 <code>ViewComponent = view</code>。</li>
+<li>这样 Mediator 可以<strong>脱离 Unity 场景做单元测试</strong>（ViewComponent 传 mock 对象）。</li>
+</ul>
+<h3 id="103-为什么-hidepanelcommand-支持两种-body-类型">10.3 为什么 HidePanelCommand 支持两种 Body 类型
+</h3><ul>
+<li>字符串面板名：调用方不用知道 Mediator（<code>pure_MainEntry</code> 按 W 时就这样调）。</li>
+<li>Mediator 实例：调用方就是 Mediator 自己（<code>pure_RoleView_Mediator.btnClose</code> 闭包里 <code>SendNotification(HIDE_PANEL, this)</code>）。</li>
+<li>Command 里用 <code>is</code> 模式匹配两种都支持，灵活。</li>
+</ul>
+<h3 id="104-关键风险点">10.4 关键风险点
+</h3><ul>
+<li><strong><code>pure_RoleView_Mediator</code> 监听了 SHOW_PANEL 和 HIDE_PANEL 但 <code>HandleNotification</code> 里 case 空着</strong>：会浪费一次 switch 分发。注释里也提到了，纯演示用，生产代码可以删掉这两个监听。</li>
+<li><strong>HidePanelCommand 销毁 GameObject 后没 <code>RemoveMediator</code></strong>：Mediator 还在 Facade 字典里，下次再 Show 同一面板时 <code>HasMediator</code> 返回 true 走不进 <code>RegisterMediator</code> 分支，但 <code>ViewComponent == null</code> 会进 <code>SetView</code> 分支，所以能复用。如果想彻底清理，加 <code>Facade.RemoveMediator(NAME)</code>。</li>
+<li><strong><code>pure_PlayerProxy.LevUp</code> 不是线程安全</strong>：PureMVC 默认在主线程使用没问题，但如果接到服务器推送的多线程通知要小心。</li>
+</ul>
+<hr>
+<h2 id="十一和上篇普通-mvc--mvp-的对比">十一、和上篇普通 MVC / MVP 的对比
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>普通 MVC（前篇）</th>
+					<th>MVP（前篇）</th>
+					<th><strong>PureMVC（本篇）</strong></th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>中间层</td>
+					<td>Controller 类</td>
+					<td>Presenter 类</td>
+					<td>Facade + Command + Mediator + Proxy</td>
+			</tr>
+			<tr>
+					<td>通信</td>
+					<td>View 直接调 Model 方法</td>
+					<td>View 调 Presenter，Presenter 调 Model</td>
+					<td>全部 <code>SendNotification</code></td>
+			</tr>
+			<tr>
+					<td>View 与 Model</td>
+					<td>直接引用</td>
+					<td>通过 Presenter</td>
+					<td>完全互不可见</td>
+			</tr>
+			<tr>
+					<td>加新面板</td>
+					<td>改 Controller + 加 View</td>
+					<td>加 Presenter + View</td>
+					<td>加 View + Mediator + 在 ShowPanelCommand 加一个 case</td>
+			</tr>
+			<tr>
+					<td>跨面板协作</td>
+					<td>各 Controller 互相引用</td>
+					<td>各 Presenter 互相引用</td>
+					<td>通过通知协作，互不引用</td>
+			</tr>
+			<tr>
+					<td>学习成本</td>
+					<td>低</td>
+					<td>中</td>
+					<td>高（要懂通知双分发、Command 一次性、Mediator 生命周期）</td>
+			</tr>
+			<tr>
+					<td>适合规模</td>
+					<td>小项目</td>
+					<td>中项目</td>
+					<td>大项目 / 多面板协作 / 需要解耦的场景</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>PureMVC 的「重」换来的是<strong>加面板 / 改业务流程对老代码零侵入</strong>：你加一个 SkillPanel，只需要写 <code>pure_SkillView</code> + <code>pure_SkillView_Mediator</code> + 在 <code>pure_ShowPanelCommand</code> 加 <code>case &quot;SkillPanel&quot;</code>，MainPanel 和 RolePanel 一行代码都不用改。这是普通 MVC/MVP 做不到的。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a>
+        
+            <a href="/tags/puremvc/">PureMVC</a>
+        
+            <a href="/tags/mvc/">MVC</a>
+        
+            <a href="/tags/%E6%A1%86%E6%9E%B6/">框架</a>
+        
+            <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+        
+            <a href="/tags/%E9%80%9A%E7%9F%A5/">通知</a>
+        
+            <a href="/tags/%E8%A7%A3%E8%80%A6/">解耦</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>KK57-0803.0815</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/unity-mvc%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity MVC框架实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 普通事件中心(仅支持无参函数订阅)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity%E5%AF%B9%E8%B1%A1%E7%BC%93%E5%AD%98%E6%B1%A0%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity对象缓存池实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-mvp%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity MVP框架实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity单例模式实现总结</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2025 - 
+        
+        2026 KimKitsuragi
+    </section>
+    
+
+
+   
+<section class="count_info">
+    <div>
+        本站稳定运行：
+        <span id="ds" class="running-days number-highlight"></span>
+        天
+        <span id="hs" class="running-days number-highlight"></span>
+        小时
+        <span id="ms" class="running-days number-highlight"></span>
+        分钟
+    </div>
+    <div>
+        
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+        共发表文章数：
+        <span class="number-highlight">23</span>
+        篇 · 总计
+        <span class="number-highlight">64.30</span>
+        k 字
+    </div>
+    <div>
+        <span id="busuanzi_container_site_pv">
+            本站总访问量：
+            <span id="busuanzi_value_site_pv" class="number-highlight"></span>
+            次
+        </span>
+    </div>
+</section>
+
+
+<script>
+(function() {
+    
+    const startDate = '2026-01-01';
+    const s1 = new Date(startDate.replace(/-/g, "/"));
+    const s2 = new Date();
+    const diff = s2.getTime() - s1.getTime();
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const ds = document.getElementById('ds');
+    const hs = document.getElementById('hs');
+    const ms = document.getElementById('ms');
+
+    if (ds) ds.textContent = days;
+    if (hs) hs.textContent = hours;
+    if (ms) ms.textContent = minutes;
+
+    const pv = document.getElementById('busuanzi_value_site_pv');
+    if (pv) {
+        pv.classList.add('number-highlight');
+        
+        pv.addEventListener('DOMNodeInserted', function() {
+            const value = parseInt(this.textContent);
+            if (value > 1000) {
+                this.textContent = '1';
+            }
+        });
+    }
+})();
+</script>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.85c2f5bca0520a2fd76601ba7e90d1aa29ff9fd53ca3e867a3afacf18679d31d.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+
+<style>
+  @font-face {
+    font-family: 'MengWaXiYuan';
+    src: url('/font/JianShouMengWaChaoCuYuanTi-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    --font-primary: 'MengWaXiYuan', sans-serif;
+  }
+  html, body,
+  .article-content,
+  .single__contents,
+  .widget--toc,
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary) !important;
+  }
+  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
+    font-family: inherit !important;
+  }
+</style>
+
+
+
+<style>
+  #TableOfContents > ul ul,
+  #TableOfContents > ul ol,
+  #TableOfContents > ol ul,
+  #TableOfContents > ol ol {
+    display: none;
+  }
+  #TableOfContents .open {
+    display: block !important;
+  }
+</style>
+
+
+<style>
+  #backTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 20px;  
+    z-index: 99;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-image: url('https://kimkitsuragi0571.github.io/icons/backTop.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    outline: none;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    function initTocHide() {
+      const toc = document.querySelector(".widget--toc");
+      if (!toc) return;
+
+      let timer = null;
+      window.addEventListener('scroll', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          
+          document.querySelectorAll('.open').forEach(el => el.classList.remove('open'));
+
+          
+          const activeLink = document.querySelector(
+            ".toc-link.active, .toc-link.active-class, .active, .active-class"
+          );
+          if (!activeLink) return;
+
+          
+          const nextSibling = activeLink.nextElementSibling;
+          if (nextSibling && (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL')) {
+            nextSibling.classList.add('open');
+          }
+
+          
+          let parent = activeLink.parentElement;
+          while (parent && parent.parentElement) {
+            if (parent.tagName === 'UL' || parent.tagName === 'OL') {
+              parent.classList.add('open');
+            }
+            parent = parent.parentElement;
+          }
+        }, 80);
+      });
+    }
+
+    
+    function initScrollTop() {
+      const rightSidebar = document.querySelector(".right-sidebar");
+      if (!rightSidebar) return;
+
+      const btn = document.createElement("div");
+      btn.id = "backTopBtn";
+      btn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+      rightSidebar.appendChild(btn);
+
+      window.addEventListener('scroll', () => {
+        btn.style.display = window.scrollY > 20 ? "block" : "none";
+      });
+    }
+
+    
+    initTocHide();
+    initScrollTop();
+  });
+</script>
+
+
+
+<style>
+    .highlight {
+        max-height: 400px;
+        overflow: hidden;
+        position: relative;  
+    }
+
+    .code-show {
+        max-height: none !important;
+    }
+
+    .code-more-box {
+        width: 100%;
+        padding-top: 78px;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(#fff));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .code-more-btn {
+        display: block;
+        margin: auto;
+        width: 44px;
+        height: 22px;
+        background: #f0f0f5;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-top: 6px;
+        cursor: pointer;
+    }
+
+    .code-more-img {
+        cursor: pointer !important;
+        display: block;
+        margin: auto;
+        width: 22px;
+        height: 16px;
+    }
+</style>
+
+<script>
+  function initCodeMoreBox() {
+    document.querySelectorAll(".highlight").forEach(codeBlock => {
+      if (codeBlock.querySelector('.code-more-box')) return;
+      if (codeBlock.scrollHeight <= codeBlock.clientHeight) return;
+
+      const codeMoreBox = document.createElement('div');
+      codeMoreBox.classList.add('code-more-box');
+
+      const codeMoreBtn = document.createElement('span');
+      codeMoreBtn.classList.add('code-more-btn');
+      codeMoreBtn.addEventListener('click', () => {
+        codeBlock.classList.add('code-show');
+        codeMoreBox.style.display = 'none';
+      });
+
+      const img = document.createElement('img');
+      img.classList.add('code-more-img');
+      
+      img.src = "/icons/codeMore.png";
+
+      codeMoreBtn.appendChild(img);
+      codeMoreBox.appendChild(codeMoreBtn);
+      codeBlock.appendChild(codeMoreBox);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCodeMoreBox);
+</script>
+
+<div id="jsi-flying-fish-container"></div>
+
+
+<style>
+#jsi-flying-fish-container {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    z-index: -1;
+    opacity: 0;           
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity .3s;
+}
+ 
+.show-fish #jsi-flying-fish-container {
+    opacity: .5;
+}
+</style>
+
+
+<script>
+window.initFlyingFish = function () {
+    const container = document.getElementById('jsi-flying-fish-container');
+    if (!container) return;
+
+     
+    const oldCanvas = container.querySelector('canvas');
+    if (oldCanvas) oldCanvas.remove();
+
+     
+    const script = document.createElement('script');
+    script.src = 'https://cdn.meimolihan.eu.org/hugo/fish/fish.js';
+    script.onload = function () {
+        if (typeof RENDERER !== 'undefined') RENDERER.init();
+    };
+    document.head.appendChild(script);
+
+     
+    function checkBottom() {
+        const doc = document.documentElement;
+        const isBottom = (window.innerHeight + Math.ceil(window.pageYOffset))
+                         >= (doc.scrollHeight - 10);
+        document.body.classList.toggle('show-fish', isBottom);
+    }
+
+     
+    window.addEventListener('scroll', checkBottom);
+    checkBottom(); 
+};
+
+ 
+document.addEventListener('DOMContentLoaded', initFlyingFish);
+
+ 
+document.addEventListener('pjax:complete', initFlyingFish);
+</script>
+
+
+<div id="toast-stack"></div>
+
+<script>
+ 
+(() => {
+  const toastStack = document.getElementById('toast-stack');
+  let toastCount = 0;
+  const MAX_TOAST = 5;
+  const DURATION  = 2500;
+
+   
+  let lastText = '';
+  let lastTime = 0;
+
+  window.pushToast = function (msg = '✅ 复制成功 ') {
+    const now = Date.now();
+    if (msg === lastText && now - lastTime < 500) return; 
+    lastText = msg;
+    lastTime = now;
+
+     
+    if (toastCount >= MAX_TOAST) toastStack.firstElementChild?.closeToast();
+
+    const item = document.createElement('div');
+    item.className = 'snack-left-top';
+    item.textContent = msg;
+
+    let closeTimer = null;
+    function closeToast() {
+      if (item.isClosing) return;
+      item.isClosing = true;
+      item.classList.remove('show');
+      item.addEventListener('transitionend', () => {
+        item.remove();
+        toastCount--;
+      }, { once: true });
+      clearTimeout(closeTimer);
+    }
+    item.closeToast = closeToast;
+
+    toastStack.appendChild(item);
+    toastCount++;
+    void item.offsetWidth;
+    item.classList.add('show');
+    closeTimer = setTimeout(closeToast, DURATION);
+  };
+
+   
+  document.addEventListener('copy', e => {
+    const text = window.getSelection().toString().trim();
+    if (!text) return;
+    e.preventDefault();
+    navigator.clipboard.writeText(text)
+      .then(() => pushToast())
+      .catch(console.warn);
+  });
+
+   
+  const container = document.querySelector('.article-content');
+  if (container) {
+    container.addEventListener('click', e => {
+      if (!e.target.matches('.copyCodeButton')) return;
+      const wrap = e.target.closest('pre, .highlight');
+      const codeTd = wrap?.querySelector('td:nth-child(2)') || wrap;
+      const txt = codeTd ? codeTd.textContent.trim() : '';
+      navigator.clipboard.writeText(txt)
+        .then(() => pushToast())
+        .catch(err => alert('复制失败：' + err));
+    });
+  }
+})();
+</script>
+
+<style>
+ 
+.copyCodeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #3d3c3c;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.copyCodeButton:hover {
+  background: var(--hover-text-color);
+  color: #fff;
+}
+
+ 
+.snack-left-top {
+  position: fixed;
+  left: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  transform: translateX(calc(-100% - 20px));
+  width: 300px;
+  height: 60px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 15px;
+  background: var(--hover-text-color);
+  color: #fff;
+  box-shadow: 4px 4px 14px rgba(0, 0, 0, .35);
+  z-index: 9999;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+}
+ 
+.snack-left-top.show {
+  transform: translateX(0);
+}
+ 
+#toast-stack {
+  position: fixed;
+  left: 0;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  z-index: 9999;
+  pointer-events: none;
+}
+
+ 
+#toast-stack .snack-left-top {
+  position: relative;    
+  margin-bottom: 12px;   
+  pointer-events: auto;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1),
+              opacity   .35s cubic-bezier(.4, 0, .2, 1);
+  opacity: 0;
+  transform: translateX(calc(-100% - 20px));
+}
+
+#toast-stack .snack-left-top.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>
+
+<style>
+   
+  .fixed-ghost-box {
+    position: fixed;
+    bottom: 90px;      
+    right: 20px;       
+    z-index: 10;       
+    background-color: transparent;
+    margin: 0;
+    pointer-events: none;  
+    overflow: visible;
+  }
+
+   
+  #ghost {
+    position: relative;
+    transform: scale(0.3);   
+    transform-origin: center center;  
+    pointer-events: none;
+  }
+
+  #red {
+    animation: upNDown infinite 0.5s;
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    grid-template-rows: repeat(14, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    grid-template-areas:
+      "a1  a2  a3  a4  a5  top0  top0  top0  top0  a10 a11 a12 a13 a14"
+      "b1  b2  b3  top1 top1 top1 top1 top1 top1 top1 top1 b12 b13 b14"
+      "c1 c2 top2 top2 top2 top2 top2 top2 top2 top2 top2 top2 c13 c14"
+      "d1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 d14"
+      "e1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 e14"
+      "f1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 f14"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "st0 st0 an4 st1 an7 st2 an10 an10 st3 an13 st4 an16 st5 st5"
+      "an1 an2 an3 an5 an6 an8 an9 an9 an11 an12 an14 an15 an17 an18";
+  }
+
+  @keyframes upNDown {
+    0%,49% { transform: translateY(0px); }
+    50%,100% { transform: translateY(-10px); }
+  }
+
+  #top0,#top1,#top2,#top3,#top4,#st0,#st1,#st2,#st3,#st4,#st5 {
+    background-color: rgba(255, 0, 0, 0.397);
+  }
+  #top0 { grid-area: top0; }
+  #top1 { grid-area: top1; }
+  #top2 { grid-area: top2; }
+  #top3 { grid-area: top3; }
+  #top4 { grid-area: top4; }
+  #st0 { grid-area: st0; }
+  #st1 { grid-area: st1; }
+  #st2 { grid-area: st2; }
+  #st3 { grid-area: st3; }
+  #st4 { grid-area: st4; }
+  #st5 { grid-area: st5; }
+
+  #an1 { grid-area: an1; animation: flicker0 infinite 0.5s; }
+  #an18 { grid-area: an18; animation: flicker0 infinite 0.5s; }
+  #an2 { grid-area: an2; animation: flicker1 infinite 0.5s; }
+  #an17 { grid-area: an17; animation: flicker1 infinite 0.5s; }
+  #an3 { grid-area: an3; animation: flicker1 infinite 0.5s; }
+  #an16 { grid-area: an16; animation: flicker1 infinite 0.5s; }
+  #an4 { grid-area: an4; animation: flicker1 infinite 0.5s; }
+  #an15 { grid-area: an15; animation: flicker1 infinite 0.5s; }
+  #an6 { grid-area: an6; animation: flicker0 infinite 0.5s; }
+  #an12 { grid-area: an12; animation: flicker0 infinite 0.5s; }
+  #an7 { grid-area: an7; animation: flicker0 infinite 0.5s; }
+  #an13 { grid-area: an13; animation: flicker0 infinite 0.5s; }
+  #an9 { grid-area: an9; animation: flicker1 infinite 0.5s; }
+  #an10 { grid-area: an10; animation: flicker1 infinite 0.5s; }
+  #an8 { grid-area: an8; animation: flicker0 infinite 0.5s; }
+  #an11 { grid-area: an11; animation: flicker0 infinite 0.5s; }
+
+  @keyframes flicker0 {
+    0%,49% { background-color: rgba(255, 0, 0, 0.397); }
+    50%,100% { background-color: transparent; }
+  }
+  @keyframes flicker1 {
+    0%,49% { background-color: transparent; }
+    50%,100% { background-color: rgba(255, 0, 0, 0.397); }
+  }
+
+  #eye { width: 40px; height: 50px; position: absolute; top: 30px; left: 10px; }
+  #eye::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #eye1 { width: 40px; height: 50px; position: absolute; top: 30px; right: 30px; }
+  #eye1::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye1::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #pupil { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; left: 10px; z-index: 1; animation: eyesMovement infinite 3s; }
+  #pupil1 { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; right: 50px; z-index: 1; animation: eyesMovement infinite 3s; }
+
+  @keyframes eyesMovement {
+    0%,49% { transform: translateX(0px); }
+    50%,99% { transform: translateX(10px); }
+    100% { transform: translateX(0px); }
+  }
+
+  #shadow {
+    background-color: black;
+    width: 140px;
+    height: 140px;
+    position: absolute;
+	border-radius: 50%;
+    transform: rotateX(80deg);
+    filter: blur(20px);
+    top: 80%;
+    animation: shadowMovement infinite 0.5s;
+  }
+  @keyframes shadowMovement {
+    0%,49% { opacity: 0.5; }
+    50%,100% { opacity: 0.2; }
+  }
+
+   
+  @media (max-width: 1444px) {
+    #ghost { 
+      transform: scale(0.3) !important; 
+      transform-origin: center center !important;
+    }
+    .fixed-ghost-box {
+      bottom: 90px !important;
+      right: 5px !important;
+    }
+  }
+</style>
+
+
+<div class="fixed-ghost-box">
+  <div id="ghost">
+    <div id="red">
+      <div id="pupil"></div>
+      <div id="pupil1"></div>
+      <div id="eye"></div>
+      <div id="eye1"></div>
+      <div id="top0"></div>
+      <div id="top1"></div>
+      <div id="top2"></div>
+      <div id="top3"></div>
+      <div id="top4"></div>
+      <div id="st0"></div>
+      <div id="st1"></div>
+      <div id="st2"></div>
+      <div id="st3"></div>
+      <div id="st4"></div>
+      <div id="st5"></div>
+      <div id="an1"></div>
+      <div id="an2"></div>
+      <div id="an3"></div>
+      <div id="an4"></div>
+      <div id="an5"></div>
+      <div id="an6"></div>
+      <div id="an7"></div>
+      <div id="an8"></div>
+      <div id="an9"></div>
+      <div id="an10"></div>
+      <div id="an11"></div>
+      <div id="an12"></div>
+      <div id="an13"></div>
+      <div id="an14"></div>
+      <div id="an15"></div>
+      <div id="an16"></div>
+      <div id="an17"></div>
+      <div id="an18"></div>
+    </div>
+    <div id="shadow"></div>
+  </div>
+</div>
+
+
+<style>
+   
+  .btn-wrap {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+  }
+
+   
+  .footer-hover-btn {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    outline: none;
+    padding: 12px 20px;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+    pointer-events: none;
+  }
+
+   
+  .btn-wrap::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    top: 8px;
+  }
+  .btn-wrap::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    top: 8px;
+  }
+
+   
+  .footer-hover-btn::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+  }
+  .footer-hover-btn::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    bottom: 8px;
+  }
+
+   
+  .btn-wrap:hover::before,
+  .btn-wrap:hover::after,
+  .btn-wrap:hover .footer-hover-btn::before,
+  .btn-wrap:hover .footer-hover-btn::after {
+    width: 50%;
+  }
+
+   
+  @media (max-width: 768px) {
+    .footer-hover-btn {
+      padding: 8px 12px;
+    }
+  }
+</style>
+
+<div class="btn-wrap">
+  <button class="footer-hover-btn">
+    --KK57-0803.0815--
+  </button>
+</div>
+
+    </body>
+</html>

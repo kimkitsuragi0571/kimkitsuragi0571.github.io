@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>进度条 on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/</link>
         <description>Recent content in 进度条 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Wed, 26 Aug 2026 09:47:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 26 Aug 2026 09:47:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity 场景加载模块</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</link>
         <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</guid>
         <description>&lt;p&gt;Unity 原生 &lt;code&gt;SceneManager.LoadScene&lt;/code&gt; 同步加载会卡住主线程，大场景加载时画面会冻结。异步加载 &lt;code&gt;LoadSceneAsync&lt;/code&gt; 可以在后台加载，但需要协程配合 + 进度回调。场景加载模块 &lt;code&gt;ScenesMgr&lt;/code&gt; 把同步/异步加载封装成统一接口，异步加载进度通过&lt;strong&gt;泛型事件中心&lt;/strong&gt;广播给 UI，实现加载进度条。&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;一场景管理器scenesmgr&#34;&gt;一、场景管理器：ScenesMgr

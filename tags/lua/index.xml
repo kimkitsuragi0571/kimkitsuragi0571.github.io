@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Lua on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/lua/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/lua/</link>
         <description>Recent content in Lua on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Tue, 11 Aug 2026 22:00:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/lua/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 11 Aug 2026 22:00:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/lua/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity中C#调用Lua</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</link>
         <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADc%23%E8%B0%83%E7%94%A8lua/</guid>
         <description>&lt;p&gt;本文基于 &lt;strong&gt;Lua 文件重定向管理器&lt;/strong&gt;，演示 C# 调用 Lua 中各种成员的方法：函数、类、List、Dictionary、普通变量等。委托类型声明独立放在专门脚本中，和函数调用脚本分离。&lt;/p&gt;
 &lt;h2 id=&#34;一委托类型声明-xdel_reloaddel&#34;&gt;一、委托类型声明 xDel_ReLoadDel
 &lt;/h2&gt;&lt;p&gt;委托类型声明单独放一个脚本，直接写在&lt;strong&gt;命名空间裸区域&lt;/strong&gt;而非类内部（因为本身就是类型声明）。&lt;/p&gt;
@@ -635,10 +635,10 @@
         </item>
         <item>
         <title>Unity中Lua文件重定向管理器</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/</link>
         <pubDate>Sun, 19 Jul 2026 21:55:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity%E4%B8%ADlua%E6%96%87%E4%BB%B6%E9%87%8D%E5%AE%9A%E5%90%91%E7%AE%A1%E7%90%86%E5%99%A8/</guid>
         <description>&lt;p&gt;在 Unity 中使用 xLua 时，&lt;code&gt;luaEnv.DoString(&amp;quot;require &#39;main&#39;&amp;quot;)&lt;/code&gt; 默认只会到 xLua 内置的几个路径查找 Lua 文件。如果 Lua 脚本被打进 AB 包，或者放在自定义目录下，就找不到。本文通过自定义 Loader 实现 &lt;strong&gt;绝对路径 → AB 包路径 → 默认路径&lt;/strong&gt; 的三级自动重定向。&lt;/p&gt;
 &lt;h2 id=&#34;一ab包管理器修改版abpackagemgr&#34;&gt;一、AB包管理器（修改版）ABPackageMgr
 &lt;/h2&gt;&lt;p&gt;本版在前一篇 AB 包管理器基础上做了两处修改：&lt;/p&gt;

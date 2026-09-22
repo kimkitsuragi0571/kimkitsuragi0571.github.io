@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="游戏开发里，玩家存档、配置表、资源打包等场景都会涉及「把 C# 对象 / 普通变量写成磁盘上的二进制文件」或反过来。本文按由浅入深的顺序，依次演示四组 API：\n">
+<title>Unity 二进制相关 API（BitConvert / File / FileStream / BinaryFormatter）</title>
+
+<link rel='canonical' href='https://kimkitsuragi0571.github.io/p/unity-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%9B%B8%E5%85%B3-apibitconvert-file-filestream-binaryformatter/'>
+
+<link rel="stylesheet" href="/scss/style.min.2eacd74f1dc9eabced815ff53e1794b040da36d37594c05055ed2f0726d654e0.css"><meta property='og:title' content="Unity 二进制相关 API（BitConvert / File / FileStream / BinaryFormatter）">
+<meta property='og:description' content="游戏开发里，玩家存档、配置表、资源打包等场景都会涉及「把 C# 对象 / 普通变量写成磁盘上的二进制文件」或反过来。本文按由浅入深的顺序，依次演示四组 API：\n">
+<meta property='og:url' content='https://kimkitsuragi0571.github.io/p/unity-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%9B%B8%E5%85%B3-apibitconvert-file-filestream-binaryformatter/'>
+<meta property='og:site_name' content='IBN5100'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='二进制' /><meta property='article:tag' content='文件操作' /><meta property='article:tag' content='FileStream' /><meta property='article:tag' content='序列化' /><meta property='article:tag' content='BinaryFormatter' /><meta property='article:published_time' content='2026-09-01T15:55:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-01T15:55:00&#43;08:00'/>
+<meta name="twitter:title" content="Unity 二进制相关 API（BitConvert / File / FileStream / BinaryFormatter）">
+<meta name="twitter:description" content="游戏开发里，玩家存档、配置表、资源打包等场景都会涉及「把 C# 对象 / 普通变量写成磁盘上的二进制文件」或反过来。本文按由浅入深的顺序，依次演示四组 API：\n">
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_93e389bf4708e7c7.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤔</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">IBN5100</a></h1>
+            <h2 class="site-description">相逢在宇宙</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/3546865758898959?spm_id_from=333.788.0.0'
+                        target="_blank"
+                        title="BiliBili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-bilibili"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" /><path d="M8 3l2 3" /><path d="M16 3l-2 3" /><path d="M9 13v-2" /><path d="M15 11v2" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/kimkitsuragi0571/hugo-main/actions'
+                        target="_blank"
+                        title="GitAction"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-upload"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M12 11v6" /><path d="M9.5 13.5l2.5 -2.5l2.5 2.5" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://steamcommunity.com/profiles/76561199047374887/'
+                        target="_blank"
+                        title="Steam"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5 0 1 1 -.653 8.953l-4.347 3.009l0 .038a3 3 0 0 1 -2.824 3l-.176 0a3 3 0 0 1 -2.94 -2.402l-2.56 -1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834 -.635l2.727 -3.818a4.5 4.5 0 0 1 4.429 -5.302z" /><circle cx="16.5" cy="9.5" r="1" fill="currentColor" /></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E7%9B%B8%E5%85%B3/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>相关</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>链接</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一b1变量与-byte-互转bitconverter--encoding">一、B1：变量与 byte[] 互转（BitConverter / Encoding）</a>
+      <ol>
+        <li><a href="#四个按键速查">四个按键速查</a></li>
+      </ol>
+    </li>
+    <li><a href="#二b2file-静态类--一次性读写整个文件">二、B2：File 静态类 — 一次性读写整个文件</a>
+      <ol>
+        <li><a href="#三个按键速查">三个按键速查</a></li>
+      </ol>
+    </li>
+    <li><a href="#三b3filestream-文件流--逐块读写">三、B3：FileStream 文件流 — 逐块读写</a>
+      <ol>
+        <li><a href="#五个按键速查">五个按键速查</a></li>
+        <li><a href="#不定长数据的长度前缀协议">不定长数据的「长度前缀」协议</a></li>
+      </ol>
+    </li>
+    <li><a href="#四b4binaryformatter-序列化--反序列化">四、B4：BinaryFormatter 序列化 / 反序列化</a>
+      <ol>
+        <li><a href="#四个按键速查-1">四个按键速查</a></li>
+        <li><a href="#使用条件--注意">使用条件 &amp; 注意</a></li>
+      </ol>
+    </li>
+    <li><a href="#五四种层级对照">五、四种层级对照</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/unity/" >
+                Unity
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/unity-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%9B%B8%E5%85%B3-apibitconvert-file-filestream-binaryformatter/">Unity 二进制相关 API（BitConvert / File / FileStream / BinaryFormatter）</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2026-09-01T15:55:00&#43;08:00'>2026-09-01</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 9 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>游戏开发里，玩家存档、配置表、资源打包等场景都会涉及「把 C# 对象 / 普通变量写成磁盘上的二进制文件」或反过来。本文按<strong>由浅入深</strong>的顺序，依次演示四组 API：</p>
+<ol>
+<li><strong>BitConverter / Encoding</strong> — 变量与 <code>byte[]</code> 互转（这是一切二进制操作的基石）</li>
+<li><strong>File 静态类</strong> — 一次性读写整个文件（简单、常用）</li>
+<li><strong>FileStream 文件流</strong> — 逐块读写（控制粒度更细，适合大数据 / 不定长数据）</li>
+<li><strong>BinaryFormatter + MemoryStream / FileStream</strong> — 把整个 C# 对象序列化 / 反序列化</li>
+</ol>
+<p>所有测试代码挂载到场景任意物体，按对应按键即可触发。</p>
+<hr>
+<h2 id="一b1变量与-byte-互转bitconverter--encoding">一、B1：变量与 byte[] 互转（BitConverter / Encoding）
+</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Text</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">B1_BitConvert</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">   <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">     
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">   <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">   <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">A</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;普通变量转化为byte数组&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="m">999</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="k">foreach</span> <span class="p">(</span><span class="kt">byte</span> <span class="n">b</span> <span class="k">in</span> <span class="n">bytes</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">         <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="n">b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">S</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;byte数组转化为普通变量&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="m">999</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">int</span> <span class="n">max</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="n">max</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">D</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;string类型转化为byte数组&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="s">&#34;Hi&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">F</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;byte数组转化为string类型&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="s">&#34;Hi&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">string</span> <span class="n">str</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="n">bytes</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="s">&#34;byte数组转化为string类型(局部转化)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="kt">string</span> <span class="n">strLocal</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="n">bytes</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="n">bytes</span><span class="p">.</span><span class="n">Length</span><span class="p">-</span><span class="m">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">         <span class="n">print</span><span class="p">(</span><span class="n">strLocal</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">   <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="四个按键速查">四个按键速查
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>按键</th>
+					<th>代码</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>A</strong>（按住）</td>
+					<td><code>BitConverter.GetBytes(999)</code></td>
+					<td><code>int → byte[]</code>，int 占 4 字节，打印 4 个 byte</td>
+			</tr>
+			<tr>
+					<td><strong>S</strong>（按住）</td>
+					<td><code>BitConverter.ToInt32(bytes, 0)</code></td>
+					<td><code>byte[] → int</code>，第 2 个参数是<strong>起始偏移</strong>（从第几个字节开始解析）</td>
+			</tr>
+			<tr>
+					<td><strong>D</strong>（按住）</td>
+					<td><code>Encoding.UTF8.GetBytes(&quot;Hi&quot;)</code></td>
+					<td><code>string → byte[]</code>，编码格式必须选好（UTF8 / Unicode / ASCII）</td>
+			</tr>
+			<tr>
+					<td><strong>F</strong>（按住）</td>
+					<td><code>Encoding.UTF8.GetString(bytes, 1, bytes.Length-1)</code></td>
+					<td><code>byte[] → string</code>，支持局部解析（起始索引 + 长度）</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>常见变体：<code>GetBytes(bool)</code> 返回 1 字节，<code>GetBytes(float)</code> 返回 4 字节，<code>GetBytes(long)</code> 返回 8 字节。<code>ToXXX(bytes, startIndex)</code> 家族与 GetBytes 一一对应。</p>
+</blockquote>
+<hr>
+<h2 id="二b2file-静态类--一次性读写整个文件">二、B2：File 静态类 — 一次性读写整个文件
+</h2><p><code>File</code> 类下的 <code>WriteAllBytes / WriteAllLines / WriteAllText / ReadAllBytes / ReadAllLines</code> 都是<strong>一步到位</strong>：打开 → 全部写入 / 全部读取 → 自动关闭。适合小文件 / 简单场景。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">B2_FileOperation</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Q</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(!</span><span class="n">File</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">persistentDataPath</span> <span class="p">+</span> <span class="s">&#34;/MonsterData_Dragon.binary&#34;</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="s">&#34;创建二进制文件&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="n">persistentDataPath</span> <span class="p">+</span> <span class="s">&#34;/MonsterData_Dragon.binary&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Close</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">W</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;写入文件(先不使用文件流)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">string</span> <span class="n">path</span> <span class="p">=</span> <span class="n">Application</span><span class="p">.</span><span class="n">persistentDataPath</span> <span class="p">+</span> <span class="s">&#34;/MonsterData_Dragon.binary&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span><span class="n">File</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="s">&#34;直接写入指定byte数组&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="m">999</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">File</span><span class="p">.</span><span class="n">WriteAllBytes</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">bytes</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="s">&#34;直接写入string数组每一行&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">string</span><span class="p">[]</span> <span class="n">strs</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">string</span><span class="p">[]</span> <span class="p">{</span> <span class="s">&#34;1&#34;</span><span class="p">,</span> <span class="s">&#34;2&#34;</span><span class="p">,</span> <span class="s">&#34;3&#34;</span> <span class="p">};</span>
+</span></span><span class="line"><span class="cl">                <span class="n">File</span><span class="p">.</span><span class="n">WriteAllLines</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">strs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="s">&#34;直接写入指定string&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">File</span><span class="p">.</span><span class="n">WriteAllText</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s">&#34;Hi&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">E</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;读取文件(先不使用文件流)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">string</span> <span class="n">path</span> <span class="p">=</span> <span class="n">Application</span><span class="p">.</span><span class="n">persistentDataPath</span> <span class="p">+</span> <span class="s">&#34;/MonsterData_Dragon.binary&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;直接读取文件到指定byte数组&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllBytes</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;直接读取每一行到string数组&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">string</span><span class="p">[]</span> <span class="n">strs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllLines</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//剩下还有复制替换文件啥的都懒得写了</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="三个按键速查">三个按键速查
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>按键</th>
+					<th>代码</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>Q</strong></td>
+					<td><code>File.Exists + File.Create</code></td>
+					<td>不存在就创建（<code>.Close()</code> 别忘了，否则下一次打开会报占用）</td>
+			</tr>
+			<tr>
+					<td><strong>W</strong></td>
+					<td><code>WriteAllBytes / WriteAllLines / WriteAllText</code></td>
+					<td>三种一次性写入；每次调用都会<strong>覆盖原内容</strong>，三者不是追加</td>
+			</tr>
+			<tr>
+					<td><strong>E</strong></td>
+					<td><code>ReadAllBytes / ReadAllLines</code></td>
+					<td>一次性全部读取；大文件（几十 MB 以上）会瞬间占用同等内存，改用 FileStream</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>路径统一用 <code>Application.persistentDataPath</code>（不同平台自动映射到可读写目录，如 Windows 下 <code>C:/Users/&lt;用户名&gt;/AppData/LocalLow/&lt;公司&gt;/&lt;产品&gt;</code>）。不要用 <code>Application.dataPath</code>（打包后只读）。</p>
+</blockquote>
+<hr>
+<h2 id="三b3filestream-文件流--逐块读写">三、B3：FileStream 文件流 — 逐块读写
+</h2><p><code>File</code> 静态类是「一次性干完」。如果要先写一个 int 再写一段字符串、或者读一半处理一半，就要用 <code>FileStream</code>。它的核心模型是「流指针」：当前读 / 写到第几个字节，读写完自动往后移。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Text</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">B3_FileStream</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>   
+</span></span><span class="line"><span class="cl">    <span class="kt">string</span> <span class="n">path</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">path</span> <span class="p">=</span> <span class="n">Application</span><span class="p">.</span><span class="n">persistentDataPath</span> <span class="p">+</span> <span class="s">&#34;/MonsterData_Dragon.binary&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Alpha1</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//创建文件不一样,但是一般就填个path即可</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;打开文件,并获取其文件流&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">fs</span><span class="p">.</span><span class="n">CanRead</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">print</span><span class="p">(</span><span class="n">fs</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//每次记得把缓存写入,防止文件丢失</span>
+</span></span><span class="line"><span class="cl">                <span class="n">print</span><span class="p">(</span><span class="s">&#34;强制将内存缓冲区中的数据立即写入硬盘&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Flush</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Dispose</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Alpha2</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;通过字节流写入文件(固定长度的字节数组)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytesInt</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="m">998</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//部分写入(固定长度的变量)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">bytesInt</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">bytesInt</span><span class="p">.</span><span class="n">Length</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//全部写入,只能用File调用</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//File.WriteAllBytes(path, String);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//File.WriteAllText(path, &#34;String&#34;);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//File.WriteAllBytes(path, bytesString);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Alpha3</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;通过字节流写入文件(不定长度的字符串)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//写入字符串长度主要是方便读取时使用</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytesString</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="s">&#34;Hello Unity Binary&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">len</span> <span class="p">=</span> <span class="n">bytesString</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//注意先把长度写入</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">BitConverter</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">len</span><span class="p">),</span> <span class="m">0</span><span class="p">,</span><span class="m">4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//写入本体</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Write</span><span class="p">(</span><span class="n">bytesString</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Flush</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Alpha4</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;通过字节流读取文件(固定长度的字节数组)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//count只是个检测条件,真正存储数据的是bytesInt</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytesInt</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="m">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//读取fs的前4位(不一定够4B),放入bytesInt的前4位,返回count实际返回的字节数</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">count</span> <span class="p">=</span> <span class="n">fs</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="n">bytesInt</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="p">==</span> <span class="m">4</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="c1">//只有刚好4B,才能转化为Int类型</span>
+</span></span><span class="line"><span class="cl">                    <span class="kt">int</span> <span class="k">value</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">bytesInt</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">               
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">Alpha5</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;通过字节流读取文件(不定长度的字符串)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">Open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//先和定长一样的读取长度</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytesLen</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="m">4</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">count</span> <span class="p">=</span> <span class="n">fs</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="n">bytesLen</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="m">4</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">int</span> <span class="n">len</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="p">==</span> <span class="m">4</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">len</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">ToInt32</span><span class="p">(</span><span class="n">bytesLen</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="c1">//然后根据长度创建字节数组</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytesString</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="p">[</span><span class="n">len</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//最后读取</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="n">bytesString</span><span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//还原为string</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">string</span> <span class="n">result</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="n">bytesString</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="五个按键速查">五个按键速查
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>按键</th>
+					<th>核心代码</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>1</strong></td>
+					<td><code>File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite)</code></td>
+					<td>打开 / 创建文件流；<code>using</code> 出作用域自动 Dispose；<code>fs.Flush()</code> 强制把缓冲区刷进磁盘防掉电丢失</td>
+			</tr>
+			<tr>
+					<td><strong>2</strong></td>
+					<td><code>fs.Write(bytesInt, 0, bytesInt.Length)</code></td>
+					<td>固定长度写入（int 正好 4B）；Write 三参数：字节数组、数组起始偏移、写入字节数</td>
+			</tr>
+			<tr>
+					<td><strong>3</strong></td>
+					<td>先 <code>Write(len, 4B)</code> 再 <code>Write(body, len B)</code></td>
+					<td><strong>不定长字符串的写入协议</strong>：把字符串长度（int 4B）先写在前面，后面跟着真正的字符串字节。读取时先读长度再读本体</td>
+			</tr>
+			<tr>
+					<td><strong>4</strong></td>
+					<td><code>fs.Read(bytesInt, 0, 4)</code> → <code>ToInt32</code></td>
+					<td>固定长度读取；Read 返回值 count 是「实际读到了多少字节」，文件末尾可能不足 4B，必须判 count 再转</td>
+			</tr>
+			<tr>
+					<td><strong>5</strong></td>
+					<td>先 <code>Read(4B) → len</code>，再 <code>Read(len B) → body</code></td>
+					<td>不定长字符串读取，与按键 3 的写入协议对称，最后 <code>Encoding.UTF8.GetString</code> 还原</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="不定长数据的长度前缀协议">不定长数据的「长度前缀」协议
+</h3><p>这是手写二进制存储时最常见的套路：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">写入: [4字节: len=18] [18字节: &#34;Hello Unity Binary&#34;]
+</span></span><span class="line"><span class="cl">读取: 先读4字节 → 拿到 18 → 再读 18 字节 → 得到字符串
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果没有长度前缀，读取方根本不知道字符串在哪结束（不像 C 风格以 <code>\0</code> 结尾那样有约定）。同理存储数组、字典也是先写元素个数，再挨个写每个元素。</p>
+<hr>
+<h2 id="四b4binaryformatter-序列化--反序列化">四、B4：BinaryFormatter 序列化 / 反序列化
+</h2><p>手写 BitConverter + FileStream 写十几个字段很累。<code>BinaryFormatter</code> 可以<strong>直接把标记了 <code>[Serializable]</code> 的 C# 对象整个变成字节流</strong>，反序列化时再还原回来。内部会处理所有字段、引用、嵌套结构。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.IO</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Runtime.Serialization.Formatters.Binary</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">B4_Serialize</span> <span class="p">:</span> <span class="n">MonoBehaviour</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">string</span> <span class="n">path</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Start</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">path</span> <span class="p">=</span> <span class="n">Application</span><span class="p">.</span><span class="n">persistentDataPath</span> <span class="p">+</span> <span class="s">&#34;/MonsterData_Dragon.binary&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    <span class="c1">// Update is called once per frame</span>
+</span></span><span class="line"><span class="cl">    <span class="k">void</span> <span class="n">Update</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">A</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Student</span> <span class="n">stu</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Student</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//先攒后写:内存消耗峰值高</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;使用MemoryStream内存流对象序列化&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">MemoryStream</span> <span class="n">ms</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MemoryStream</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//二进制格式化器,负责将C#对象转化为字节流</span>
+</span></span><span class="line"><span class="cl">                <span class="n">BinaryFormatter</span> <span class="n">bf</span> <span class="p">=</span> <span class="k">new</span> <span class="n">BinaryFormatter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//stu序列化到ms内存流</span>
+</span></span><span class="line"><span class="cl">                <span class="n">bf</span><span class="p">.</span><span class="n">Serialize</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">stu</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//byte[] bytes = ms.GetBuffer();直接返回整个缓冲区,可能有无意义部分</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//ToArray只返回有效数据部分</span>
+</span></span><span class="line"><span class="cl">                <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">ms</span><span class="p">.</span><span class="n">ToArray</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//BinaryFormatter序列化--&gt;写入MemoryStream内存流并转为Byte对象--&gt; File.WriteAllBytes写入路径文件</span>
+</span></span><span class="line"><span class="cl">                <span class="n">File</span><span class="p">.</span><span class="n">WriteAllBytes</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">bytes</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//注意MemoryStream并不需要ms.Flush,本来就写在RAM上不需要缓冲区攒够了才写</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">S</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Student</span> <span class="n">stu</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Student</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//边转边写:可能有损坏风险</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;使用FileStream文件流对象序列化&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="k">new</span> <span class="n">FileStream</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">BinaryFormatter</span> <span class="n">bf</span> <span class="p">=</span> <span class="k">new</span> <span class="n">BinaryFormatter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//序列化直接写入文件流而非内存流</span>
+</span></span><span class="line"><span class="cl">                <span class="n">bf</span><span class="p">.</span><span class="n">Serialize</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">stu</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">fs</span><span class="p">.</span><span class="n">Flush</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">D</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">           <span class="kt">byte</span><span class="p">[]</span> <span class="n">bytes</span> <span class="p">=</span> <span class="n">File</span><span class="p">.</span><span class="n">ReadAllBytes</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">           <span class="n">print</span><span class="p">(</span><span class="s">&#34;使用MemoryStream内存流对象反序列化&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">//创建内存流对象的时候就传入bytes数组,相当于省略了ms.Write()这一步</span>
+</span></span><span class="line"><span class="cl">           <span class="k">using</span> <span class="p">(</span><span class="n">MemoryStream</span> <span class="n">ms</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MemoryStream</span><span class="p">(</span><span class="n">bytes</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">           <span class="p">{</span>
+</span></span><span class="line"><span class="cl">               <span class="n">BinaryFormatter</span> <span class="n">bf</span> <span class="p">=</span> <span class="k">new</span> <span class="n">BinaryFormatter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">               <span class="c1">//bf负责把ms里面的bytes数组翻译出来</span>
+</span></span><span class="line"><span class="cl">               <span class="n">Student</span> <span class="n">stu</span> <span class="p">=</span> <span class="n">bf</span><span class="p">.</span><span class="n">Deserialize</span><span class="p">(</span><span class="n">ms</span><span class="p">)</span> <span class="k">as</span> <span class="n">Student</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">           <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">Input</span><span class="p">.</span><span class="n">GetKeyDown</span><span class="p">(</span><span class="n">KeyCode</span><span class="p">.</span><span class="n">F</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">print</span><span class="p">(</span><span class="s">&#34;使用FileStream文件流对象反序列化&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">using</span> <span class="p">(</span><span class="n">FileStream</span> <span class="n">fs</span> <span class="p">=</span> <span class="k">new</span> <span class="n">FileStream</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">FileMode</span><span class="p">.</span><span class="n">OpenOrCreate</span><span class="p">,</span> <span class="n">FileAccess</span><span class="p">.</span><span class="n">ReadWrite</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">BinaryFormatter</span> <span class="n">bf</span> <span class="p">=</span> <span class="k">new</span> <span class="n">BinaryFormatter</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Student</span> <span class="n">stu</span> <span class="p">=</span> <span class="n">bf</span><span class="p">.</span><span class="n">Deserialize</span><span class="p">(</span><span class="n">fs</span><span class="p">)</span> <span class="k">as</span> <span class="n">Student</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="na">
+</span></span></span><span class="line"><span class="cl"><span class="na">[System.Serializable]</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">Student</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">age</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="四个按键速查-1">四个按键速查
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>按键</th>
+					<th>流程</th>
+					<th>特点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>A</strong></td>
+					<td><code>MemoryStream</code> 序列化 → <code>ToArray()</code> → <code>WriteAllBytes</code></td>
+					<td><strong>先攒后写</strong>：对象先全部转成内存中的字节数组，再一次性写文件。内存峰值高（两份字节），但中间出错不会弄脏磁盘文件</td>
+			</tr>
+			<tr>
+					<td><strong>S</strong></td>
+					<td><code>bf.Serialize(fs, stu)</code> 直接写 <code>FileStream</code></td>
+					<td><strong>边转边写</strong>：转一点写一点，内存占用小。但中途异常会在磁盘上留下半截损坏的文件</td>
+			</tr>
+			<tr>
+					<td><strong>D</strong></td>
+					<td><code>ReadAllBytes → new MemoryStream(bytes) → bf.Deserialize</code></td>
+					<td>内存流反序列化，对应按键 A</td>
+			</tr>
+			<tr>
+					<td><strong>F</strong></td>
+					<td><code>FileStream → bf.Deserialize(fs)</code></td>
+					<td>文件流反序列化，对应按键 S</td>
+			</tr>
+	</tbody>
+</table></div>
+<h3 id="使用条件--注意">使用条件 &amp; 注意
+</h3><ol>
+<li><strong>类必须加 <code>[System.Serializable]</code></strong>：字段也得是可序列化的（<code>string / int / float / 嵌套 [Serializable] 类</code>）。<code>[NonSerialized]</code> 可以标记某个字段「不存」。</li>
+<li><strong>MemoryStream 不用 Flush</strong>：写入的目的地本来就是 RAM，没有「操作系统缓冲区 → 磁盘」这一步，不存在丢数据风险。</li>
+<li><strong>ms.GetBuffer() vs ms.ToArray()</strong>：GetBuffer 返回整个内部缓冲区（可能后面跟着没用的 0 字节），ToArray 只返回有效数据部分，一般选后者。</li>
+<li><strong>安全性</strong>：BinaryFormatter 的输出不是自描述 JSON，改一个字节就会反序列化异常；且存在反序列化漏洞攻击风险，<strong>不要用 BinaryFormatter 存网络传输的数据或不可信来源的文件</strong>（.NET 5+ 已标 Obsolete）。Unity 本地存档、单机场景放心用。</li>
+</ol>
+<hr>
+<h2 id="五四种层级对照">五、四种层级对照
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>层级</th>
+					<th>API</th>
+					<th>适用场景</th>
+					<th>记忆要点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>字节级</td>
+					<td><code>BitConverter.GetBytes / ToXXX</code> + <code>Encoding.UTF8.GetBytes / GetString</code></td>
+					<td>单个变量转 byte[]</td>
+					<td>int 4B / string 用 Encoding / 起始偏移</td>
+			</tr>
+			<tr>
+					<td>一次性文件级</td>
+					<td><code>File.WriteAllBytes / ReadAllBytes</code> 等</td>
+					<td>小文件、简单配置、代码不足 10 行的场合</td>
+					<td>路径用 persistentDataPath，每次写入是<strong>覆盖</strong></td>
+			</tr>
+			<tr>
+					<td>流式文件级</td>
+					<td><code>FileStream.Write / Read</code> + 「长度前缀」协议</td>
+					<td>大数据、不定长字符串 / 数组、自定义协议</td>
+					<td>读要判断实际 count；写不定长先写 len；用 <code>using</code> 自动释放；记得 <code>Flush</code></td>
+			</tr>
+			<tr>
+					<td>对象级</td>
+					<td><code>BinaryFormatter.Serialize / Deserialize</code> + <code>MemoryStream</code> / <code>FileStream</code></td>
+					<td>直接存整个对象（存档）；类型安全写代码最省事</td>
+					<td>类要加 <code>[Serializable]</code>；边转边写 vs 先攒后写；不要用在网络 / 不信任数据</td>
+			</tr>
+	</tbody>
+</table></div>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a>
+        
+            <a href="/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6/">二进制</a>
+        
+            <a href="/tags/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/">文件操作</a>
+        
+            <a href="/tags/filestream/">FileStream</a>
+        
+            <a href="/tags/%E5%BA%8F%E5%88%97%E5%8C%96/">序列化</a>
+        
+            <a href="/tags/binaryformatter/">BinaryFormatter</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>KK57-0803.0815</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/unity-json-%E7%9B%B8%E5%85%B3-apijsonutility-litjson/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity JSON 相关 API（JsonUtility / LitJson）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puremvc-framework-example/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity PureMVC 框架示例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/csharp-dict-principle/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C# 字典底层实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity UI模块实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%82%B9%E5%87%BB%E9%80%BB%E8%BE%91/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 代码实现自定义点击逻辑</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2025 - 
+        
+        2026 KimKitsuragi
+    </section>
+    
+
+
+   
+<section class="count_info">
+    <div>
+        本站稳定运行：
+        <span id="ds" class="running-days number-highlight"></span>
+        天
+        <span id="hs" class="running-days number-highlight"></span>
+        小时
+        <span id="ms" class="running-days number-highlight"></span>
+        分钟
+    </div>
+    <div>
+        
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+        共发表文章数：
+        <span class="number-highlight">23</span>
+        篇 · 总计
+        <span class="number-highlight">64.30</span>
+        k 字
+    </div>
+    <div>
+        <span id="busuanzi_container_site_pv">
+            本站总访问量：
+            <span id="busuanzi_value_site_pv" class="number-highlight"></span>
+            次
+        </span>
+    </div>
+</section>
+
+
+<script>
+(function() {
+    
+    const startDate = '2026-01-01';
+    const s1 = new Date(startDate.replace(/-/g, "/"));
+    const s2 = new Date();
+    const diff = s2.getTime() - s1.getTime();
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const ds = document.getElementById('ds');
+    const hs = document.getElementById('hs');
+    const ms = document.getElementById('ms');
+
+    if (ds) ds.textContent = days;
+    if (hs) hs.textContent = hours;
+    if (ms) ms.textContent = minutes;
+
+    const pv = document.getElementById('busuanzi_value_site_pv');
+    if (pv) {
+        pv.classList.add('number-highlight');
+        
+        pv.addEventListener('DOMNodeInserted', function() {
+            const value = parseInt(this.textContent);
+            if (value > 1000) {
+                this.textContent = '1';
+            }
+        });
+    }
+})();
+</script>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.85c2f5bca0520a2fd76601ba7e90d1aa29ff9fd53ca3e867a3afacf18679d31d.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+
+<style>
+  @font-face {
+    font-family: 'MengWaXiYuan';
+    src: url('/font/JianShouMengWaChaoCuYuanTi-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    --font-primary: 'MengWaXiYuan', sans-serif;
+  }
+  html, body,
+  .article-content,
+  .single__contents,
+  .widget--toc,
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary) !important;
+  }
+  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
+    font-family: inherit !important;
+  }
+</style>
+
+
+
+<style>
+  #TableOfContents > ul ul,
+  #TableOfContents > ul ol,
+  #TableOfContents > ol ul,
+  #TableOfContents > ol ol {
+    display: none;
+  }
+  #TableOfContents .open {
+    display: block !important;
+  }
+</style>
+
+
+<style>
+  #backTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 20px;  
+    z-index: 99;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-image: url('https://kimkitsuragi0571.github.io/icons/backTop.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    outline: none;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    function initTocHide() {
+      const toc = document.querySelector(".widget--toc");
+      if (!toc) return;
+
+      let timer = null;
+      window.addEventListener('scroll', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          
+          document.querySelectorAll('.open').forEach(el => el.classList.remove('open'));
+
+          
+          const activeLink = document.querySelector(
+            ".toc-link.active, .toc-link.active-class, .active, .active-class"
+          );
+          if (!activeLink) return;
+
+          
+          const nextSibling = activeLink.nextElementSibling;
+          if (nextSibling && (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL')) {
+            nextSibling.classList.add('open');
+          }
+
+          
+          let parent = activeLink.parentElement;
+          while (parent && parent.parentElement) {
+            if (parent.tagName === 'UL' || parent.tagName === 'OL') {
+              parent.classList.add('open');
+            }
+            parent = parent.parentElement;
+          }
+        }, 80);
+      });
+    }
+
+    
+    function initScrollTop() {
+      const rightSidebar = document.querySelector(".right-sidebar");
+      if (!rightSidebar) return;
+
+      const btn = document.createElement("div");
+      btn.id = "backTopBtn";
+      btn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+      rightSidebar.appendChild(btn);
+
+      window.addEventListener('scroll', () => {
+        btn.style.display = window.scrollY > 20 ? "block" : "none";
+      });
+    }
+
+    
+    initTocHide();
+    initScrollTop();
+  });
+</script>
+
+
+
+<style>
+    .highlight {
+        max-height: 400px;
+        overflow: hidden;
+        position: relative;  
+    }
+
+    .code-show {
+        max-height: none !important;
+    }
+
+    .code-more-box {
+        width: 100%;
+        padding-top: 78px;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(#fff));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .code-more-btn {
+        display: block;
+        margin: auto;
+        width: 44px;
+        height: 22px;
+        background: #f0f0f5;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-top: 6px;
+        cursor: pointer;
+    }
+
+    .code-more-img {
+        cursor: pointer !important;
+        display: block;
+        margin: auto;
+        width: 22px;
+        height: 16px;
+    }
+</style>
+
+<script>
+  function initCodeMoreBox() {
+    document.querySelectorAll(".highlight").forEach(codeBlock => {
+      if (codeBlock.querySelector('.code-more-box')) return;
+      if (codeBlock.scrollHeight <= codeBlock.clientHeight) return;
+
+      const codeMoreBox = document.createElement('div');
+      codeMoreBox.classList.add('code-more-box');
+
+      const codeMoreBtn = document.createElement('span');
+      codeMoreBtn.classList.add('code-more-btn');
+      codeMoreBtn.addEventListener('click', () => {
+        codeBlock.classList.add('code-show');
+        codeMoreBox.style.display = 'none';
+      });
+
+      const img = document.createElement('img');
+      img.classList.add('code-more-img');
+      
+      img.src = "/icons/codeMore.png";
+
+      codeMoreBtn.appendChild(img);
+      codeMoreBox.appendChild(codeMoreBtn);
+      codeBlock.appendChild(codeMoreBox);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCodeMoreBox);
+</script>
+
+<div id="jsi-flying-fish-container"></div>
+
+
+<style>
+#jsi-flying-fish-container {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    z-index: -1;
+    opacity: 0;           
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity .3s;
+}
+ 
+.show-fish #jsi-flying-fish-container {
+    opacity: .5;
+}
+</style>
+
+
+<script>
+window.initFlyingFish = function () {
+    const container = document.getElementById('jsi-flying-fish-container');
+    if (!container) return;
+
+     
+    const oldCanvas = container.querySelector('canvas');
+    if (oldCanvas) oldCanvas.remove();
+
+     
+    const script = document.createElement('script');
+    script.src = 'https://cdn.meimolihan.eu.org/hugo/fish/fish.js';
+    script.onload = function () {
+        if (typeof RENDERER !== 'undefined') RENDERER.init();
+    };
+    document.head.appendChild(script);
+
+     
+    function checkBottom() {
+        const doc = document.documentElement;
+        const isBottom = (window.innerHeight + Math.ceil(window.pageYOffset))
+                         >= (doc.scrollHeight - 10);
+        document.body.classList.toggle('show-fish', isBottom);
+    }
+
+     
+    window.addEventListener('scroll', checkBottom);
+    checkBottom(); 
+};
+
+ 
+document.addEventListener('DOMContentLoaded', initFlyingFish);
+
+ 
+document.addEventListener('pjax:complete', initFlyingFish);
+</script>
+
+
+<div id="toast-stack"></div>
+
+<script>
+ 
+(() => {
+  const toastStack = document.getElementById('toast-stack');
+  let toastCount = 0;
+  const MAX_TOAST = 5;
+  const DURATION  = 2500;
+
+   
+  let lastText = '';
+  let lastTime = 0;
+
+  window.pushToast = function (msg = '✅ 复制成功 ') {
+    const now = Date.now();
+    if (msg === lastText && now - lastTime < 500) return; 
+    lastText = msg;
+    lastTime = now;
+
+     
+    if (toastCount >= MAX_TOAST) toastStack.firstElementChild?.closeToast();
+
+    const item = document.createElement('div');
+    item.className = 'snack-left-top';
+    item.textContent = msg;
+
+    let closeTimer = null;
+    function closeToast() {
+      if (item.isClosing) return;
+      item.isClosing = true;
+      item.classList.remove('show');
+      item.addEventListener('transitionend', () => {
+        item.remove();
+        toastCount--;
+      }, { once: true });
+      clearTimeout(closeTimer);
+    }
+    item.closeToast = closeToast;
+
+    toastStack.appendChild(item);
+    toastCount++;
+    void item.offsetWidth;
+    item.classList.add('show');
+    closeTimer = setTimeout(closeToast, DURATION);
+  };
+
+   
+  document.addEventListener('copy', e => {
+    const text = window.getSelection().toString().trim();
+    if (!text) return;
+    e.preventDefault();
+    navigator.clipboard.writeText(text)
+      .then(() => pushToast())
+      .catch(console.warn);
+  });
+
+   
+  const container = document.querySelector('.article-content');
+  if (container) {
+    container.addEventListener('click', e => {
+      if (!e.target.matches('.copyCodeButton')) return;
+      const wrap = e.target.closest('pre, .highlight');
+      const codeTd = wrap?.querySelector('td:nth-child(2)') || wrap;
+      const txt = codeTd ? codeTd.textContent.trim() : '';
+      navigator.clipboard.writeText(txt)
+        .then(() => pushToast())
+        .catch(err => alert('复制失败：' + err));
+    });
+  }
+})();
+</script>
+
+<style>
+ 
+.copyCodeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #3d3c3c;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.copyCodeButton:hover {
+  background: var(--hover-text-color);
+  color: #fff;
+}
+
+ 
+.snack-left-top {
+  position: fixed;
+  left: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  transform: translateX(calc(-100% - 20px));
+  width: 300px;
+  height: 60px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 15px;
+  background: var(--hover-text-color);
+  color: #fff;
+  box-shadow: 4px 4px 14px rgba(0, 0, 0, .35);
+  z-index: 9999;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+}
+ 
+.snack-left-top.show {
+  transform: translateX(0);
+}
+ 
+#toast-stack {
+  position: fixed;
+  left: 0;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  z-index: 9999;
+  pointer-events: none;
+}
+
+ 
+#toast-stack .snack-left-top {
+  position: relative;    
+  margin-bottom: 12px;   
+  pointer-events: auto;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1),
+              opacity   .35s cubic-bezier(.4, 0, .2, 1);
+  opacity: 0;
+  transform: translateX(calc(-100% - 20px));
+}
+
+#toast-stack .snack-left-top.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>
+
+<style>
+   
+  .fixed-ghost-box {
+    position: fixed;
+    bottom: 90px;      
+    right: 20px;       
+    z-index: 10;       
+    background-color: transparent;
+    margin: 0;
+    pointer-events: none;  
+    overflow: visible;
+  }
+
+   
+  #ghost {
+    position: relative;
+    transform: scale(0.3);   
+    transform-origin: center center;  
+    pointer-events: none;
+  }
+
+  #red {
+    animation: upNDown infinite 0.5s;
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    grid-template-rows: repeat(14, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    grid-template-areas:
+      "a1  a2  a3  a4  a5  top0  top0  top0  top0  a10 a11 a12 a13 a14"
+      "b1  b2  b3  top1 top1 top1 top1 top1 top1 top1 top1 b12 b13 b14"
+      "c1 c2 top2 top2 top2 top2 top2 top2 top2 top2 top2 top2 c13 c14"
+      "d1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 d14"
+      "e1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 e14"
+      "f1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 f14"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "st0 st0 an4 st1 an7 st2 an10 an10 st3 an13 st4 an16 st5 st5"
+      "an1 an2 an3 an5 an6 an8 an9 an9 an11 an12 an14 an15 an17 an18";
+  }
+
+  @keyframes upNDown {
+    0%,49% { transform: translateY(0px); }
+    50%,100% { transform: translateY(-10px); }
+  }
+
+  #top0,#top1,#top2,#top3,#top4,#st0,#st1,#st2,#st3,#st4,#st5 {
+    background-color: rgba(255, 0, 0, 0.397);
+  }
+  #top0 { grid-area: top0; }
+  #top1 { grid-area: top1; }
+  #top2 { grid-area: top2; }
+  #top3 { grid-area: top3; }
+  #top4 { grid-area: top4; }
+  #st0 { grid-area: st0; }
+  #st1 { grid-area: st1; }
+  #st2 { grid-area: st2; }
+  #st3 { grid-area: st3; }
+  #st4 { grid-area: st4; }
+  #st5 { grid-area: st5; }
+
+  #an1 { grid-area: an1; animation: flicker0 infinite 0.5s; }
+  #an18 { grid-area: an18; animation: flicker0 infinite 0.5s; }
+  #an2 { grid-area: an2; animation: flicker1 infinite 0.5s; }
+  #an17 { grid-area: an17; animation: flicker1 infinite 0.5s; }
+  #an3 { grid-area: an3; animation: flicker1 infinite 0.5s; }
+  #an16 { grid-area: an16; animation: flicker1 infinite 0.5s; }
+  #an4 { grid-area: an4; animation: flicker1 infinite 0.5s; }
+  #an15 { grid-area: an15; animation: flicker1 infinite 0.5s; }
+  #an6 { grid-area: an6; animation: flicker0 infinite 0.5s; }
+  #an12 { grid-area: an12; animation: flicker0 infinite 0.5s; }
+  #an7 { grid-area: an7; animation: flicker0 infinite 0.5s; }
+  #an13 { grid-area: an13; animation: flicker0 infinite 0.5s; }
+  #an9 { grid-area: an9; animation: flicker1 infinite 0.5s; }
+  #an10 { grid-area: an10; animation: flicker1 infinite 0.5s; }
+  #an8 { grid-area: an8; animation: flicker0 infinite 0.5s; }
+  #an11 { grid-area: an11; animation: flicker0 infinite 0.5s; }
+
+  @keyframes flicker0 {
+    0%,49% { background-color: rgba(255, 0, 0, 0.397); }
+    50%,100% { background-color: transparent; }
+  }
+  @keyframes flicker1 {
+    0%,49% { background-color: transparent; }
+    50%,100% { background-color: rgba(255, 0, 0, 0.397); }
+  }
+
+  #eye { width: 40px; height: 50px; position: absolute; top: 30px; left: 10px; }
+  #eye::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #eye1 { width: 40px; height: 50px; position: absolute; top: 30px; right: 30px; }
+  #eye1::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye1::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #pupil { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; left: 10px; z-index: 1; animation: eyesMovement infinite 3s; }
+  #pupil1 { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; right: 50px; z-index: 1; animation: eyesMovement infinite 3s; }
+
+  @keyframes eyesMovement {
+    0%,49% { transform: translateX(0px); }
+    50%,99% { transform: translateX(10px); }
+    100% { transform: translateX(0px); }
+  }
+
+  #shadow {
+    background-color: black;
+    width: 140px;
+    height: 140px;
+    position: absolute;
+	border-radius: 50%;
+    transform: rotateX(80deg);
+    filter: blur(20px);
+    top: 80%;
+    animation: shadowMovement infinite 0.5s;
+  }
+  @keyframes shadowMovement {
+    0%,49% { opacity: 0.5; }
+    50%,100% { opacity: 0.2; }
+  }
+
+   
+  @media (max-width: 1444px) {
+    #ghost { 
+      transform: scale(0.3) !important; 
+      transform-origin: center center !important;
+    }
+    .fixed-ghost-box {
+      bottom: 90px !important;
+      right: 5px !important;
+    }
+  }
+</style>
+
+
+<div class="fixed-ghost-box">
+  <div id="ghost">
+    <div id="red">
+      <div id="pupil"></div>
+      <div id="pupil1"></div>
+      <div id="eye"></div>
+      <div id="eye1"></div>
+      <div id="top0"></div>
+      <div id="top1"></div>
+      <div id="top2"></div>
+      <div id="top3"></div>
+      <div id="top4"></div>
+      <div id="st0"></div>
+      <div id="st1"></div>
+      <div id="st2"></div>
+      <div id="st3"></div>
+      <div id="st4"></div>
+      <div id="st5"></div>
+      <div id="an1"></div>
+      <div id="an2"></div>
+      <div id="an3"></div>
+      <div id="an4"></div>
+      <div id="an5"></div>
+      <div id="an6"></div>
+      <div id="an7"></div>
+      <div id="an8"></div>
+      <div id="an9"></div>
+      <div id="an10"></div>
+      <div id="an11"></div>
+      <div id="an12"></div>
+      <div id="an13"></div>
+      <div id="an14"></div>
+      <div id="an15"></div>
+      <div id="an16"></div>
+      <div id="an17"></div>
+      <div id="an18"></div>
+    </div>
+    <div id="shadow"></div>
+  </div>
+</div>
+
+
+<style>
+   
+  .btn-wrap {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+  }
+
+   
+  .footer-hover-btn {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    outline: none;
+    padding: 12px 20px;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+    pointer-events: none;
+  }
+
+   
+  .btn-wrap::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    top: 8px;
+  }
+  .btn-wrap::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    top: 8px;
+  }
+
+   
+  .footer-hover-btn::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+  }
+  .footer-hover-btn::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    bottom: 8px;
+  }
+
+   
+  .btn-wrap:hover::before,
+  .btn-wrap:hover::after,
+  .btn-wrap:hover .footer-hover-btn::before,
+  .btn-wrap:hover .footer-hover-btn::after {
+    width: 50%;
+  }
+
+   
+  @media (max-width: 768px) {
+    .footer-hover-btn {
+      padding: 8px 12px;
+    }
+  }
+</style>
+
+<div class="btn-wrap">
+  <button class="footer-hover-btn">
+    --KK57-0803.0815--
+  </button>
+</div>
+
+    </body>
+</html>

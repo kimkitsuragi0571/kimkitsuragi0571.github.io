@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>UIPanelMgr on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/uipanelmgr/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/uipanelmgr/</link>
         <description>Recent content in UIPanelMgr on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Fri, 28 Aug 2026 17:45:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/uipanelmgr/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 28 Aug 2026 17:45:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/uipanelmgr/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity UI模块实现</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/</link>
         <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-ui%E6%A8%A1%E5%9D%97%E5%AE%9E%E7%8E%B0/</guid>
         <description>&lt;p&gt;UGUI 项目里，如果每个面板都手写「获取组件 → 绑定 onClick → 分别写方法」，代码会非常臃肿。本文实现一个完整的 UI 模块：&lt;strong&gt;UIPanelBase 基类自动抓组件 + 虚方法统一订阅、UIPanelMgr 管理器负责面板加载 / 层级挂载 / 自定义事件封装、具体面板只需重写虚方法即可。&lt;/strong&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;一四层结构&#34;&gt;一、四层结构

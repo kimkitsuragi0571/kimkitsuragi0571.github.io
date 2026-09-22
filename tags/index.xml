@@ -2,393 +2,529 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Tags on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/</link>
         <description>Recent content in Tags on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Fri, 28 Aug 2026 17:45:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>UGUI</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/ugui/</link>
-        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        <lastBuildDate>Thu, 17 Sep 2026 09:30:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>MVC</title>
+        <link>https://kimkitsuragi0571.github.io/tags/mvc/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/ugui/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/mvc/</guid>
         <description></description>
         </item>
         <item>
-        <title>UIPanelMgr</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/uipanelmgr/</link>
-        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        <title>PureMVC</title>
+        <link>https://kimkitsuragi0571.github.io/tags/puremvc/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/uipanelmgr/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/puremvc/</guid>
         <description></description>
         </item>
         <item>
         <title>笔记</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E7%AC%94%E8%AE%B0/</link>
-        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        <link>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E7%AC%94%E8%AE%B0/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>面板管理</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E9%9D%A2%E6%9D%BF%E7%AE%A1%E7%90%86/</link>
-        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E9%9D%A2%E6%9D%BF%E7%AE%A1%E7%90%86/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>虚方法重写</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%99%9A%E6%96%B9%E6%B3%95%E9%87%8D%E5%86%99/</link>
-        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E8%99%9A%E6%96%B9%E6%B3%95%E9%87%8D%E5%86%99/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Button</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/button/</link>
-        <pubDate>Fri, 28 Aug 2026 16:30:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/button/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>EventTrigger</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/eventtrigger/</link>
-        <pubDate>Fri, 28 Aug 2026 16:30:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/eventtrigger/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>点击事件</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6/</link>
-        <pubDate>Fri, 28 Aug 2026 16:30:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Async</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/async/</link>
-        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/async/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Await</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/await/</link>
-        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/await/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Resources</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/resources/</link>
-        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/resources/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Task</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/task/</link>
-        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/task/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>TaskCompletionSource</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/taskcompletionsource/</link>
-        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/taskcompletionsource/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>拓展方法</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E6%8B%93%E5%B1%95%E6%96%B9%E6%B3%95/</link>
-        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E6%8B%93%E5%B1%95%E6%96%B9%E6%B3%95/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Callback</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/callback/</link>
-        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/callback/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>委托</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%A7%94%E6%89%98/</link>
-        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%A7%94%E6%89%98/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>协程</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%8D%8F%E7%A8%8B/</link>
-        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%8D%8F%E7%A8%8B/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>异步加载</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD/</link>
-        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>SceneManager</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/scenemanager/</link>
-        <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/scenemanager/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>进度条</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/</link>
-        <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>事件中心</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/</link>
-        <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>UnityAction</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/unityaction/</link>
-        <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/unityaction/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>泛型</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E6%B3%9B%E5%9E%8B/</link>
-        <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E6%B3%9B%E5%9E%8B/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</guid>
         <description></description>
         </item>
         <item>
         <title>解耦</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%A7%A3%E8%80%A6/</link>
-        <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%A7%A3%E8%80%A6/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E8%A7%A3%E8%80%A6/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E8%A7%A3%E8%80%A6/</guid>
         <description></description>
         </item>
         <item>
-        <title>Coroutine</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/coroutine/</link>
-        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
+        <title>框架</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%A1%86%E6%9E%B6/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/coroutine/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>MonoBehaviour</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/monobehaviour/</link>
-        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/monobehaviour/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Update</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/update/</link>
-        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/update/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>单例</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%8D%95%E4%BE%8B/</link>
-        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%8D%95%E4%BE%8B/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Update封装</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/update%E5%B0%81%E8%A3%85/</link>
-        <pubDate>Sun, 23 Aug 2026 17:56:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/update%E5%B0%81%E8%A3%85/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>事件</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6/</link>
-        <pubDate>Sun, 23 Aug 2026 17:56:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>AssetBundle</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/assetbundle/</link>
-        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/assetbundle/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Editor</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/editor/</link>
-        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/editor/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>XLua</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/xlua/</link>
-        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/xlua/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>工具</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%B7%A5%E5%85%B7/</link>
-        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%B7%A5%E5%85%B7/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>C#调用Lua</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/c%23%E8%B0%83%E7%94%A8lua/</link>
-        <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/c%23%E8%B0%83%E7%94%A8lua/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Lua</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/lua/</link>
-        <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/lua/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>接口</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E6%8E%A5%E5%8F%A3/</link>
-        <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E6%8E%A5%E5%8F%A3/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>重定向</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E9%87%8D%E5%AE%9A%E5%90%91/</link>
-        <pubDate>Sun, 19 Jul 2026 21:55:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E9%87%8D%E5%AE%9A%E5%90%91/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>单例模式</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</link>
-        <pubDate>Sun, 19 Jul 2026 21:10:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>资源加载</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/</link>
-        <pubDate>Sun, 19 Jul 2026 21:10:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>对象池</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%AF%B9%E8%B1%A1%E6%B1%A0/</link>
-        <pubDate>Fri, 17 Jul 2026 22:56:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%AF%B9%E8%B1%A1%E6%B1%A0/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E6%A1%86%E6%9E%B6/</guid>
         <description></description>
         </item>
         <item>
         <title>设计模式</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>通知</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E9%80%9A%E7%9F%A5/</link>
+        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E9%80%9A%E7%9F%A5/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>C#</title>
+        <link>https://kimkitsuragi0571.github.io/tags/c%23/</link>
+        <pubDate>Tue, 08 Sep 2026 10:05:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/c%23/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Dictionary</title>
+        <link>https://kimkitsuragi0571.github.io/tags/dictionary/</link>
+        <pubDate>Tue, 08 Sep 2026 10:05:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/dictionary/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>哈希表</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/</link>
+        <pubDate>Tue, 08 Sep 2026 10:05:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%93%88%E5%B8%8C%E8%A1%A8/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>数据结构</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</link>
+        <pubDate>Tue, 08 Sep 2026 10:05:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>字典</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%AD%97%E5%85%B8/</link>
+        <pubDate>Tue, 08 Sep 2026 10:05:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%AD%97%E5%85%B8/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>BinaryFormatter</title>
+        <link>https://kimkitsuragi0571.github.io/tags/binaryformatter/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/binaryformatter/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>FileStream</title>
+        <link>https://kimkitsuragi0571.github.io/tags/filestream/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/filestream/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>JSON</title>
+        <link>https://kimkitsuragi0571.github.io/tags/json/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/json/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>JsonUtility</title>
+        <link>https://kimkitsuragi0571.github.io/tags/jsonutility/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/jsonutility/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>LitJson</title>
+        <link>https://kimkitsuragi0571.github.io/tags/litjson/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/litjson/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>存档</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%AD%98%E6%A1%A3/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%AD%98%E6%A1%A3/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>二进制</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>文件操作</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>序列化</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%BA%8F%E5%88%97%E5%8C%96/</link>
+        <pubDate>Tue, 01 Sep 2026 15:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%BA%8F%E5%88%97%E5%8C%96/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>UGUI</title>
+        <link>https://kimkitsuragi0571.github.io/tags/ugui/</link>
+        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/ugui/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>UIPanelMgr</title>
+        <link>https://kimkitsuragi0571.github.io/tags/uipanelmgr/</link>
+        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/uipanelmgr/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>面板管理</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E9%9D%A2%E6%9D%BF%E7%AE%A1%E7%90%86/</link>
+        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E9%9D%A2%E6%9D%BF%E7%AE%A1%E7%90%86/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>虚方法重写</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%99%9A%E6%96%B9%E6%B3%95%E9%87%8D%E5%86%99/</link>
+        <pubDate>Fri, 28 Aug 2026 17:45:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E8%99%9A%E6%96%B9%E6%B3%95%E9%87%8D%E5%86%99/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Button</title>
+        <link>https://kimkitsuragi0571.github.io/tags/button/</link>
+        <pubDate>Fri, 28 Aug 2026 16:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/button/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>EventTrigger</title>
+        <link>https://kimkitsuragi0571.github.io/tags/eventtrigger/</link>
+        <pubDate>Fri, 28 Aug 2026 16:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/eventtrigger/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>点击事件</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6/</link>
+        <pubDate>Fri, 28 Aug 2026 16:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Async</title>
+        <link>https://kimkitsuragi0571.github.io/tags/async/</link>
+        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/async/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Await</title>
+        <link>https://kimkitsuragi0571.github.io/tags/await/</link>
+        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/await/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Resources</title>
+        <link>https://kimkitsuragi0571.github.io/tags/resources/</link>
+        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/resources/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Task</title>
+        <link>https://kimkitsuragi0571.github.io/tags/task/</link>
+        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/task/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>TaskCompletionSource</title>
+        <link>https://kimkitsuragi0571.github.io/tags/taskcompletionsource/</link>
+        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/taskcompletionsource/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>拓展方法</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%8B%93%E5%B1%95%E6%96%B9%E6%B3%95/</link>
+        <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E6%8B%93%E5%B1%95%E6%96%B9%E6%B3%95/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Callback</title>
+        <link>https://kimkitsuragi0571.github.io/tags/callback/</link>
+        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/callback/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>委托</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%A7%94%E6%89%98/</link>
+        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%A7%94%E6%89%98/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>协程</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%8D%8F%E7%A8%8B/</link>
+        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%8D%8F%E7%A8%8B/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>异步加载</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD/</link>
+        <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>SceneManager</title>
+        <link>https://kimkitsuragi0571.github.io/tags/scenemanager/</link>
+        <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/scenemanager/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>进度条</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/</link>
+        <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E8%BF%9B%E5%BA%A6%E6%9D%A1/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>事件中心</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/</link>
+        <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>UnityAction</title>
+        <link>https://kimkitsuragi0571.github.io/tags/unityaction/</link>
+        <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/unityaction/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>泛型</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%B3%9B%E5%9E%8B/</link>
+        <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E6%B3%9B%E5%9E%8B/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Coroutine</title>
+        <link>https://kimkitsuragi0571.github.io/tags/coroutine/</link>
+        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/coroutine/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>MonoBehaviour</title>
+        <link>https://kimkitsuragi0571.github.io/tags/monobehaviour/</link>
+        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/monobehaviour/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Update</title>
+        <link>https://kimkitsuragi0571.github.io/tags/update/</link>
+        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/update/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>单例</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%8D%95%E4%BE%8B/</link>
+        <pubDate>Sun, 23 Aug 2026 18:44:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%8D%95%E4%BE%8B/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Update封装</title>
+        <link>https://kimkitsuragi0571.github.io/tags/update%E5%B0%81%E8%A3%85/</link>
+        <pubDate>Sun, 23 Aug 2026 17:56:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/update%E5%B0%81%E8%A3%85/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>事件</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6/</link>
+        <pubDate>Sun, 23 Aug 2026 17:56:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>AssetBundle</title>
+        <link>https://kimkitsuragi0571.github.io/tags/assetbundle/</link>
+        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/assetbundle/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Editor</title>
+        <link>https://kimkitsuragi0571.github.io/tags/editor/</link>
+        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/editor/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>XLua</title>
+        <link>https://kimkitsuragi0571.github.io/tags/xlua/</link>
+        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/xlua/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>工具</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%B7%A5%E5%85%B7/</link>
+        <pubDate>Sat, 22 Aug 2026 15:20:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%B7%A5%E5%85%B7/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>C#调用Lua</title>
+        <link>https://kimkitsuragi0571.github.io/tags/c%23%E8%B0%83%E7%94%A8lua/</link>
+        <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/c%23%E8%B0%83%E7%94%A8lua/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Lua</title>
+        <link>https://kimkitsuragi0571.github.io/tags/lua/</link>
+        <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/lua/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>接口</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%8E%A5%E5%8F%A3/</link>
+        <pubDate>Tue, 11 Aug 2026 22:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E6%8E%A5%E5%8F%A3/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>重定向</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E9%87%8D%E5%AE%9A%E5%90%91/</link>
+        <pubDate>Sun, 19 Jul 2026 21:55:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E9%87%8D%E5%AE%9A%E5%90%91/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>单例模式</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</link>
+        <pubDate>Sun, 19 Jul 2026 21:10:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>资源加载</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/</link>
+        <pubDate>Sun, 19 Jul 2026 21:10:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>对象池</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%AF%B9%E8%B1%A1%E6%B1%A0/</link>
         <pubDate>Fri, 17 Jul 2026 22:56:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%AF%B9%E8%B1%A1%E6%B1%A0/</guid>
         <description></description>
         </item>
         <item>
         <title>优化</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E4%BC%98%E5%8C%96/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BC%98%E5%8C%96/</link>
         <pubDate>Fri, 17 Jul 2026 22:56:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E4%BC%98%E5%8C%96/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E4%BC%98%E5%8C%96/</guid>
         <description></description>
         </item>
         <item>
         <title>MVP</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/mvp/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/mvp/</link>
         <pubDate>Fri, 17 Jul 2026 22:19:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/mvp/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>MVC</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/mvc/</link>
-        <pubDate>Fri, 17 Jul 2026 18:20:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi-0571.github.io/tags/mvc/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/mvp/</guid>
         <description></description>
         </item>
         <item>
         <title>2D动画</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/2d%E5%8A%A8%E7%94%BB/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/2d%E5%8A%A8%E7%94%BB/</link>
         <pubDate>Sun, 03 May 2026 10:40:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/2d%E5%8A%A8%E7%94%BB/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/2d%E5%8A%A8%E7%94%BB/</guid>
         <description></description>
         </item>
         <item>
         <title>序列帧</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%BA%8F%E5%88%97%E5%B8%A7/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%BA%8F%E5%88%97%E5%B8%A7/</link>
         <pubDate>Sun, 03 May 2026 10:40:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%BA%8F%E5%88%97%E5%B8%A7/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%BA%8F%E5%88%97%E5%B8%A7/</guid>
         <description></description>
         </item>
         <item>
         <title>博客</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E5%8D%9A%E5%AE%A2/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E5%8D%9A%E5%AE%A2/</link>
         <pubDate>Sun, 11 Jan 2026 11:20:41 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/tags/%E5%8D%9A%E5%AE%A2/</guid>
+        <guid>https://kimkitsuragi0571.github.io/tags/%E5%8D%9A%E5%AE%A2/</guid>
         <description></description>
         </item>
         

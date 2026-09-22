@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Callback on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/callback/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/callback/</link>
         <description>Recent content in Callback on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Wed, 26 Aug 2026 10:17:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/callback/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 26 Aug 2026 10:17:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/callback/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity 资源加载模块(使用旧版callback实现)</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</link>
         <pubDate>Wed, 26 Aug 2026 10:17:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8%E6%97%A7%E7%89%88callback%E5%AE%9E%E7%8E%B0/</guid>
         <description>&lt;p&gt;Unity 中 &lt;code&gt;Resources.Load&lt;/code&gt; 同步加载资源会卡帧，&lt;code&gt;Resources.LoadAsync&lt;/code&gt; 异步加载需要配合协程。资源加载模块 &lt;code&gt;ResLoadMgr&lt;/code&gt; 封装了同步和异步两种加载方式，自动判断 GameObject 类型并实例化。&lt;/p&gt;
 &lt;p&gt;异步加载中有一个核心问题：&lt;strong&gt;协程无法直接返回值给调用方&lt;/strong&gt;。旧版方案通过 callback（回调函数）解决，把结果作为参数传入回调执行。&lt;/p&gt;
 &lt;hr&gt;

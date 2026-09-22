@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>资源加载 on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/</link>
         <description>Recent content in 资源加载 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Sun, 19 Jul 2026 21:10:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 19 Jul 2026 21:10:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity AB包管理器</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-ab%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-ab%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/</link>
         <pubDate>Sun, 19 Jul 2026 21:10:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-ab%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-ab%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/</guid>
         <description>&lt;p&gt;AssetBundle（AB包）是 Unity 用于资源热更新和动态加载的核心机制。本文实现一个通用的 AB 包管理器，封装主包加载、依赖加载、同步/异步资源加载和包卸载等常用逻辑。&lt;/p&gt;
 &lt;h2 id=&#34;一单例基类-monosingletonbase&#34;&gt;一、单例基类 MonoSingletonBase
 &lt;/h2&gt;&lt;p&gt;继承 &lt;code&gt;MonoBehaviour&lt;/code&gt; 的泛型单例基类，提供自动创建实例、不销毁、防重复等能力。&lt;/p&gt;

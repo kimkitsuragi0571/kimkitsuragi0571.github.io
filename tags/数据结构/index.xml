@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>数据结构 on IBN5100</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</link>
+        <description>Recent content in 数据结构 on IBN5100</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>KimKitsuragi</copyright>
+        <lastBuildDate>Tue, 08 Sep 2026 10:05:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>C# 字典底层实现原理</title>
+        <link>https://kimkitsuragi0571.github.io/p/csharp-dict-principle/</link>
+        <pubDate>Tue, 08 Sep 2026 10:05:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/p/csharp-dict-principle/</guid>
+        <description>&lt;p&gt;了解 C# &lt;code&gt;Dictionary&lt;/code&gt; 实现原理之前，先了解 Hash 算法和解决 Hash 碰撞冲突。&lt;/p&gt;
+&lt;h2 id=&#34;一hash-算法基础&#34;&gt;一、Hash 算法基础
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Hash 算法&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;用一个任意长度输入 → 通过 Hash 函数 → 得到一个统一长度的结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Hash 表（散列表）&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;根据元素关键字计算出其在 Hash 表的存储地址&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Hash 函数（散列函数）&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Addr = HashFunc(Key)&lt;/code&gt;，建立 Key-存储地址 的映射&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Hash 冲突&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;本来应该是每个 Key 对应唯一的结果&lt;/li&gt;
+&lt;li&gt;但是现在不同的 Key 会有相同的地址结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;雪崩效应&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;两个值非常接近的 Key 最终算出来的地址可能相差很大&lt;/li&gt;
+&lt;li&gt;所以密码学 Hash 比较适合用来测试数据是否被改动过&lt;/li&gt;
+&lt;li&gt;而数据结构 Hash 也需要用这个实现均匀分布和计算速度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;二关于字典的关键成员&#34;&gt;二、关于字典的关键成员
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://kimkitsuragi0571.github.io/p/csharp-dict-principle/dict-structure.png&#34;
+	width=&#34;2145&#34;
+	height=&#34;1178&#34;
+	srcset=&#34;https://kimkitsuragi0571.github.io/p/csharp-dict-principle/dict-structure_hu_b00b551b29f370a2.png 480w, https://kimkitsuragi0571.github.io/p/csharp-dict-principle/dict-structure_hu_21c2a3717ba0b9ca.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;image-1&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;182&#34;
+		data-flex-basis=&#34;437px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;右下角的就是 &lt;code&gt;Dictionary&lt;/code&gt; 中关键成员：&lt;strong&gt;Hash 桶数组 &lt;code&gt;buckets&lt;/code&gt; + 键值对结构体数组 &lt;code&gt;entries&lt;/code&gt;&lt;/strong&gt;。Hash 桶的作用就是存储 Entry 数组的下标。&lt;/p&gt;
+&lt;p&gt;当我们 &lt;code&gt;dict.Add(&amp;quot;Age&amp;quot;, 18)&lt;/code&gt;：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;首先计算 &lt;code&gt;hashCode(&amp;quot;Age&amp;quot;) = 10&lt;/code&gt;，算出 Key 哈希值
+&lt;ul&gt;
+&lt;li&gt;传入 String 类型通过编码算出哈希值&lt;/li&gt;
+&lt;li&gt;但也是有可能不同 String 算出相同哈希的&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;然后 &lt;code&gt;10 % 7 = 3&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;对 7 取余因为图上的 &lt;code&gt;buckets&lt;/code&gt; 数组长度为 7
+&lt;ul&gt;
+&lt;li&gt;就是为了保证所有元素不超出 &lt;code&gt;buckets&lt;/code&gt; 数组而已&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;也就是以前讲过的散列算法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;得到 &lt;code&gt;buckets[3] = 0&lt;/code&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;buckets&lt;/code&gt; 数组中存放的就是 &lt;code&gt;entries&lt;/code&gt; 数组的下标&lt;/li&gt;
+&lt;li&gt;直白点说 &lt;code&gt;Key == &amp;quot;Age&amp;quot;&lt;/code&gt; 的键值对存放在 &lt;code&gt;entries[0]&lt;/code&gt;，其下标存放在 &lt;code&gt;buckets[3]&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;以后可能还有计算出 Key 为 &lt;code&gt;&amp;quot;Grade&amp;quot;&lt;/code&gt; 的元素在 &lt;code&gt;entries[4]&lt;/code&gt;，同样哈希余数为 3：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;此时就会将其加入同一个桶 &lt;code&gt;buckets[3]&lt;/code&gt; 的链表之中&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;entries[i]&lt;/code&gt; 相当于 &lt;code&gt;LinkedNode&lt;/code&gt;，其中存储了 &lt;code&gt;next&lt;/code&gt; 索引
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;entries[0]&lt;/code&gt; 和 &lt;code&gt;entries[4]&lt;/code&gt; 构成了链表&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;采用的是&lt;strong&gt;头插法&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;注意 &lt;code&gt;buckets[3]&lt;/code&gt; 并不存储链表本体，只存储链表头结点（最新插入 &lt;code&gt;entries[i]&lt;/code&gt;）的索引&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;三桶数组的意义&#34;&gt;三、桶数组的意义
+&lt;/h2&gt;&lt;p&gt;桶数组就相当于变相压缩了 &lt;code&gt;entries&lt;/code&gt; 的索引——让 Key 哈希值余数相同的 &lt;code&gt;entries[i]&lt;/code&gt; 放在同一个链表里。查找某个 Key，就先算出其 Key 哈希值余数为 3，然后到对应链表里面查找。&lt;/p&gt;
+&lt;h3 id=&#34;为啥不干脆查找-key-为-age-的-entriesi&#34;&gt;为啥不干脆查找 Key 为 &amp;ldquo;Age&amp;rdquo; 的 entries[i]
+&lt;/h3&gt;&lt;p&gt;因为 &lt;code&gt;entries&lt;/code&gt; 并没有按顺序排列，你只能遍历对比 &lt;code&gt;Key == &amp;quot;Age&amp;quot;&lt;/code&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;为什么不直接查找-hash-值为-10-的元素&#34;&gt;为什么不直接查找 Hash 值为 10 的元素
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;buckets&lt;/code&gt; 桶数组里面只变相存储了哈希值对长度取的余数。哈希值本身雪崩效应数值差距很大，总不能 10 ~ 18947 这些都存储吧？而且这样和直接找 Key 没啥区别了。&lt;/p&gt;
+&lt;h2 id=&#34;四关于-entries-数组成员&#34;&gt;四、关于 entries 数组成员
+&lt;/h2&gt;&lt;h3 id=&#34;为什么要存完整的-hashcode&#34;&gt;为什么要存完整的 hashCode
+&lt;/h3&gt;&lt;p&gt;找具体元素时要遍历链表，先比较 &lt;code&gt;HashCode&lt;/code&gt;，如果和目标相同再比较 &lt;code&gt;Key&lt;/code&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;string 类型的比较比 int 类型慢很多，所以先比较 &lt;code&gt;hashCode&lt;/code&gt; 筛选一遍&lt;/li&gt;
+&lt;li&gt;不同 string 仍然可能有相同 &lt;code&gt;hashCode&lt;/code&gt;（哈希冲突），所以还是得比较 &lt;code&gt;Key&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;存储-next-下标&#34;&gt;存储 next 下标
+&lt;/h3&gt;&lt;p&gt;就是实现类似链表的结构。&lt;/p&gt;
+&lt;h2 id=&#34;五查找时间复杂度&#34;&gt;五、查找时间复杂度
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;最好 / 平均 时间复杂度为 O(1)&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;链表只有一个元素（没有哈希冲突，没有余数相同）&lt;/li&gt;
+&lt;li&gt;此时查找一个元素，直接算出其哈希值余数，就能找到索引&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;最坏时间复杂度为 O(n)&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;n 个元素的哈希余数均相同，构成了一张长度 n 的链表&lt;/li&gt;
+&lt;li&gt;查找某个元素就需要遍历链表了&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

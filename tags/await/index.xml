@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Await on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/await/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/await/</link>
         <description>Recent content in Await on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Wed, 26 Aug 2026 10:20:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/await/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 26 Aug 2026 10:20:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/await/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity 资源加载模块(使用await实现)</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/</link>
         <pubDate>Wed, 26 Aug 2026 10:20:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E8%B5%84%E6%BA%90%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97%E4%BD%BF%E7%94%A8await%E5%AE%9E%E7%8E%B0/</guid>
         <description>&lt;p&gt;上一篇用 callback 解决了协程无法返回值的问题。C# 的 &lt;code&gt;async/await&lt;/code&gt; 模式可以让异步代码像同步代码一样线性编写：&lt;strong&gt;直接 return 返回值，不用在回调和协程里面绕，还能用标准 try/catch 捕获异常。&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;但 Unity 2022 版的 &lt;code&gt;ResourceRequest&lt;/code&gt;（继承自 &lt;code&gt;AsyncOperation&lt;/code&gt;）没有实现 &lt;code&gt;GetAwaiter()&lt;/code&gt; 方法，无法直接 &lt;code&gt;await req&lt;/code&gt;。需要自己手写一个拓展方法，用 &lt;code&gt;TaskCompletionSource&lt;/code&gt; 把旧式异步包装成 &lt;code&gt;Task&lt;/code&gt;。&lt;/p&gt;
 &lt;hr&gt;

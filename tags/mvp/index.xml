@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>MVP on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/mvp/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/mvp/</link>
         <description>Recent content in MVP on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Fri, 17 Jul 2026 22:19:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/mvp/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 17 Jul 2026 22:19:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/mvp/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity MVP框架实现</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-mvp%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-mvp%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/</link>
         <pubDate>Fri, 17 Jul 2026 22:19:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-mvp%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-mvp%E6%A1%86%E6%9E%B6%E5%AE%9E%E7%8E%B0/</guid>
         <description>&lt;p&gt;MVP（Model-View-Presenter）是 MVC 的演变版本，核心区别在于：View 不再直接接收 Model 数据，所有数据流转都由 Presenter 集中处理，使 View 更加被动、纯粹。本文在上一篇 MVC 框架基础上，展示如何改造为 MVP 结构。&lt;/p&gt;
 &lt;h2 id=&#34;一model层playermodel&#34;&gt;一、Model层：PlayerModel
 &lt;/h2&gt;&lt;blockquote&gt;

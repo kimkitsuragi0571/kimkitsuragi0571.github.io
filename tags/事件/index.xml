@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>事件 on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6/</link>
         <description>Recent content in 事件 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Sun, 23 Aug 2026 17:56:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 23 Aug 2026 17:56:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity Mono模块</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-mono%E6%A8%A1%E5%9D%97/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-mono%E6%A8%A1%E5%9D%97/</link>
         <pubDate>Sun, 23 Aug 2026 17:56:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-mono%E6%A8%A1%E5%9D%97/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-mono%E6%A8%A1%E5%9D%97/</guid>
         <description>&lt;p&gt;Unity 中继承 MonoBehaviour 的类才能挂载到 GameObject 上，才能使用 Unity 的生命周期函数（Update、Start 等）。但有些纯逻辑类不想继承 MonoBehaviour，却又想每帧执行逻辑。Mono 模块的核心思路就是：用一个继承 MonoBehaviour 的公共模块统一执行 Update，然后通过事件把每帧调用暴露给外部非 Mono 脚本。&lt;/p&gt;
 &lt;h2 id=&#34;一三层继承结构&#34;&gt;一、三层继承结构
 &lt;/h2&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;

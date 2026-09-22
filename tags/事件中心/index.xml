@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>事件中心 on IBN5100</title>
-        <link>https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/</link>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/</link>
         <description>Recent content in 事件中心 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Wed, 26 Aug 2026 09:47:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi-0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 26 Aug 2026 09:47:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity 场景加载模块</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</link>
         <pubDate>Wed, 26 Aug 2026 09:47:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E5%9C%BA%E6%99%AF%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%9D%97/</guid>
         <description>&lt;p&gt;Unity 原生 &lt;code&gt;SceneManager.LoadScene&lt;/code&gt; 同步加载会卡住主线程，大场景加载时画面会冻结。异步加载 &lt;code&gt;LoadSceneAsync&lt;/code&gt; 可以在后台加载，但需要协程配合 + 进度回调。场景加载模块 &lt;code&gt;ScenesMgr&lt;/code&gt; 把同步/异步加载封装成统一接口，异步加载进度通过&lt;strong&gt;泛型事件中心&lt;/strong&gt;广播给 UI，实现加载进度条。&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;一场景管理器scenesmgr&#34;&gt;一、场景管理器：ScenesMgr
@@ -412,10 +412,10 @@
         </item>
         <item>
         <title>Unity 普通事件中心(仅支持无参函数订阅)</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</link>
         <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E6%99%AE%E9%80%9A%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E4%BB%85%E6%94%AF%E6%8C%81%E6%97%A0%E5%8F%82%E5%87%BD%E6%95%B0%E8%AE%A2%E9%98%85/</guid>
         <description>&lt;p&gt;事件中心模块解决的核心问题是&lt;strong&gt;脚本间强耦合&lt;/strong&gt;：比如怪物死亡时要触发玩家奖励、播放动画、任务记录等多种逻辑，传统做法是在怪物 &lt;code&gt;Dead()&lt;/code&gt; 方法中获取 Player 物体再调用其方法，脚本间关联性太强，不符合七大设计原则。&lt;/p&gt;
 &lt;p&gt;事件中心的思想是：&lt;strong&gt;怪物死亡时通知事件中心，事件中心再通知所有订阅了这个事件的脚本执行各自逻辑。&lt;/strong&gt; 订阅者也要提前告诉事件中心：&amp;ldquo;XX 事件触发时，请执行我的 XX 方法。&amp;rdquo;&lt;/p&gt;
 &lt;p&gt;本篇是基础版事件中心，仅支持无参函数订阅（&lt;code&gt;UnityAction&lt;/code&gt;）。&lt;/p&gt;
@@ -759,10 +759,10 @@
         </item>
         <item>
         <title>Unity 支持泛型的事件中心模块</title>
-        <link>https://kimkitsuragi-0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</link>
+        <link>https://kimkitsuragi0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</link>
         <pubDate>Tue, 25 Aug 2026 19:24:00 +0800</pubDate>
         
-        <guid>https://kimkitsuragi-0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</guid>
+        <guid>https://kimkitsuragi0571.github.io/p/unity-%E6%94%AF%E6%8C%81%E6%B3%9B%E5%9E%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E4%B8%AD%E5%BF%83%E6%A8%A1%E5%9D%97/</guid>
         <description>&lt;p&gt;前面的事件中心模块中，&lt;code&gt;UnityAction&lt;/code&gt; 只能存放无参数类型的函数。升级为泛型版本后，事件可以携带参数（比如怪物死亡时传递怪物类型、玩家攻击时传递伤害值），同时&lt;strong&gt;兼容无参数版本&lt;/strong&gt;。&lt;/p&gt;
 &lt;h2 id=&#34;一核心思路&#34;&gt;一、核心思路
 &lt;/h2&gt;&lt;p&gt;普通事件中心用 &lt;code&gt;Dictionary&amp;lt;string, UnityAction&amp;gt;&lt;/code&gt; 存储事件，Key 是事件名，Value 是无参委托。问题在于：&lt;strong&gt;所有事件都只能是无参的&lt;/strong&gt;。&lt;/p&gt;
