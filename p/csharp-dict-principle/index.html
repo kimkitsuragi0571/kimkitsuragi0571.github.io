@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi0571.github.io/p/csharp-dict-principle/'>
 
-<link rel="stylesheet" href="/scss/style.min.2eacd74f1dc9eabced815ff53e1794b040da36d37594c05055ed2f0726d654e0.css"><meta property='og:title' content="C# 字典底层实现原理">
+<link rel="stylesheet" href="/scss/style.min.19d9be3f60f2721fb07f6d63c1853bde9d114ebbeffc0f011716547b8fde294a.css"><meta property='og:title' content="C# 字典底层实现原理">
 <meta property='og:description' content="了解 C# Dictionary 实现原理之前，先了解 Hash 算法和解决 Hash 碰撞冲突。\n一、Hash 算法基础 Hash 算法 用一个任意长度输入 → 通过 Hash 函数 → 得到一个统一长度的结果 Hash 表（散列表） 根据元素关键字计算出其在 Hash 表的存储地址 Hash 函数（散列函数） Addr = HashFunc(Key)，建立 Key-存储地址 的映射 Hash 冲突 本来应该是每个 Key 对应唯一的结果 但是现在不同的 Key 会有相同的地址结果 雪崩效应 两个值非常接近的 Key 最终算出来的地址可能相差很大 所以密码学 Hash 比较适合用来测试数据是否被改动过 而数据结构 Hash 也需要用这个实现均匀分布和计算速度 二、关于字典的关键成员 ">
 <meta property='og:url' content='https://kimkitsuragi0571.github.io/p/csharp-dict-principle/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -71,7 +71,7 @@
         
         <div class="site-meta">
             <h1 class="site-name"><a href="/">IBN5100</a></h1>
-            <h2 class="site-description">相逢在宇宙</h2>
+            <h2 class="site-description">记录C#,Unity及.Net相关技术</h2>
         </div>
     </header><ol class="menu-social">
             

@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://kimkitsuragi0571.github.io/p/unity-2d%E5%BA%8F%E5%88%97%E5%B8%A7%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.2eacd74f1dc9eabced815ff53e1794b040da36d37594c05055ed2f0726d654e0.css"><meta property='og:title' content="Unity 2D序列帧动画实现">
+<link rel="stylesheet" href="/scss/style.min.19d9be3f60f2721fb07f6d63c1853bde9d114ebbeffc0f011716547b8fde294a.css"><meta property='og:title' content="Unity 2D序列帧动画实现">
 <meta property='og:description' content="通过序列帧Sprite数组实现2D动画播放，适用于简单的2D游戏动画效果。\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 using System.Collections; using System.Collections.Generic; using UnityEngine; public class Animation2D : MonoBehaviour { //直接定义个序列帧Sprite数组 public Sprite[] sprs; public SpriteRenderer sr; private float time; private int index = 0; void Start() { sr = GetComponent&lt;SpriteRenderer&gt;(); sr.sprite = sprs[index]; // 打印开始信息 Debug.Log(&#34;动画开始，当前帧：&#34; + index); } void Update() { //每次增加帧间隔时间 time += Time.deltaTime; //间隔时间到0.02f if (time &gt;= 0.1f) { index++; //已经显示到最后一张图,从头显示 if (index &gt;= sprs.Length) { index = 0; } sr.sprite = sprs[index]; //记得把间隔也重置下 time = 0; // 打印当前播放的帧 Debug.Log(&#34;正在播放第 &#34; + index + &#34; 帧&#34;); } } } 实现原理 核心机制 Sprite数组：sprs[] 存储所有序列帧图片 帧切换：通过 Time.deltaTime 累加时间，达到间隔后切换帧 循环播放：当播放到最后一张时，重置 index = 0 重新开始 关键参数 参数 说明 sprs[] 序列帧图片数组，在Inspector中拖入 time 时间累加器，记录帧间隔 index 当前播放帧索引 0.1f 每帧播放时长（秒） 使用方法 1. 创建动画控制器脚本 将脚本挂载到包含 SpriteRenderer 组件的GameObject上\n">
 <meta property='og:url' content='https://kimkitsuragi0571.github.io/p/unity-2d%E5%BA%8F%E5%88%97%E5%B8%A7%E5%8A%A8%E7%94%BB%E5%AE%9E%E7%8E%B0/'>
 <meta property='og:site_name' content='IBN5100'>
@@ -71,7 +71,7 @@
         
         <div class="site-meta">
             <h1 class="site-name"><a href="/">IBN5100</a></h1>
-            <h2 class="site-description">相逢在宇宙</h2>
+            <h2 class="site-description">记录C#,Unity及.Net相关技术</h2>
         </div>
     </header><ol class="menu-social">
             
