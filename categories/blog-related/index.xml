@@ -2,12 +2,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>博客相关 on IBN5100</title>
-        <link>https://kimkitsuragi0571.github.io/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/</link>
+        <link>https://kimkitsuragi0571.github.io/categories/blog-related/</link>
         <description>Recent content in 博客相关 on IBN5100</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Sun, 11 Jan 2026 11:20:41 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 11 Jan 2026 11:20:41 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/categories/blog-related/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Hugo部署静态博客基本使用方法</title>
         <link>https://kimkitsuragi0571.github.io/p/hugo%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/</link>
         <pubDate>Sun, 11 Jan 2026 11:20:41 +0800</pubDate>

@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content=".NET 里读取配置的方式很多，本文用同一个 PlayerInfo.json 作为数据源，依次演示 5 种读取方式：\n基本配置读取 — ConfigurationBuilder + AddJsonFile，通过 configRoot[key] 或 Get&lt;T&gt;() 直接取 选项方式读取配置 — AddOptions&lt;TOptions&gt;().Bind(configRoot)，配合 IOptions&lt;TOptions&gt; 注入 选项方式工厂注册 — 链式 Bind().Configure() 或在 Configure 闭包里手动 Bind，可叠加多步修改 读取终端配置参数 — AddCommandLine(args)，从命令行参数读取配置 UserSecret 配置 — AddUserSecrets&lt;T&gt;()，本地 C 盘的 secrets.json 覆盖公开 json 这 5 种方式的代码都基于同一份 PlayerConfig 数据类结构，只是配置源和注册写法不同。\n">
+<title>Dotnet 配置读取示例（Json / Options / 命令行 / UserSecret）</title>
+
+<link rel='canonical' href='https://kimkitsuragi0571.github.io/p/dotnet-config-reading-example/'>
+
+<link rel="stylesheet" href="/scss/style.min.19d9be3f60f2721fb07f6d63c1853bde9d114ebbeffc0f011716547b8fde294a.css"><meta property='og:title' content="Dotnet 配置读取示例（Json / Options / 命令行 / UserSecret）">
+<meta property='og:description' content=".NET 里读取配置的方式很多，本文用同一个 PlayerInfo.json 作为数据源，依次演示 5 种读取方式：\n基本配置读取 — ConfigurationBuilder + AddJsonFile，通过 configRoot[key] 或 Get&lt;T&gt;() 直接取 选项方式读取配置 — AddOptions&lt;TOptions&gt;().Bind(configRoot)，配合 IOptions&lt;TOptions&gt; 注入 选项方式工厂注册 — 链式 Bind().Configure() 或在 Configure 闭包里手动 Bind，可叠加多步修改 读取终端配置参数 — AddCommandLine(args)，从命令行参数读取配置 UserSecret 配置 — AddUserSecrets&lt;T&gt;()，本地 C 盘的 secrets.json 覆盖公开 json 这 5 种方式的代码都基于同一份 PlayerConfig 数据类结构，只是配置源和注册写法不同。\n">
+<meta property='og:url' content='https://kimkitsuragi0571.github.io/p/dotnet-config-reading-example/'>
+<meta property='og:site_name' content='IBN5100'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='笔记' /><meta property='article:tag' content='Dotnet' /><meta property='article:tag' content='配置' /><meta property='article:tag' content='IConfiguration' /><meta property='article:tag' content='Options' /><meta property='article:tag' content='UserSecrets' /><meta property='article:published_time' content='2026-09-17T10:00:00&#43;08:00'/><meta property='article:modified_time' content='2026-09-17T10:00:00&#43;08:00'/>
+<meta name="twitter:title" content="Dotnet 配置读取示例（Json / Options / 命令行 / UserSecret）">
+<meta name="twitter:description" content=".NET 里读取配置的方式很多，本文用同一个 PlayerInfo.json 作为数据源，依次演示 5 种读取方式：\n基本配置读取 — ConfigurationBuilder + AddJsonFile，通过 configRoot[key] 或 Get&lt;T&gt;() 直接取 选项方式读取配置 — AddOptions&lt;TOptions&gt;().Bind(configRoot)，配合 IOptions&lt;TOptions&gt; 注入 选项方式工厂注册 — 链式 Bind().Configure() 或在 Configure 闭包里手动 Bind，可叠加多步修改 读取终端配置参数 — AddCommandLine(args)，从命令行参数读取配置 UserSecret 配置 — AddUserSecrets&lt;T&gt;()，本地 C 盘的 secrets.json 覆盖公开 json 这 5 种方式的代码都基于同一份 PlayerConfig 数据类结构，只是配置源和注册写法不同。\n">
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_93e389bf4708e7c7.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🤔</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">IBN5100</a></h1>
+            <h2 class="site-description">记录C#,Unity及.Net相关技术</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/3546865758898959?spm_id_from=333.788.0.0'
+                        target="_blank"
+                        title="BiliBili"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-bilibili"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v6a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4v-6z" /><path d="M8 3l2 3" /><path d="M16 3l-2 3" /><path d="M9 13v-2" /><path d="M15 11v2" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/kimkitsuragi0571/hugo-main/actions'
+                        target="_blank"
+                        title="GitAction"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-upload"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M12 11v6" /><path d="M9.5 13.5l2.5 -2.5l2.5 2.5" /></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/CaiJimmy/hugo-theme-stack'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://steamcommunity.com/profiles/76561199047374887/'
+                        target="_blank"
+                        title="Steam"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-steam"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.5 5a4.5 4.5 0 1 1 -.653 8.953l-4.347 3.009l0 .038a3 3 0 0 1 -2.824 3l-.176 0a3 3 0 0 1 -2.94 -2.402l-2.56 -1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834 -.635l2.727 -3.818a4.5 4.5 0 0 1 4.429 -5.302z" /><circle cx="16.5" cy="9.5" r="1" fill="currentColor" /></svg>
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E7%9B%B8%E5%85%B3/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>相关</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E9%93%BE%E6%8E%A5/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>链接</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一公共数据源-playerinfojson">一、公共数据源 PlayerInfo.json</a></li>
+    <li><a href="#二基本配置读取">二、基本配置读取</a></li>
+    <li><a href="#三选项方式读取配置">三、选项方式读取配置</a></li>
+    <li><a href="#四选项方式工厂注册">四、选项方式工厂注册</a></li>
+    <li><a href="#五读取终端配置参数">五、读取终端配置参数</a></li>
+    <li><a href="#六usersecret-配置">六、UserSecret 配置</a></li>
+    <li><a href="#七五种方式对比">七、五种方式对比</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/unity/" >
+                Unity
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/dotnet-config-reading-example/">Dotnet 配置读取示例（Json / Options / 命令行 / UserSecret）</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2026-09-17T10:00:00&#43;08:00'>2026-09-17</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 12 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>.NET 里读取配置的方式很多，本文用同一个 <code>PlayerInfo.json</code> 作为数据源，依次演示 <strong>5 种</strong>读取方式：</p>
+<ol>
+<li><strong>基本配置读取</strong> — <code>ConfigurationBuilder</code> + <code>AddJsonFile</code>，通过 <code>configRoot[key]</code> 或 <code>Get&lt;T&gt;()</code> 直接取</li>
+<li><strong>选项方式读取配置</strong> — <code>AddOptions&lt;TOptions&gt;().Bind(configRoot)</code>，配合 <code>IOptions&lt;TOptions&gt;</code> 注入</li>
+<li><strong>选项方式工厂注册</strong> — 链式 <code>Bind().Configure()</code> 或在 <code>Configure</code> 闭包里手动 <code>Bind</code>，可叠加多步修改</li>
+<li><strong>读取终端配置参数</strong> — <code>AddCommandLine(args)</code>，从命令行参数读取配置</li>
+<li><strong>UserSecret 配置</strong> — <code>AddUserSecrets&lt;T&gt;()</code>，本地 C 盘的 secrets.json 覆盖公开 json</li>
+</ol>
+<p>这 5 种方式的代码都基于同一份 <code>PlayerConfig</code> 数据类结构，只是配置源和注册写法不同。</p>
+<hr>
+<h2 id="一公共数据源-playerinfojson">一、公共数据源 PlayerInfo.json
+</h2><blockquote>
+<p><strong>注意：Json 文件必须复制到输出目录，程序实际的工作目录是 <code>bin/Debug/netX.X</code> 或 <code>bin/Release/netX.X</code> 这样的输出文件夹，而不是你的源代码文件夹。</strong> 所以需要在 VS / Rider 里把 <code>PlayerInfo.json</code> 的「复制到输出目录」设为「如果较新则复制」，否则运行时会找不到文件。</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;playerName&#34;</span><span class="p">:</span> <span class="s2">&#34;Batman&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;playerLevel&#34;</span><span class="p">:</span> <span class="s2">&#34;13&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;Items&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Gun&#34;</span><span class="p">:</span> <span class="s2">&#34;BatGun&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;Car&#34;</span><span class="p">:</span> <span class="s2">&#34;BatCar&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;Skills&#34;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">  <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;Kick&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;Punch&#34;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这份 json 包含了 4 种常见结构：普通字符串、嵌套对象、数组、以及需要「层级读取」的子节点。后面的所有示例都围绕它展开。</p>
+<hr>
+<h2 id="二基本配置读取">二、基本配置读取
+</h2><p>这是最底层的写法：<code>ConfigurationBuilder</code> 作为草稿，往里 <code>AddJsonFile</code>，再 <code>Build()</code> 生成 <code>IConfigurationRoot</code>，之后所有读取都从根对象里取。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.DependencyInjection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Logging</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">internal</span> <span class="k">class</span> <span class="nc">Program</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//1.配置系统构建器(用于往里面添加Json,相当于草稿)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ConfigurationBuilder</span> <span class="n">configBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationBuilder</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//2.添加Json配置文件源</span>
+</span></span><span class="line"><span class="cl">        <span class="n">configBuilder</span><span class="p">.</span><span class="n">AddJsonFile</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//文件名-文件不存在是否报错-文件修改后是否自动刷新</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;PlayerInfo.json&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">optional</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">reloadOnChange</span><span class="p">:</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//3.配置系统根对象(构建器添加好数据,就Build生成根对象,以后就从根对象里面读取)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">IConfigurationRoot</span> <span class="n">configRoot</span> <span class="p">=</span> <span class="n">configBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.接下来只需要从根对象里面读取</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.1 读取普通字符串和数字(注意都是string还需要转化)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//string name = configRoot.GetValue&lt;string&gt;(&#34;playerName&#34;, &#34;Unknown&#34;);可以避免读取null</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">playerName</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">[</span><span class="s">&#34;playerName&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.2 读取嵌套对象</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//用:冒号表示层级就行了</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">gun</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">[</span><span class="s">&#34;Items:Gun&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">car</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">[</span><span class="s">&#34;Items:Car&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.3 读取数组列表</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//用:冒号后接索引就行了</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">skill1</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">[</span><span class="s">&#34;Skills:0&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">skill2</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">[</span><span class="s">&#34;Skills:1&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.4 读取某一层级</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//直接先读取某个非叶子节点作为层级,然后通过该层级直接获取子节点,也可以直接foreach遍历所有子节点</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这样就不用每个都写一遍:冒号层级获取了</span>
+</span></span><span class="line"><span class="cl">        <span class="n">IConfigurationSection</span> <span class="n">itemsSection</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">.</span><span class="n">GetSection</span><span class="p">(</span><span class="s">&#34;Items&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//还可以直接遍历获取所有子节点foreach (var child in itemsSection.GetChildren())</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">gunSection</span> <span class="p">=</span> <span class="n">itemsSection</span><span class="p">[</span><span class="s">&#34;Gun&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">string</span> <span class="n">carSection</span> <span class="p">=</span> <span class="n">itemsSection</span><span class="p">[</span><span class="s">&#34;Car&#34;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.直接通过配置根对象反序列化</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerConfig</span> <span class="n">player</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">.</span><span class="n">Get</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//类名和Json文件名[不需要!]相同</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerConfig</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//属性名和Json字段名需要相同</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">PlayerName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">PlayerLevel</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>       <span class="c1">// 自动把字符串 &#34;13&#34; 转成 int</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">ItemInfo</span> <span class="n">Items</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>        <span class="c1">// 对应嵌套对象</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">Skills</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>   <span class="c1">// 对应数组</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//同样的,嵌套类名也随便取</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ItemInfo</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Gun</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Car</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键点</strong>：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>写法</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>configRoot[&quot;playerName&quot;]</code></td>
+					<td>直接按 key 取，返回字符串</td>
+			</tr>
+			<tr>
+					<td><code>configRoot[&quot;Items:Gun&quot;]</code></td>
+					<td>用 <code>:</code> 冒号表示嵌套层级</td>
+			</tr>
+			<tr>
+					<td><code>configRoot[&quot;Skills:0&quot;]</code></td>
+					<td>数组用 <code>:索引</code></td>
+			</tr>
+			<tr>
+					<td><code>configRoot.GetSection(&quot;Items&quot;)</code></td>
+					<td>取某个子节点作为 <code>IConfigurationSection</code>，之后再在它上面取子节点</td>
+			</tr>
+			<tr>
+					<td><code>configRoot.Get&lt;PlayerConfig&gt;()</code></td>
+					<td>把整个根对象反序列化成强类型对象（属性名要和 json 字段名一致）</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p><code>AddJsonFile</code> 的三个参数：<code>路径 / optional（文件不存在是否报错）/ reloadOnChange（文件修改后是否自动刷新）</code>。生产环境一般 <code>optional: false</code>（缺文件直接报错比静默 null 好排查）。</p>
+</blockquote>
+<hr>
+<h2 id="三选项方式读取配置">三、选项方式读取配置
+</h2><p>基本读取是「直接从 configRoot 取」，选项方式则是「把配置绑定到一个强类型对象，再通过 <code>IOptions&lt;T&gt;</code> 注入到业务类」。这需要配合 DI 容器使用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.DependencyInjection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Logging</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Options</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">internal</span> <span class="k">class</span> <span class="nc">Program</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//1.依旧创建构造器-&gt;添加文件-&gt;Build根对象</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ConfigurationBuilder</span> <span class="n">configBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationBuilder</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">configBuilder</span><span class="p">.</span><span class="n">AddJsonFile</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;PlayerInfo.json&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">optional</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">reloadOnChange</span><span class="p">:</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">IConfigurationRoot</span> <span class="n">configRoot</span> <span class="p">=</span> <span class="n">configBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//如果你想直接Get返回强类型对象,对比下面的选项方式</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PlayerConfig</span> <span class="n">player</span> <span class="p">=</span> <span class="n">configRoot</span><span class="p">.</span><span class="n">Get</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.创建DI注册容器,注册根对象</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">serv</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ServiceCollection</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//当调用IOptions&lt;PlayerConfig&gt;接口时,返回PlayerConfig数据副本(通过之前的ConfigRoot生成)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//分别绑定生成PlayerConfig的数据,用configRoot根对象实现</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;().</span><span class="n">Bind</span><span class="p">(</span><span class="n">configRoot</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//别忘了显式注册PlayerService本身(虽然你不写系统也自动帮你实现)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//哦好吧AI告诉我系统并不会帮我自动实现,系统咋这么坏</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.创建DI容器</span>
+</span></span><span class="line"><span class="cl">        <span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">prov</span> <span class="p">=</span> <span class="n">serv</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//同样通过容器获取PlayerService对象</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="n">playerService</span> <span class="p">=</span> <span class="n">prov</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//打印信息</span>
+</span></span><span class="line"><span class="cl">            <span class="n">playerService</span><span class="p">.</span><span class="n">ShowPlayerInfo</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//2.创建业务服务类</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerService</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">PlayerConfig</span> <span class="n">_config</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//当请求PlayerService实例时,需要IOptions&lt;PlayerConfig&gt;参数</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">PlayerService</span><span class="p">(</span><span class="n">IOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//prov检查</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// .Value属性才是真正的 PlayerConfig 对象</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_config</span> <span class="p">=</span> <span class="n">options</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">ShowPlayerInfo</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;玩家: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;等级: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerLevel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;武器: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Items</span><span class="p">.</span><span class="n">Gun</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;技能数: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Skills</span><span class="p">.</span><span class="n">Count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//3.依旧创建对应类(属性有set且和字段相同)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerConfig</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">PlayerName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">PlayerLevel</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">ItemInfo</span> <span class="n">Items</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">Skills</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ItemInfo</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Gun</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Car</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>关键调用链</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">AddOptions&lt;PlayerConfig&gt;().Bind(configRoot)
+</span></span><span class="line"><span class="cl">    ↓ 注册 IOptions&lt;PlayerConfig&gt;
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">PlayerService 构造函数需要 IOptions&lt;PlayerConfig&gt;
+</span></span><span class="line"><span class="cl">    ↓
+</span></span><span class="line"><span class="cl">DI 容器自动注入 options.Value (即 PlayerConfig 实例)
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><code>IOptions&lt;T&gt;.Value</code> 才是真正的配置对象。另外 <code>PlayerService</code> 本身也必须显式 <code>AddScoped&lt;PlayerService&gt;()</code> 注册，否则 <code>GetRequiredService&lt;PlayerService&gt;()</code> 会抛异常。</p>
+</blockquote>
+<hr>
+<h2 id="四选项方式工厂注册">四、选项方式工厂注册
+</h2><p>如果绑定后还想<strong>再叠加几步修改</strong>（比如改名字、改等级），可以用工厂注册的写法：链式 <code>Bind().Configure()</code> 或者在 <code>Configure</code> 闭包里手动 <code>Bind</code> 再改。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.DependencyInjection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Logging</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Options</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">internal</span> <span class="k">class</span> <span class="nc">Program</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ConfigurationBuilder</span> <span class="n">configBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationBuilder</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">configBuilder</span><span class="p">.</span><span class="n">AddJsonFile</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;PlayerInfo.json&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">optional</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">reloadOnChange</span><span class="p">:</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.创建另一个构建器,Add并build另一个Root</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ConfigurationBuilder</span> <span class="n">serverBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationBuilder</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serverBuilder</span><span class="p">.</span><span class="n">AddJsonFile</span>
+</span></span><span class="line"><span class="cl">        <span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="s">&#34;ServerInfo.json&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">optional</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">reloadOnChange</span><span class="p">:</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">        <span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">IConfigurationRoot</span> <span class="n">configRoot</span> <span class="p">=</span> <span class="n">configBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">IConfigurationRoot</span> <span class="n">serverRoot</span> <span class="p">=</span> <span class="n">serverBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">serv</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ServiceCollection</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//哦下面有工厂注册的写法这里我就注释掉了</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//serv.AddOptions&lt;PlayerConfig&gt;().Bind(configRoot);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddOptions</span><span class="p">&lt;</span><span class="n">ServerConfig</span><span class="p">&gt;().</span><span class="n">Bind</span><span class="p">(</span><span class="n">serverRoot</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//6.选项方法的工厂注册写法(提前链式调用Bind,指定构建器)</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//链式写法:泛型和参数都只能是同一配置类PlayerConfig,按照顺序执行</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;()</span>
+</span></span><span class="line"><span class="cl">            <span class="p">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">configRoot</span><span class="p">)</span><span class="c1">//这里就是依次链式调用Bind-&gt;第一步-&gt;第二步</span>
+</span></span><span class="line"><span class="cl">            <span class="p">.</span><span class="n">Configure</span><span class="p">((</span><span class="n">PlayerConfig</span> <span class="n">config</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;第一步&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">config</span><span class="p">.</span><span class="n">PlayerName</span> <span class="p">=</span> <span class="s">&#34;Ken&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">})</span>
+</span></span><span class="line"><span class="cl">            <span class="p">.</span><span class="n">Configure</span><span class="p">((</span><span class="n">PlayerConfig</span> <span class="n">config</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;第二步&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="n">config</span><span class="p">.</span><span class="n">PlayerLevel</span> <span class="p">=</span> <span class="m">99</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">});</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//7.工厂注册的另一种写法(不通过提前链式调用实现)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddOptions</span><span class="p">&lt;</span><span class="n">ServerConfig</span><span class="p">&gt;()</span>
+</span></span><span class="line"><span class="cl">            <span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">config</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//通过闭包引用外部serverRoot根对象,然后Bind</span>
+</span></span><span class="line"><span class="cl">                <span class="n">serverRoot</span><span class="p">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">//然后就可以修改了</span>
+</span></span><span class="line"><span class="cl">                <span class="n">config</span><span class="p">.</span><span class="n">Port</span> <span class="p">=</span> <span class="m">9999</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">});</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//8.业务类只需要注册同一个就行</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">prov</span> <span class="p">=</span> <span class="n">serv</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="n">playerService</span> <span class="p">=</span> <span class="n">prov</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">playerService</span><span class="p">.</span><span class="n">ShowPlayerInfo</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerService</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">PlayerConfig</span> <span class="n">_config</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//2.业务类里面新增额外注入即可,不用专门新增业务类</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">ServerConfig</span> <span class="n">_serverConfig</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">PlayerService</span><span class="p">(</span><span class="n">IOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">,</span> <span class="n">IOptions</span><span class="p">&lt;</span><span class="n">ServerConfig</span><span class="p">&gt;</span> <span class="n">serverOptions</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_config</span> <span class="p">=</span> <span class="n">options</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_serverConfig</span> <span class="p">=</span> <span class="n">serverOptions</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">ShowPlayerInfo</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;玩家: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;等级: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerLevel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//3.这里就可以直接使用另一个配置类的数据了</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;服务器IP: &#34;</span> <span class="p">+</span> <span class="n">_serverConfig</span><span class="p">.</span><span class="n">Ip</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;服务器端口: &#34;</span> <span class="p">+</span> <span class="n">_serverConfig</span><span class="p">.</span><span class="n">Port</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"> <span class="c1">//1.这里新增额外配置类</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ServerConfig</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Ip</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">Port</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerConfig</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">PlayerName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">PlayerLevel</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">ItemInfo</span> <span class="n">Items</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;</span> <span class="n">Skills</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ItemInfo</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Gun</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string</span> <span class="n">Car</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>两种工厂注册写法</strong>：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>写法</th>
+					<th>特点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>AddOptions&lt;T&gt;().Bind(root).Configure(...)</code></td>
+					<td>链式，先 Bind 再叠加多个 Configure，按顺序执行</td>
+			</tr>
+			<tr>
+					<td><code>AddOptions&lt;T&gt;().Configure(config =&gt; { root.Bind(config); ... })</code></td>
+					<td>只调一个 Configure，在闭包里先 Bind 再改</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>业务类的构造函数可以同时注入 <code>IOptions&lt;PlayerConfig&gt;</code> 和 <code>IOptions&lt;ServerConfig&gt;</code>，DI 会分别解析。</p>
+<hr>
+<h2 id="五读取终端配置参数">五、读取终端配置参数
+</h2><p>有时候配置不想写在 json 里，而是启动时通过命令行参数传入（比如 <code>dotnet run -- PlayerName=Hero PlayerLevel=99</code>），就用 <code>AddCommandLine(args)</code>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.DependencyInjection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Logging</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Options</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">internal</span> <span class="k">class</span> <span class="nc">Program</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//依旧创建构造器,但是不需要AddJsonFile了</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">configBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationBuilder</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这里通过AddCommandLine(也就是IConfigurationBuilder的拓展方法)实现:</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//构建器添加cmd参数-&gt;构造Root对象</span>
+</span></span><span class="line"><span class="cl">        <span class="n">configBuilder</span><span class="p">.</span><span class="n">AddCommandLine</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">configRoot</span> <span class="p">=</span> <span class="n">configBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">serv</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ServiceCollection</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddOptions</span><span class="p">().</span><span class="n">Configure</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;(((</span><span class="n">PlayerConfig</span> <span class="n">config</span><span class="p">)</span> <span class="p">=&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//这段是通过闭包引入外界configRoot</span>
+</span></span><span class="line"><span class="cl">            <span class="n">configRoot</span><span class="p">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">prov</span> <span class="p">=</span> <span class="n">serv</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="n">playerService</span> <span class="p">=</span> <span class="n">prov</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//终端负责在调用指令时传入参数dotnet run -- PlayerName=Hero PlayerLevel=99</span>
+</span></span><span class="line"><span class="cl">            <span class="n">playerService</span><span class="p">.</span><span class="n">ShowPlayerInfo</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//2.创建业务服务类</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerService</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">PlayerConfig</span> <span class="n">_config</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//当请求PlayerService实例时,需要IOptions&lt;PlayerConfig&gt;参数</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">PlayerService</span><span class="p">(</span><span class="n">IOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//prov检查</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// .Value属性才是真正的 PlayerConfig 对象</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_config</span> <span class="p">=</span> <span class="n">options</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">ShowPlayerInfo</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;玩家: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;等级: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerLevel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">_config</span><span class="p">.</span><span class="n">Items</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;武器: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Items</span><span class="p">.</span><span class="n">Gun</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;载具: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Items</span><span class="p">.</span><span class="n">Car</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">_config</span><span class="p">.</span><span class="n">Skills</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;技能数: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Skills</span><span class="p">.</span><span class="n">Count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">skill</span> <span class="k">in</span> <span class="n">_config</span><span class="p">.</span><span class="n">Skills</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34; - &#34;</span> <span class="p">+</span> <span class="n">skill</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">//3.依旧创建对应类(属性有set且和字段相同)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerConfig</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string?</span> <span class="n">PlayerName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">PlayerLevel</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">ItemInfo</span><span class="p">?</span> <span class="n">Items</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;?</span> <span class="n">Skills</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ItemInfo</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string?</span> <span class="n">Gun</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string?</span> <span class="n">Car</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>运行方式</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">dotnet run -- PlayerName=Hero PlayerLevel=99
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>--</code> 后面的参数会被 <code>AddCommandLine</code> 解析成 key-value 对。</li>
+<li><code>configRoot.Bind(config)</code> 把命令行参数绑定到 <code>PlayerConfig</code> 上。</li>
+<li>注意这里没有 <code>AddJsonFile</code>，配置完全来自命令行。</li>
+</ul>
+<hr>
+<h2 id="六usersecret-配置">六、UserSecret 配置
+</h2><p>正式项目里密码、密钥这类敏感信息不能写进公开的 <code>PlayerInfo.json</code>（否则提交 Git 就泄露了）。.NET 提供了 <code>UserSecrets</code> 机制：把敏感配置存在<strong>本地 C 盘</strong>的 <code>secrets.json</code> 里，运行时用它覆盖公开 json 中对应的字段。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span><span class="lnt">93
+</span><span class="lnt">94
+</span><span class="lnt">95
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">System.Collections.Generic</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Configuration</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.DependencyInjection</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Logging</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">Microsoft.Extensions.Options</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">internal</span> <span class="k">class</span> <span class="nc">Program</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">static</span> <span class="k">void</span> <span class="n">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//1.安装Microsoft.Extensions.Configuration.UserSecrets包</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//2.项目目录打开终端,执行dotnet user-secrets init,在csproj文件中生成唯一Id</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//3.第一次在命令行写入密码dotnet user-secrets set &#34;Player:Password&#34; &#34;123&#34;,自动创建secrets.json</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//注意在C盘生成目录而不是项目目录哈,所以提交Git项目时ID不会被泄露</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//4.挂载到配置构建器</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">configBuilder</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ConfigurationBuilder</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">configBuilder</span><span class="p">.</span><span class="n">AddJsonFile</span><span class="p">(</span><span class="s">&#34;PlayerInfo.json&#34;</span><span class="p">,</span><span class="kc">true</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//多个配置源时,后配置的优先级高,这里就是优先级高于普通Json,替换掉了对应内容</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这种写法只能是secrets.json用于替换普通json,不能是随便写一个.json泛型改为对应名就可以用于替换普通Json了</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//而泛型替换的意义在于配置源分散在不同项目/类库时,用于指定读取哪个项目的 secrets.json</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//比如configBuilder.AddUserSecrets&lt;PlayerConfig&gt;(); 读取Game.Core 项目里的PlayerConfig</span>
+</span></span><span class="line"><span class="cl">        <span class="n">configBuilder</span><span class="p">.</span><span class="n">AddUserSecrets</span><span class="p">&lt;</span><span class="n">Program</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.执行流程</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.1 AddJsonFile(&#34;PlayerInfo.json&#34;)读取公开的json配置,相当于默认值</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.2 AddUserSecrets&lt;Program&gt;()总之指定系统运行时去C盘找secrets.json</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.3 读取C盘中secrets.json中对应内容用于替代PlayerInfo.json(不能是随便一个.json用于覆盖PlayerInfo.json)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//5.4 替换PlayerInfo.json中的其他内容:dotnet user-secrets set &#34;PlayerName&#34; &#34;真实玩家名字&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//因为真正的内容存储在本地C盘,git上传项目时不会暴露,但换电脑就没有对应密码了</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//这只是测试环境下防止git暴露密码而已,正式环境肯定不能用的</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1">//接下来就是验证输出环节喵</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">configRoot</span> <span class="p">=</span> <span class="n">configBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">serv</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ServiceCollection</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;()</span>
+</span></span><span class="line"><span class="cl">            <span class="p">.</span><span class="n">Bind</span><span class="p">(</span><span class="n">configRoot</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">serv</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">prov</span> <span class="p">=</span> <span class="n">serv</span><span class="p">.</span><span class="n">BuildServiceProvider</span><span class="p">())</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kt">var</span> <span class="n">playerService</span> <span class="p">=</span> <span class="n">prov</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">PlayerService</span><span class="p">&gt;();</span>
+</span></span><span class="line"><span class="cl">            <span class="n">playerService</span><span class="p">.</span><span class="n">ShowPlayerInfo</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerService</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">PlayerConfig</span> <span class="n">_config</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">PlayerService</span><span class="p">(</span><span class="n">IOptions</span><span class="p">&lt;</span><span class="n">PlayerConfig</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_config</span> <span class="p">=</span> <span class="n">options</span><span class="p">.</span><span class="n">Value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">ShowPlayerInfo</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;玩家: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerName</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;等级: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">PlayerLevel</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">_config</span><span class="p">.</span><span class="n">Items</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;武器: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Items</span><span class="p">.</span><span class="n">Gun</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;载具: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Items</span><span class="p">.</span><span class="n">Car</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span><span class="n">_config</span><span class="p">.</span><span class="n">Skills</span> <span class="p">!=</span> <span class="kc">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34;技能数: &#34;</span> <span class="p">+</span> <span class="n">_config</span><span class="p">.</span><span class="n">Skills</span><span class="p">.</span><span class="n">Count</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">skill</span> <span class="k">in</span> <span class="n">_config</span><span class="p">.</span><span class="n">Skills</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">&#34; - &#34;</span> <span class="p">+</span> <span class="n">skill</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">PlayerConfig</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string?</span> <span class="n">PlayerName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">int</span> <span class="n">PlayerLevel</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">ItemInfo</span><span class="p">?</span> <span class="n">Items</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">&gt;?</span> <span class="n">Skills</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">ItemInfo</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string?</span> <span class="n">Gun</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kt">string?</span> <span class="n">Car</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>使用步骤</strong>：</p>
+<ol>
+<li>安装 <code>Microsoft.Extensions.Configuration.UserSecrets</code> 包。</li>
+<li>项目目录执行 <code>dotnet user-secrets init</code>，会在 <code>.csproj</code> 里生成唯一 <code>UserSecretsId</code>。</li>
+<li>执行 <code>dotnet user-secrets set &quot;PlayerName&quot; &quot;真实玩家名字&quot;</code>，自动在 C 盘创建 <code>secrets.json</code>。</li>
+<li>代码里 <code>configBuilder.AddJsonFile(&quot;PlayerInfo.json&quot;).AddUserSecrets&lt;Program&gt;()</code>。</li>
+</ol>
+<p><strong>核心规则</strong>：多个配置源时，<strong>后添加的优先级更高</strong>。<code>AddUserSecrets</code> 在 <code>AddJsonFile</code> 之后，所以 secrets.json 里的字段会覆盖 json 里的同名字段。因为 secrets.json 存在本地 C 盘（不在项目目录），提交 Git 时不会泄露。</p>
+<hr>
+<h2 id="七五种方式对比">七、五种方式对比
+</h2><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>方式</th>
+					<th>配置源</th>
+					<th>是否需要 DI</th>
+					<th>适用场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>基本配置读取</td>
+					<td>json 文件</td>
+					<td>否</td>
+					<td>简单小工具，直接 <code>configRoot[key]</code> 取</td>
+			</tr>
+			<tr>
+					<td>选项方式读取</td>
+					<td>json 文件</td>
+					<td>是</td>
+					<td>正式项目，强类型 + <code>IOptions&lt;T&gt;</code> 注入</td>
+			</tr>
+			<tr>
+					<td>选项方式工厂注册</td>
+					<td>多个 json</td>
+					<td>是</td>
+					<td>需要叠加多步修改 / 多配置类</td>
+			</tr>
+			<tr>
+					<td>终端配置参数</td>
+					<td>命令行 args</td>
+					<td>是</td>
+					<td>启动时动态传参（如临时覆盖端口）</td>
+			</tr>
+			<tr>
+					<td>UserSecret</td>
+					<td>本地 C 盘 secrets.json</td>
+					<td>是</td>
+					<td>开发环境防止敏感信息提交 Git</td>
+			</tr>
+	</tbody>
+</table></div>
+<blockquote>
+<p>实际项目中最常用的组合是：<strong>选项方式读取 + UserSecret</strong>。公开配置放 json，敏感字段（密码、连接串）放 secrets.json，运行时自动覆盖。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E7%AC%94%E8%AE%B0/">笔记</a>
+        
+            <a href="/tags/dotnet/">Dotnet</a>
+        
+            <a href="/tags/%E9%85%8D%E7%BD%AE/">配置</a>
+        
+            <a href="/tags/iconfiguration/">IConfiguration</a>
+        
+            <a href="/tags/options/">Options</a>
+        
+            <a href="/tags/usersecrets/">UserSecrets</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>KK57-0803.0815</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/dependency-injection-example/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">依赖注入代码示例（DI / ServiceCollection / 构造函数注入）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/puremvc-framework-example/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity PureMVC 框架示例</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/csharp-dict-principle/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">C# 字典底层实现原理</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-json-%E7%9B%B8%E5%85%B3-apijsonutility-litjson/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity JSON 相关 API（JsonUtility / LitJson）</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/unity-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%9B%B8%E5%85%B3-apibitconvert-file-filestream-binaryformatter/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Unity 二进制相关 API（BitConvert / File / FileStream / BinaryFormatter）</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2025 - 
+        
+        2026 KimKitsuragi
+    </section>
+    
+
+
+   
+<section class="count_info">
+    <div>
+        本站稳定运行：
+        <span id="ds" class="running-days number-highlight"></span>
+        天
+        <span id="hs" class="running-days number-highlight"></span>
+        小时
+        <span id="ms" class="running-days number-highlight"></span>
+        分钟
+    </div>
+    <div>
+        
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+        共发表文章数：
+        <span class="number-highlight">25</span>
+        篇 · 总计
+        <span class="number-highlight">72.36</span>
+        k 字
+    </div>
+    <div>
+        <span id="busuanzi_container_site_pv">
+            本站总访问量：
+            <span id="busuanzi_value_site_pv" class="number-highlight"></span>
+            次
+        </span>
+    </div>
+</section>
+
+
+<script>
+(function() {
+    
+    const startDate = '2026-01-01';
+    const s1 = new Date(startDate.replace(/-/g, "/"));
+    const s2 = new Date();
+    const diff = s2.getTime() - s1.getTime();
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const ds = document.getElementById('ds');
+    const hs = document.getElementById('hs');
+    const ms = document.getElementById('ms');
+
+    if (ds) ds.textContent = days;
+    if (hs) hs.textContent = hours;
+    if (ms) ms.textContent = minutes;
+
+    const pv = document.getElementById('busuanzi_value_site_pv');
+    if (pv) {
+        pv.classList.add('number-highlight');
+        
+        pv.addEventListener('DOMNodeInserted', function() {
+            const value = parseInt(this.textContent);
+            if (value > 1000) {
+                this.textContent = '1';
+            }
+        });
+    }
+})();
+</script>
+
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.85c2f5bca0520a2fd76601ba7e90d1aa29ff9fd53ca3e867a3afacf18679d31d.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+
+
+
+<style>
+  @font-face {
+    font-family: 'MengWaXiYuan';
+    src: url('/font/JianShouMengWaChaoCuYuanTi-2.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root {
+    --font-primary: 'MengWaXiYuan', sans-serif;
+  }
+  html, body,
+  .article-content,
+  .single__contents,
+  .widget--toc,
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary) !important;
+  }
+  .article-content *:not(code):not(pre):not(.chroma):not(.highlight) {
+    font-family: inherit !important;
+  }
+</style>
+
+
+
+<style>
+  #TableOfContents > ul ul,
+  #TableOfContents > ul ol,
+  #TableOfContents > ol ul,
+  #TableOfContents > ol ol {
+    display: none;
+  }
+  #TableOfContents .open {
+    display: block !important;
+  }
+</style>
+
+
+<style>
+  #backTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 30px;
+    right: 20px;  
+    z-index: 99;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    background-image: url('https://kimkitsuragi0571.github.io/icons/backTop.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    outline: none;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    function initTocHide() {
+      const toc = document.querySelector(".widget--toc");
+      if (!toc) return;
+
+      let timer = null;
+      window.addEventListener('scroll', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          
+          document.querySelectorAll('.open').forEach(el => el.classList.remove('open'));
+
+          
+          const activeLink = document.querySelector(
+            ".toc-link.active, .toc-link.active-class, .active, .active-class"
+          );
+          if (!activeLink) return;
+
+          
+          const nextSibling = activeLink.nextElementSibling;
+          if (nextSibling && (nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL')) {
+            nextSibling.classList.add('open');
+          }
+
+          
+          let parent = activeLink.parentElement;
+          while (parent && parent.parentElement) {
+            if (parent.tagName === 'UL' || parent.tagName === 'OL') {
+              parent.classList.add('open');
+            }
+            parent = parent.parentElement;
+          }
+        }, 80);
+      });
+    }
+
+    
+    function initScrollTop() {
+      const rightSidebar = document.querySelector(".right-sidebar");
+      if (!rightSidebar) return;
+
+      const btn = document.createElement("div");
+      btn.id = "backTopBtn";
+      btn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+      rightSidebar.appendChild(btn);
+
+      window.addEventListener('scroll', () => {
+        btn.style.display = window.scrollY > 20 ? "block" : "none";
+      });
+    }
+
+    
+    initTocHide();
+    initScrollTop();
+  });
+</script>
+
+
+
+<style>
+    .highlight {
+        max-height: 400px;
+        overflow: hidden;
+        position: relative;  
+    }
+
+    .code-show {
+        max-height: none !important;
+    }
+
+    .code-more-box {
+        width: 100%;
+        padding-top: 78px;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0)), to(#fff));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .code-more-btn {
+        display: block;
+        margin: auto;
+        width: 44px;
+        height: 22px;
+        background: #f0f0f5;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding-top: 6px;
+        cursor: pointer;
+    }
+
+    .code-more-img {
+        cursor: pointer !important;
+        display: block;
+        margin: auto;
+        width: 22px;
+        height: 16px;
+    }
+</style>
+
+<script>
+  function initCodeMoreBox() {
+    document.querySelectorAll(".highlight").forEach(codeBlock => {
+      if (codeBlock.querySelector('.code-more-box')) return;
+      if (codeBlock.scrollHeight <= codeBlock.clientHeight) return;
+
+      const codeMoreBox = document.createElement('div');
+      codeMoreBox.classList.add('code-more-box');
+
+      const codeMoreBtn = document.createElement('span');
+      codeMoreBtn.classList.add('code-more-btn');
+      codeMoreBtn.addEventListener('click', () => {
+        codeBlock.classList.add('code-show');
+        codeMoreBox.style.display = 'none';
+      });
+
+      const img = document.createElement('img');
+      img.classList.add('code-more-img');
+      
+      img.src = "/icons/codeMore.png";
+
+      codeMoreBtn.appendChild(img);
+      codeMoreBox.appendChild(codeMoreBtn);
+      codeBlock.appendChild(codeMoreBox);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCodeMoreBox);
+</script>
+
+<div id="jsi-flying-fish-container"></div>
+
+
+<style>
+#jsi-flying-fish-container {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    z-index: -1;
+    opacity: 0;           
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity .3s;
+}
+ 
+.show-fish #jsi-flying-fish-container {
+    opacity: .5;
+}
+</style>
+
+
+<script>
+window.initFlyingFish = function () {
+    const container = document.getElementById('jsi-flying-fish-container');
+    if (!container) return;
+
+     
+    const oldCanvas = container.querySelector('canvas');
+    if (oldCanvas) oldCanvas.remove();
+
+     
+    const script = document.createElement('script');
+    script.src = 'https://cdn.meimolihan.eu.org/hugo/fish/fish.js';
+    script.onload = function () {
+        if (typeof RENDERER !== 'undefined') RENDERER.init();
+    };
+    document.head.appendChild(script);
+
+     
+    function checkBottom() {
+        const doc = document.documentElement;
+        const isBottom = (window.innerHeight + Math.ceil(window.pageYOffset))
+                         >= (doc.scrollHeight - 10);
+        document.body.classList.toggle('show-fish', isBottom);
+    }
+
+     
+    window.addEventListener('scroll', checkBottom);
+    checkBottom(); 
+};
+
+ 
+document.addEventListener('DOMContentLoaded', initFlyingFish);
+
+ 
+document.addEventListener('pjax:complete', initFlyingFish);
+</script>
+
+
+<div id="toast-stack"></div>
+
+<script>
+ 
+(() => {
+  const toastStack = document.getElementById('toast-stack');
+  let toastCount = 0;
+  const MAX_TOAST = 5;
+  const DURATION  = 2500;
+
+   
+  let lastText = '';
+  let lastTime = 0;
+
+  window.pushToast = function (msg = '✅ 复制成功 ') {
+    const now = Date.now();
+    if (msg === lastText && now - lastTime < 500) return; 
+    lastText = msg;
+    lastTime = now;
+
+     
+    if (toastCount >= MAX_TOAST) toastStack.firstElementChild?.closeToast();
+
+    const item = document.createElement('div');
+    item.className = 'snack-left-top';
+    item.textContent = msg;
+
+    let closeTimer = null;
+    function closeToast() {
+      if (item.isClosing) return;
+      item.isClosing = true;
+      item.classList.remove('show');
+      item.addEventListener('transitionend', () => {
+        item.remove();
+        toastCount--;
+      }, { once: true });
+      clearTimeout(closeTimer);
+    }
+    item.closeToast = closeToast;
+
+    toastStack.appendChild(item);
+    toastCount++;
+    void item.offsetWidth;
+    item.classList.add('show');
+    closeTimer = setTimeout(closeToast, DURATION);
+  };
+
+   
+  document.addEventListener('copy', e => {
+    const text = window.getSelection().toString().trim();
+    if (!text) return;
+    e.preventDefault();
+    navigator.clipboard.writeText(text)
+      .then(() => pushToast())
+      .catch(console.warn);
+  });
+
+   
+  const container = document.querySelector('.article-content');
+  if (container) {
+    container.addEventListener('click', e => {
+      if (!e.target.matches('.copyCodeButton')) return;
+      const wrap = e.target.closest('pre, .highlight');
+      const codeTd = wrap?.querySelector('td:nth-child(2)') || wrap;
+      const txt = codeTd ? codeTd.textContent.trim() : '';
+      navigator.clipboard.writeText(txt)
+        .then(() => pushToast())
+        .catch(err => alert('复制失败：' + err));
+    });
+  }
+})();
+</script>
+
+<style>
+ 
+.copyCodeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: #3d3c3c;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.copyCodeButton:hover {
+  background: var(--hover-text-color);
+  color: #fff;
+}
+
+ 
+.snack-left-top {
+  position: fixed;
+  left: 20px;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  transform: translateX(calc(-100% - 20px));
+  width: 300px;
+  height: 60px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 15px;
+  background: var(--hover-text-color);
+  color: #fff;
+  box-shadow: 4px 4px 14px rgba(0, 0, 0, .35);
+  z-index: 9999;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+}
+ 
+.snack-left-top.show {
+  transform: translateX(0);
+}
+ 
+#toast-stack {
+  position: fixed;
+  left: 0;
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  z-index: 9999;
+  pointer-events: none;
+}
+
+ 
+#toast-stack .snack-left-top {
+  position: relative;    
+  margin-bottom: 12px;   
+  pointer-events: auto;
+  transition: transform .35s cubic-bezier(.4, 0, .2, 1),
+              opacity   .35s cubic-bezier(.4, 0, .2, 1);
+  opacity: 0;
+  transform: translateX(calc(-100% - 20px));
+}
+
+#toast-stack .snack-left-top.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>
+
+<style>
+   
+  .fixed-ghost-box {
+    position: fixed;
+    bottom: 90px;      
+    right: 20px;       
+    z-index: 10;       
+    background-color: transparent;
+    margin: 0;
+    pointer-events: none;  
+    overflow: visible;
+  }
+
+   
+  #ghost {
+    position: relative;
+    transform: scale(0.3);   
+    transform-origin: center center;  
+    pointer-events: none;
+  }
+
+  #red {
+    animation: upNDown infinite 0.5s;
+    position: relative;
+    width: 140px;
+    height: 140px;
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    grid-template-rows: repeat(14, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    grid-template-areas:
+      "a1  a2  a3  a4  a5  top0  top0  top0  top0  a10 a11 a12 a13 a14"
+      "b1  b2  b3  top1 top1 top1 top1 top1 top1 top1 top1 b12 b13 b14"
+      "c1 c2 top2 top2 top2 top2 top2 top2 top2 top2 top2 top2 c13 c14"
+      "d1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 d14"
+      "e1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 e14"
+      "f1 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 top3 f14"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4 top4"
+      "st0 st0 an4 st1 an7 st2 an10 an10 st3 an13 st4 an16 st5 st5"
+      "an1 an2 an3 an5 an6 an8 an9 an9 an11 an12 an14 an15 an17 an18";
+  }
+
+  @keyframes upNDown {
+    0%,49% { transform: translateY(0px); }
+    50%,100% { transform: translateY(-10px); }
+  }
+
+  #top0,#top1,#top2,#top3,#top4,#st0,#st1,#st2,#st3,#st4,#st5 {
+    background-color: rgba(255, 0, 0, 0.397);
+  }
+  #top0 { grid-area: top0; }
+  #top1 { grid-area: top1; }
+  #top2 { grid-area: top2; }
+  #top3 { grid-area: top3; }
+  #top4 { grid-area: top4; }
+  #st0 { grid-area: st0; }
+  #st1 { grid-area: st1; }
+  #st2 { grid-area: st2; }
+  #st3 { grid-area: st3; }
+  #st4 { grid-area: st4; }
+  #st5 { grid-area: st5; }
+
+  #an1 { grid-area: an1; animation: flicker0 infinite 0.5s; }
+  #an18 { grid-area: an18; animation: flicker0 infinite 0.5s; }
+  #an2 { grid-area: an2; animation: flicker1 infinite 0.5s; }
+  #an17 { grid-area: an17; animation: flicker1 infinite 0.5s; }
+  #an3 { grid-area: an3; animation: flicker1 infinite 0.5s; }
+  #an16 { grid-area: an16; animation: flicker1 infinite 0.5s; }
+  #an4 { grid-area: an4; animation: flicker1 infinite 0.5s; }
+  #an15 { grid-area: an15; animation: flicker1 infinite 0.5s; }
+  #an6 { grid-area: an6; animation: flicker0 infinite 0.5s; }
+  #an12 { grid-area: an12; animation: flicker0 infinite 0.5s; }
+  #an7 { grid-area: an7; animation: flicker0 infinite 0.5s; }
+  #an13 { grid-area: an13; animation: flicker0 infinite 0.5s; }
+  #an9 { grid-area: an9; animation: flicker1 infinite 0.5s; }
+  #an10 { grid-area: an10; animation: flicker1 infinite 0.5s; }
+  #an8 { grid-area: an8; animation: flicker0 infinite 0.5s; }
+  #an11 { grid-area: an11; animation: flicker0 infinite 0.5s; }
+
+  @keyframes flicker0 {
+    0%,49% { background-color: rgba(255, 0, 0, 0.397); }
+    50%,100% { background-color: transparent; }
+  }
+  @keyframes flicker1 {
+    0%,49% { background-color: transparent; }
+    50%,100% { background-color: rgba(255, 0, 0, 0.397); }
+  }
+
+  #eye { width: 40px; height: 50px; position: absolute; top: 30px; left: 10px; }
+  #eye::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #eye1 { width: 40px; height: 50px; position: absolute; top: 30px; right: 30px; }
+  #eye1::before { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 20px; height: 50px; transform: translateX(10px); display: block; position: absolute; }
+  #eye1::after { content: ""; background-color: rgba(255, 255, 255, 0.182); width: 40px; height: 30px; transform: translateY(10px); display: block; position: absolute; }
+
+  #pupil { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; left: 10px; z-index: 1; animation: eyesMovement infinite 3s; }
+  #pupil1 { width: 20px; height: 20px; background-color: rgba(101, 81, 248, 0.277); position: absolute; top: 50px; right: 50px; z-index: 1; animation: eyesMovement infinite 3s; }
+
+  @keyframes eyesMovement {
+    0%,49% { transform: translateX(0px); }
+    50%,99% { transform: translateX(10px); }
+    100% { transform: translateX(0px); }
+  }
+
+  #shadow {
+    background-color: black;
+    width: 140px;
+    height: 140px;
+    position: absolute;
+	border-radius: 50%;
+    transform: rotateX(80deg);
+    filter: blur(20px);
+    top: 80%;
+    animation: shadowMovement infinite 0.5s;
+  }
+  @keyframes shadowMovement {
+    0%,49% { opacity: 0.5; }
+    50%,100% { opacity: 0.2; }
+  }
+
+   
+  @media (max-width: 1444px) {
+    #ghost { 
+      transform: scale(0.3) !important; 
+      transform-origin: center center !important;
+    }
+    .fixed-ghost-box {
+      bottom: 90px !important;
+      right: 5px !important;
+    }
+  }
+</style>
+
+
+<div class="fixed-ghost-box">
+  <div id="ghost">
+    <div id="red">
+      <div id="pupil"></div>
+      <div id="pupil1"></div>
+      <div id="eye"></div>
+      <div id="eye1"></div>
+      <div id="top0"></div>
+      <div id="top1"></div>
+      <div id="top2"></div>
+      <div id="top3"></div>
+      <div id="top4"></div>
+      <div id="st0"></div>
+      <div id="st1"></div>
+      <div id="st2"></div>
+      <div id="st3"></div>
+      <div id="st4"></div>
+      <div id="st5"></div>
+      <div id="an1"></div>
+      <div id="an2"></div>
+      <div id="an3"></div>
+      <div id="an4"></div>
+      <div id="an5"></div>
+      <div id="an6"></div>
+      <div id="an7"></div>
+      <div id="an8"></div>
+      <div id="an9"></div>
+      <div id="an10"></div>
+      <div id="an11"></div>
+      <div id="an12"></div>
+      <div id="an13"></div>
+      <div id="an14"></div>
+      <div id="an15"></div>
+      <div id="an16"></div>
+      <div id="an17"></div>
+      <div id="an18"></div>
+    </div>
+    <div id="shadow"></div>
+  </div>
+</div>
+
+
+<style>
+   
+  .btn-wrap {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+  }
+
+   
+  .footer-hover-btn {
+    color: #ffffff95;
+    font-size: 14px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    outline: none;
+    padding: 12px 20px;
+    margin: 0;
+    display: inline-block;
+    position: relative;
+    pointer-events: none;
+  }
+
+   
+  .btn-wrap::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    top: 8px;
+  }
+  .btn-wrap::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    top: 8px;
+  }
+
+   
+  .footer-hover-btn::before {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #1900ff;
+    transition: 0.5s ease;
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+  }
+  .footer-hover-btn::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f44336;
+    transition: 0.5s ease;
+    position: absolute;
+    right: 0;
+    bottom: 8px;
+  }
+
+   
+  .btn-wrap:hover::before,
+  .btn-wrap:hover::after,
+  .btn-wrap:hover .footer-hover-btn::before,
+  .btn-wrap:hover .footer-hover-btn::after {
+    width: 50%;
+  }
+
+   
+  @media (max-width: 768px) {
+    .footer-hover-btn {
+      padding: 8px 12px;
+    }
+  }
+</style>
+
+<div class="btn-wrap">
+  <button class="footer-hover-btn">
+    --KK57-0803.0815--
+  </button>
+</div>
+
+    </body>
+</html>

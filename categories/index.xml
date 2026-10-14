@@ -7,20 +7,20 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Thu, 17 Sep 2026 09:30:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 17 Sep 2026 10:30:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Unity</title>
         <link>https://kimkitsuragi0571.github.io/categories/unity/</link>
-        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
         
         <guid>https://kimkitsuragi0571.github.io/categories/unity/</guid>
         <description></description>
         </item>
         <item>
         <title>博客相关</title>
-        <link>https://kimkitsuragi0571.github.io/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/</link>
+        <link>https://kimkitsuragi0571.github.io/categories/blog-related/</link>
         <pubDate>Sun, 11 Jan 2026 11:20:41 +0800</pubDate>
         
-        <guid>https://kimkitsuragi0571.github.io/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/</guid>
+        <guid>https://kimkitsuragi0571.github.io/categories/blog-related/</guid>
         <description>&lt;img src="https://kimkitsuragi0571.github.io/categories/BlogRelated.jpg" alt="Featured image of post 博客相关" /&gt;&lt;p&gt;个人博客搭建与Hugo配置相关笔记&lt;/p&gt;
 </description>
         </item>

@@ -3,39 +3,69 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kimkitsuragi0571.github.io/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/categories/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
   </url><url>
-    <loc>https://kimkitsuragi0571.github.io/tags/mvc/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
+    <loc>https://kimkitsuragi0571.github.io/tags/di/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/dotnet/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/post/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/servicecollection/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/categories/unity/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/p/dependency-injection-example/</loc>
+    <lastmod>2026-09-17T10:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/p/dotnet-config-reading-example/</loc>
+    <lastmod>2026-09-17T10:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/iconfiguration/</loc>
+    <lastmod>2026-09-17T10:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/options/</loc>
+    <lastmod>2026-09-17T10:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/usersecrets/</loc>
+    <lastmod>2026-09-17T10:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/%E9%85%8D%E7%BD%AE/</loc>
+    <lastmod>2026-09-17T10:00:00+08:00</lastmod>
+  </url><url>
+    <loc>https://kimkitsuragi0571.github.io/tags/mvc/</loc>
     <lastmod>2026-09-17T09:30:00+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/tags/puremvc/</loc>
     <lastmod>2026-09-17T09:30:00+08:00</lastmod>
   </url><url>
-    <loc>https://kimkitsuragi0571.github.io/tags/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
-  </url><url>
-    <loc>https://kimkitsuragi0571.github.io/categories/unity/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
-  </url><url>
     <loc>https://kimkitsuragi0571.github.io/p/puremvc-framework-example/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
-  </url><url>
-    <loc>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2026-09-17T09:30:00+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/tags/%E8%A7%A3%E8%80%A6/</loc>
     <lastmod>2026-09-17T09:30:00+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/tags/%E6%A1%86%E6%9E%B6/</loc>
-    <lastmod>2026-09-17T09:30:00+08:00</lastmod>
-  </url><url>
-    <loc>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</loc>
     <lastmod>2026-09-17T09:30:00+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/tags/%E9%80%9A%E7%9F%A5/</loc>
@@ -281,7 +311,7 @@
     <loc>https://kimkitsuragi0571.github.io/tags/%E5%8D%9A%E5%AE%A2/</loc>
     <lastmod>2026-01-11T11:20:41+08:00</lastmod>
   </url><url>
-    <loc>https://kimkitsuragi0571.github.io/categories/%E5%8D%9A%E5%AE%A2%E7%9B%B8%E5%85%B3/</loc>
+    <loc>https://kimkitsuragi0571.github.io/categories/blog-related/</loc>
     <lastmod>2026-01-11T11:20:41+08:00</lastmod>
   </url><url>
     <loc>https://kimkitsuragi0571.github.io/page/</loc>

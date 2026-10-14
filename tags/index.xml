@@ -7,7 +7,87 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>KimKitsuragi</copyright>
-        <lastBuildDate>Thu, 17 Sep 2026 09:30:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 17 Sep 2026 10:30:00 +0800</lastBuildDate><atom:link href="https://kimkitsuragi0571.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>DI</title>
+        <link>https://kimkitsuragi0571.github.io/tags/di/</link>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/di/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Dotnet</title>
+        <link>https://kimkitsuragi0571.github.io/tags/dotnet/</link>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/dotnet/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>ServiceCollection</title>
+        <link>https://kimkitsuragi0571.github.io/tags/servicecollection/</link>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/servicecollection/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>笔记</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</link>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>设计模式</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>依赖注入</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/</link>
+        <pubDate>Thu, 17 Sep 2026 10:30:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>IConfiguration</title>
+        <link>https://kimkitsuragi0571.github.io/tags/iconfiguration/</link>
+        <pubDate>Thu, 17 Sep 2026 10:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/iconfiguration/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Options</title>
+        <link>https://kimkitsuragi0571.github.io/tags/options/</link>
+        <pubDate>Thu, 17 Sep 2026 10:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/options/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>UserSecrets</title>
+        <link>https://kimkitsuragi0571.github.io/tags/usersecrets/</link>
+        <pubDate>Thu, 17 Sep 2026 10:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/usersecrets/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>配置</title>
+        <link>https://kimkitsuragi0571.github.io/tags/%E9%85%8D%E7%BD%AE/</link>
+        <pubDate>Thu, 17 Sep 2026 10:00:00 +0800</pubDate>
+        
+        <guid>https://kimkitsuragi0571.github.io/tags/%E9%85%8D%E7%BD%AE/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>MVC</title>
         <link>https://kimkitsuragi0571.github.io/tags/mvc/</link>
         <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
@@ -24,14 +104,6 @@
         <description></description>
         </item>
         <item>
-        <title>笔记</title>
-        <link>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</link>
-        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi0571.github.io/tags/%E7%AC%94%E8%AE%B0/</guid>
-        <description></description>
-        </item>
-        <item>
         <title>解耦</title>
         <link>https://kimkitsuragi0571.github.io/tags/%E8%A7%A3%E8%80%A6/</link>
         <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
@@ -45,14 +117,6 @@
         <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
         
         <guid>https://kimkitsuragi0571.github.io/tags/%E6%A1%86%E6%9E%B6/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>设计模式</title>
-        <link>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
-        <pubDate>Thu, 17 Sep 2026 09:30:00 +0800</pubDate>
-        
-        <guid>https://kimkitsuragi0571.github.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</guid>
         <description></description>
         </item>
         <item>
